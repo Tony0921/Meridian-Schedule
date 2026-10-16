@@ -1,4 +1,10 @@
 [
-  {"id": "demo-miri", "name": "示範璃", "x_username": null, "youtube": null, "twitch": null, "enabled": true},
-  {"id": "demo-snow", "name": "示範雪", "x_username": null, "youtube": null, "twitch": null, "enabled": true}
+  {
+    "id": "miri",
+    "name": "璃 Miri",
+    "x_username": "Miri_Aetris",
+    "youtube": "https://www.youtube.com/@%E7%92%83Miri",
+    "twitch": "miri_aetris",
+    "enabled": true
+  }
 ]

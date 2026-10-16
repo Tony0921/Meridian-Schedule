@@ -71,7 +71,7 @@ async function startApp() {
 
   try {
     const [members, schedule] = await Promise.all(["members", "schedule"].map(async (name) => {
-      const response = await fetch(`./data/${name}.json`);
+      const response = await fetch(`./data/${name}.json`, { cache: "no-store" });
       if (!response.ok) throw new Error(`無法讀取 ${name}`);
       return response.json();
     }));

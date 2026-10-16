@@ -1,6 +1,18 @@
 [
-  {"source": "x", "post_id": "demo-weekly-001", "member_id": "demo-miri", "published_at": "2026-10-15T17:00:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "weekly_schedule", "status": "processed", "source_url": "https://example.com/demo/weekly-001", "media": []},
-  {"source": "x", "post_id": "demo-weekly-002", "member_id": "demo-snow", "published_at": "2026-10-15T17:00:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "weekly_schedule", "status": "processed", "source_url": "https://example.com/demo/weekly-002", "media": []},
-  {"source": "x", "post_id": "demo-cancel-001", "member_id": "demo-snow", "published_at": "2026-10-15T17:30:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "cancellation", "status": "processed", "source_url": "https://example.com/demo/cancel-001", "media": []},
-  {"source": "x", "post_id": "demo-sudden-001", "member_id": "demo-miri", "published_at": "2026-10-15T17:30:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "sudden_stream", "status": "processed", "source_url": "https://example.com/demo/sudden-001", "media": []}
+  {
+    "source": "x",
+    "post_id": "2109291418233827667",
+    "member_id": "miri",
+    "published_at": "2026-10-11T22:33:00+08:00",
+    "source_url": "https://x.com/Miri_Aetris/status/2109291418233827667",
+    "media": [
+      {
+        "type": "image",
+        "url": "https://pbs.twimg.com/media/HUW1Rbra8AAG0Fz?format=webp&name=large"
+      }
+    ],
+    "processed_at": "2026-10-16T08:37:43+00:00",
+    "type": "weekly_schedule",
+    "status": "processed"
+  }
 ]

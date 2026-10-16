@@ -1,8 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { taipeiDate, weekDates, selectEvents, safeUrl } = require("../site/app.js");
-const members = require("../data/members.json");
-const schedule = require("../data/schedule.json");
+const members = require("./fixtures/data/members.json");
+const schedule = require("./fixtures/data/schedule.json");
 
 test("台灣日期不受執行電腦時區影響", () => {
   assert.equal(taipeiDate(new Date("2026-10-15T17:00:00Z")), "2026-10-16");

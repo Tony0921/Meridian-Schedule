@@ -8,13 +8,14 @@ from processor.schemas import ValidationError, load_json
 from scripts.process_post import process_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "tests/fixtures/data"
 STAMP = "2026-10-16T18:30:00+08:00"
 
 
 class MergeTests(unittest.TestCase):
     def setUp(self):
-        self.members = load_json(ROOT / "data/members.json")
-        self.schedule = load_json(ROOT / "data/schedule.json")
+        self.members = load_json(DATA / "members.json")
+        self.schedule = load_json(DATA / "schedule.json")
 
     def fixture(self, name):
         return load_json(ROOT / "tests/fixtures" / f"{name}.json")
@@ -124,7 +125,7 @@ class MergeTests(unittest.TestCase):
     def test_all_six_fixtures_produce_valid_bundles(self):
         for path in (ROOT / "tests/fixtures").glob("*.json"):
             with self.subTest(path=path.name):
-                result = process_fixture(load_json(path), ROOT / "data", STAMP)
+                result = process_fixture(load_json(path), DATA, STAMP)
                 self.assertIn(result["decision"], {"review", "record_only", "ignored"})
 
 

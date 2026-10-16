@@ -8,12 +8,13 @@ from processor.validate import validate_data, validate_schedule
 from scripts.build_site import build_site
 
 ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "tests/fixtures/data"
 
 
 class ValidationTests(unittest.TestCase):
     def setUp(self):
         self.members, self.schedule, self.posts, self.revisions = [
-            load_json(ROOT / "data" / f"{name}.json") for name in ("members", "schedule", "posts", "revisions")]
+            load_json(DATA / f"{name}.json") for name in ("members", "schedule", "posts", "revisions")]
 
     def test_demo_data_valid(self):
         validate_data(self.members, self.schedule, self.posts, self.revisions)

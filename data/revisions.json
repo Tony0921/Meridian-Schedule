@@ -1,1 +1,170 @@
-[]
+[
+  {
+    "event_id": "miri-20261012-82b1eecac3cf",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-12",
+      "time": "20:00",
+      "title": "【珀壞時光】上次莓玩完的問答小遊戲！",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261012-82b1eecac3cf",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261013-76103223347e",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-13",
+      "time": "20:00",
+      "title": "【特戰英豪】特戰時間！ft. 賽利",
+      "platform": "twitch",
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261013-76103223347e",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261014-1dda2f10cfd5",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-14",
+      "time": null,
+      "title": "目前璃線中！",
+      "platform": null,
+      "url": null,
+      "status": "day_off",
+      "id": "miri-20261014-1dda2f10cfd5",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261015-8bc8d9c2a519",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-15",
+      "time": "21:00",
+      "title": "【晚間基密】與社交恐怖分子的基密時間",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261015-8bc8d9c2a519",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261016-ca2701285e1f",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-16",
+      "time": "21:00",
+      "title": "【特戰英豪】特戰時間！ft. 阿莓",
+      "platform": "twitch",
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261016-ca2701285e1f",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261017-67f651227bd2",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-17",
+      "time": null,
+      "title": "目前璃線中！",
+      "platform": null,
+      "url": null,
+      "status": "day_off",
+      "id": "miri-20261017-67f651227bd2",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261018-b55321506700",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-18",
+      "time": "17:00",
+      "title": "【子午 Trick & Treat 萬聖歌回接力】搗蛋鬼別搗蛋！",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261018-b55321506700",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  },
+  {
+    "event_id": "miri-20261018-4743803795bd",
+    "timestamp": "2026-10-16T08:37:43+00:00",
+    "source_post_id": "2109291418233827667",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-18",
+      "time": "19:00",
+      "title": "【璃我一下】繼續玩朋友遊戲！",
+      "platform": "twitch",
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261018-4743803795bd",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "2109291418233827667",
+      "confidence": 0.9,
+      "updated_at": "2026-10-16T08:37:43+00:00"
+    }
+  }
+]

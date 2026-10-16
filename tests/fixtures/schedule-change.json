@@ -1,0 +1,7 @@
+{
+  "post": {"source": "x", "post_id": "fixture-change", "member_id": "demo-miri", "published_at": "2026-10-16T17:00:00+08:00", "source_url": "https://example.com/fixtures/change", "media": []},
+  "proposal": {
+    "classification": "schedule_change", "confidence": 0.97, "reason": "今天改九點。",
+    "changes": [{"operation": "update", "match": {"member_id": "demo-miri", "date": "2026-10-16"}, "set": {"time": "21:00"}}]
+  }
+}

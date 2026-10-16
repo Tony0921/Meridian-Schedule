@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Members",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "name", "x_username", "youtube", "twitch", "enabled"],
+    "properties": {
+      "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+      "name": {"type": "string", "minLength": 1},
+      "x_username": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_]+$"},
+      "youtube": {"type": ["string", "null"], "format": "uri"},
+      "twitch": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_]+$"},
+      "enabled": {"type": "boolean"}
+    }
+  }
+}

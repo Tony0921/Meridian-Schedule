@@ -1,0 +1,10 @@
+{
+  "updated_at": "2026-10-15T18:00:00+08:00",
+  "events": [
+    {"id": "demo-miri-20261016-2000-001", "member_id": "demo-miri", "date": "2026-10-16", "time": "20:00", "timezone": "Asia/Taipei", "title": "Minecraft 建築夜", "platform": "youtube", "url": null, "status": "scheduled", "origin": "weekly_schedule", "source_post_id": "demo-weekly-001", "confidence": 0.98, "updated_at": "2026-10-15T18:00:00+08:00"},
+    {"id": "demo-snow-20261016-1800-001", "member_id": "demo-snow", "date": "2026-10-16", "time": "18:00", "timezone": "Asia/Taipei", "title": "一起打 LOL", "platform": "twitch", "url": null, "status": "cancelled", "origin": "weekly_schedule", "source_post_id": "demo-cancel-001", "confidence": 0.99, "updated_at": "2026-10-15T18:00:00+08:00"},
+    {"id": "demo-miri-20261017-2200-001", "member_id": "demo-miri", "date": "2026-10-17", "time": "22:00", "timezone": "Asia/Taipei", "title": "深夜突發 Apex", "platform": "youtube", "url": null, "status": "scheduled", "origin": "sudden_stream", "source_post_id": "demo-sudden-001", "confidence": 0.97, "updated_at": "2026-10-15T18:00:00+08:00"},
+    {"id": "demo-snow-20261017-off-001", "member_id": "demo-snow", "date": "2026-10-17", "time": null, "timezone": "Asia/Taipei", "title": "充電休息日", "platform": null, "url": null, "status": "day_off", "origin": "weekly_schedule", "source_post_id": "demo-weekly-002", "confidence": 0.98, "updated_at": "2026-10-15T18:00:00+08:00"},
+    {"id": "demo-miri-20261018-tbd-001", "member_id": "demo-miri", "date": "2026-10-18", "time": null, "timezone": "Asia/Taipei", "title": "週末雜談", "platform": "youtube", "url": null, "status": "tbd", "origin": "weekly_schedule", "source_post_id": "demo-weekly-001", "confidence": 0.90, "updated_at": "2026-10-15T18:00:00+08:00"}
+  ]
+}

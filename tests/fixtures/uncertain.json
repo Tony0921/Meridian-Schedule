@@ -1,0 +1,7 @@
+{
+  "post": {"source": "x", "post_id": "fixture-uncertain", "member_id": "demo-miri", "published_at": "2026-10-16T17:00:00+08:00", "source_url": "https://example.com/fixtures/uncertain", "media": []},
+  "proposal": {
+    "classification": "weekly_schedule", "confidence": 0.60, "reason": "圖片時間模糊，僅保留待人工確認結果。",
+    "changes": [{"operation": "insert", "set": {"member_id": "demo-miri", "date": "2026-10-19", "time": "20:00", "title": "不確定的行程", "platform": "youtube", "url": null, "status": "scheduled"}}]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "post": {"source": "x", "post_id": "fixture-cancel", "member_id": "demo-miri", "published_at": "2026-10-16T17:00:00+08:00", "source_url": "https://example.com/fixtures/cancel", "media": []},
+  "proposal": {
+    "classification": "cancellation", "confidence": 0.99, "reason": "今天身體不舒服，直播取消。",
+    "changes": [{"operation": "cancel", "match": {"member_id": "demo-miri", "date": "2026-10-16"}}]
+  }
+}

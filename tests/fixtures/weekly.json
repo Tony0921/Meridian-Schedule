@@ -1,0 +1,10 @@
+{
+  "post": {"source": "x", "post_id": "fixture-weekly", "member_id": "demo-miri", "published_at": "2026-10-16T17:00:00+08:00", "source_url": "https://example.com/fixtures/weekly", "media": []},
+  "proposal": {
+    "classification": "weekly_schedule", "confidence": 0.98, "reason": "模擬週表解析結果，包含週一與週日；未實際呼叫 Vision。",
+    "changes": [
+      {"operation": "insert", "set": {"member_id": "demo-miri", "date": "2026-10-19", "time": "20:00", "title": "Minecraft", "platform": "youtube", "url": null, "status": "scheduled"}},
+      {"operation": "insert", "set": {"member_id": "demo-miri", "date": "2026-10-25", "time": "21:00", "title": "雜談", "platform": "youtube", "url": null, "status": "scheduled"}}
+    ]
+  }
+}

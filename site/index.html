@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>VTuber 行程聚合器</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">VTUBER SCHEDULE</p>
+      <h1>今天，想看誰？</h1>
+      <p>把喜歡的直播，留一個時間。</p>
+      <p class="notice">MVP 範例資料 · 非真實直播公告 · 範例日期為 2026/10/16–10/18</p>
+    </header>
+    <section class="toolbar" aria-label="行程篩選">
+      <div class="view-switch" role="group" aria-label="顯示範圍">
+        <button type="button" id="today-view" aria-pressed="true">今日</button>
+        <button type="button" id="week-view" aria-pressed="false">本週</button>
+      </div>
+      <label>日期<input type="date" id="selected-date" required></label>
+      <label>VTuber<select id="member"><option value="">所有成員</option></select></label>
+    </section>
+    <section aria-labelledby="range-title">
+      <div class="section-heading">
+        <h2 id="range-title">今日行程</h2>
+        <p id="updated-at"></p>
+      </div>
+      <p id="message" role="status" aria-live="polite">正在載入行程…</p>
+      <div id="schedule"></div>
+    </section>
+    <footer>時間皆為台灣時間（Asia/Taipei） · 行程異動請以官方公告為準</footer>
+  </main>
+</body>
+</html>

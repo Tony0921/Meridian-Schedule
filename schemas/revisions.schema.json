@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["event_id", "timestamp", "source_post_id", "before", "after"],
+    "properties": {
+      "event_id": {"type": "string", "minLength": 1},
+      "timestamp": {"type": "string", "format": "date-time"},
+      "source_post_id": {"type": "string", "minLength": 1},
+      "before": {"type": ["object", "null"]},
+      "after": {"type": "object"}
+    }
+  }
+}

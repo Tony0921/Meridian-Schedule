@@ -1,0 +1,6 @@
+[
+  {"source": "x", "post_id": "demo-weekly-001", "member_id": "demo-miri", "published_at": "2026-10-15T17:00:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "weekly_schedule", "status": "processed", "source_url": "https://example.com/demo/weekly-001", "media": []},
+  {"source": "x", "post_id": "demo-weekly-002", "member_id": "demo-snow", "published_at": "2026-10-15T17:00:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "weekly_schedule", "status": "processed", "source_url": "https://example.com/demo/weekly-002", "media": []},
+  {"source": "x", "post_id": "demo-cancel-001", "member_id": "demo-snow", "published_at": "2026-10-15T17:30:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "cancellation", "status": "processed", "source_url": "https://example.com/demo/cancel-001", "media": []},
+  {"source": "x", "post_id": "demo-sudden-001", "member_id": "demo-miri", "published_at": "2026-10-15T17:30:00+08:00", "processed_at": "2026-10-15T18:00:00+08:00", "type": "sudden_stream", "status": "processed", "source_url": "https://example.com/demo/sudden-001", "media": []}
+]

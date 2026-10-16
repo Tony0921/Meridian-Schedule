@@ -1,0 +1,6 @@
+[project]
+name = "meridian-schedule"
+version = "0.1.0"
+description = "VTuber 行程聚合器 MVP 骨架"
+requires-python = ">=3.11"
+dependencies = []

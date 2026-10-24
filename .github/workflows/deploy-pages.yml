@@ -12,6 +12,10 @@ on:
       - 'tests/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: ['Process X post']
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -22,9 +26,15 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      pages: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -34,6 +44,7 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: node --test tests/test_site.cjs
       - run: python -m scripts.build_site
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

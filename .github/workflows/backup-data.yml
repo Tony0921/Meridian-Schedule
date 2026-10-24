@@ -1,0 +1,29 @@
+name: Backup schedule data
+
+on:
+  schedule:
+    - cron: '30 19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m scripts.health_check
+      - if: always()
+        run: python -m scripts.backup_data backup
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schedule-backup-${{ github.run_id }}
+          path: .local/backups/*.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

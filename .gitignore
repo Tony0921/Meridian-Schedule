@@ -8,3 +8,5 @@ __pycache__/
 *.db-*
 .local/
 dist/
+**/.update.lock
+**/.transaction.json

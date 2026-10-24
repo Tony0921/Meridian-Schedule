@@ -1,6 +1,6 @@
 # Meridian-Schedule — VTuber 行程聚合器
 
-依據 [VTuber_Schedule_SPEC.md](VTuber_Schedule_SPEC.md) 建立的 MVP，已加入 Phase 2 手動 AI Parser。可解析手動提供的貼文文字與週表圖片，驗證 JSON、合併變更、產生審核提案，並建置今日／本週靜態行程網站。
+依據 [VTuber_Schedule_SPEC.md](VTuber_Schedule_SPEC.md) 建立的 MVP，已實作 Phase 2 手動 AI Parser，以及 Phase 3～6 可在本機驗證的自動化、Collector、補漏、重試、備份與健康檢查。真實 X／AI 存取、GitHub 雲端 workflow 與 Raspberry Pi 運行仍須完成實測；不代表已通過全部 MVP 驗收。
 
 正式 `data/` 已採用 [璃 Miri 的 2026/10/12–10/18 週表](https://x.com/Miri_Aetris/status/2109291418233827667)，由人工依貼文圖片整理，包含 6 場直播與 2 個休息日，保留來源貼文與 8 筆 Revision。這份資料未經 AI API 解析；週三、週六的「目前璃線中！」以休息呈現，未標示的平台與個別直播網址保留 `null`，行程異動仍以官方最新公告為準。
 
@@ -16,12 +16,17 @@ flowchart LR
     Schema --> Policy[信心分數策略]
     Policy --> Merge[Deterministic Merge]
     Merge --> Proposal[待審核提案與 Revision]
+    Proposal --> Apply[明確採用或 GitHub PR]
+    Apply --> Backup[備份與交易復原]
+    X[X 或可替換事件來源] --> Collector[Collector SQLite outbox]
+    Collector --> Dispatch[repository_dispatch]
+    Dispatch --> Manual
     Data[人工維護的 data JSON] --> Validate[資料與關聯驗證]
     Validate --> Build[靜態網站建置]
     Build --> Pages[GitHub Pages]
 ```
 
-合併核心只處理資料，沒有檔案寫入或 repository 權限。命令列將候選資料寫入單一提案檔，**不修改 `data/`**。本次 Miri 週表已人工審核採用；自動採用提案與建立 PR 留待後續階段實作。
+合併核心只處理資料，沒有檔案寫入或 repository 權限。`process_post` 將候選資料寫入單一提案檔，**不修改 `data/`**；另外使用 `apply_proposal --approve` 明確採用，或由 `publish_proposal` 在隔離 checkout 建立資料 PR。預設所有行程變更一律審核，高信心自動採用須明確設定 `REVIEW_ALL=false`。既有 Miri 週表仍是人工整理，沒有因這次實作而改動。
 
 | 位置 | 用途 |
 | --- | --- |
@@ -33,16 +38,22 @@ flowchart LR
 | `processor/extract.py` | AI Provider Protocol 與可替換的 factory |
 | `processor/manual.py` | 手動輸入與本機圖片處理 |
 | `processor/openai_provider.py` | 第一個 Provider：OpenAI Responses API |
-| `collector/x_source.py` | 未來貼文來源的 Protocol，尚未實作 Collector |
+| `collector/` | PostSource Protocol、X API／JSONL 來源、SQLite outbox、dispatch、補漏與重試 |
+| `processor/storage.py` | 檔案鎖、過期提案檢查所需指紋、備份與交易中斷復原 |
+| `processor/media.py` | X 圖片下載、來源限制、大小與格式檢查 |
+| `scripts/apply_proposal.py` | 重新 merge、驗證、備份後採用提案 |
+| `scripts/process_event.py`、`publish_proposal.py` | 外部事件處理、重試、PR／提交與推送衝突處理 |
+| `scripts/backup_data.py`、`health_check.py` | 備份、還原、資料與 Collector 狀態檢查 |
 | `scripts/` | 驗證、手動提案與靜態建置命令 |
 | `data/` | 正式成員、行程、來源與歷史，目前為人工整理的 Miri 週表 |
 | `site/` | 原生 HTML／CSS／JavaScript，今日、本週及單一成員篩選 |
 | `tests/` | Python／JavaScript 測試與六種貼文解析結果 fixtures |
 | `tests/fixtures/data/` | 獨立的虛構測試基準，不隨正式週表更新 |
 | `examples/manual-post.json` | 不含解析答案的手動文字輸入範例 |
-| `.github/workflows/` | CI 與 GitHub Pages 部署 |
+| `.github/workflows/` | CI、貼文處理、每日補漏、備份與 Pages 部署 |
+| `docs/operations.md`、`examples/collector*` | 上線設定、失敗復原與 Pi systemd 範本 |
 
-沒有新增正式環境套件。X、Pi、SQLite 去重、補漏排程、外部 dispatch、自動 commit／PR 尚未實作。
+沒有新增正式環境套件；Python 使用標準函式庫，前端使用原生 JavaScript。完整設定與目前限制請見 [操作手冊](docs/operations.md)。
 
 ## 本機執行
 
@@ -74,7 +85,7 @@ python -m scripts.process_post tests/fixtures/schedule-change.json --data-dir te
 - `confidence >= 0.70`：`review`，輸出候選變更，貼文標為 `pending_review`。
 - 無關／未知分類只允許 `ignore`，不變更行程。
 
-`ConfidencePolicy` 可透過 Python 設定 `auto_threshold`、`review_threshold`、`review_all`。即使關閉 `review_all`，`auto` 也只是核心回傳的決策，不會自行寫入資料。CLI 固定使用預設全數審核模式。
+`ConfidencePolicy` 可透過 Python 設定 `auto_threshold`、`review_threshold`、`review_all`。`process_post` 預設全數審核，可用 `--auto --auto-threshold 0.95 --review-threshold 0.70` 回傳自動採用決策，但仍只寫提案。真正的採用端會重新計算策略，不信任提案內的 `decision` 或候選快照。
 
 合併規則：
 
@@ -83,7 +94,15 @@ python -m scripts.process_post tests/fixtures/schedule-change.json --data-dir te
 - `cancel` 只改狀態，不刪除事件。一般更新自動標記 `changed`，明確指定狀態時依提案處理。
 - 更新不允許修改 event id、來源、信心分數等內部欄位，也不允許跨成員更新。
 - 每批變更先在深層副本套用、驗證，再回傳結果；任何一筆失敗均不修改傳入資料。
-- `posts` 中已出現的貼文，CLI 會拒絕重處理。這是檔案層的檢查，Pi 的持久化去重與重試尚未實作。
+- `posts` 中已出現的貼文，CLI 會拒絕重處理；事件 Processor 在呼叫 AI 前略過已記錄貼文。Collector 另有 SQLite 持久化去重與失敗重試。
+
+採用前請先檢查 `.local/proposal.json`，再執行：
+
+```sh
+python -m scripts.apply_proposal .local/proposal.json --approve --data-dir tests/fixtures/data
+```
+
+這會實際修改指定的資料目錄；上例採用測試資料。正式採用時省略 `--data-dir`。採用前會比對基準資料指紋，過期提案必須重新產生；通過後才寫備份與交易日誌。不要將測試提案採用至正式資料。
 
 ## Phase 2：手動 AI Parser
 
@@ -158,13 +177,13 @@ python -m scripts.validate_data
 python -m scripts.build_site
 ```
 
-Python 測試涵蓋六種 spec 情境、比對歧義、跨成員保護、整批失敗回滾、重複操作、非法資料與來源關聯，以及手動文字／圖片、可替換 Provider、API 請求與錯誤回應、失敗保留原有提案。測試不呼叫真實 AI API。JavaScript 測試涵蓋台灣日期、跨年週範圍、排序、成員篩選、空資料與不安全連結。
+Python 測試涵蓋六種 spec 情境、比對歧義、跨成員保護、整批失敗回滾、重複操作、非法資料與來源關聯，以及手動文字／圖片、可替換 Provider、API 請求與錯誤回應、失敗保留原有提案。另涵蓋 SQLite 並行去重、重試間隔、補漏 checkpoint、事件作者驗證、檔案鎖、部分寫入回復、過期提案、PR 與推送衝突。外部服務均以 mock 驗證，不呼叫真實 API，也不實際 commit／push。JavaScript 測試涵蓋台灣日期、跨年週範圍、排序、成員篩選、空資料與不安全連結。
 
 手動 UI 驗證：以 375px 手機寬度確認無橫向捲動；切換今日／本週及成員；查看休息、待定、取消、突發狀態；停止伺服器後重新整理確認載入錯誤訊息。瀏覽器整合與真實 API 行為不包含於單元測試。
 
 ## GitHub Pages 部署
 
-專案已搬入 Meridian-Schedule Git 儲存庫；目前提供 CI 與 Pages workflow，尚未驗證 GitHub Pages 雲端部署。
+目前提供 CI 與 Pages workflow。前次雲端執行建置成功，但 Pages 部署回報 404，要求先啟用 Pages；本次新增 Pages 設定檢查，尚未觸發新的雲端部署。`Process X post` 完成後也會觸發 Pages workflow，處理由內建 `GITHUB_TOKEN` 提交資料而不觸發 push workflow 的情況。
 
 1. 確認 GitHub repository 已包含專案檔案；部署流程假設正式分支名稱為 `main`，若不同請同步修改 `deploy-pages.yml` 的分支與 deploy 條件。
 2. 在 repository 的 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。
@@ -173,12 +192,12 @@ Python 測試涵蓋六種 spec 情境、比對歧義、跨成員保護、整批�
 
 網站使用相對路徑，因此支援 `https://帳號.github.io/儲存庫名稱/`。公開產物只包含網站資源與 `members.json`／`schedule.json`；posts、revisions 與開發檔案不會由建置程式複製。公開 repository 內的原始檔仍可被讀取，請勿將機密寫入任何資料檔。
 
-## 後續實作順序
+## 尚待上線驗證
 
-1. 使用真實貼文與週表圖片驗證 Phase 2 AI Parser 的分類與辨識品質。
-2. 加入審核提案的採用流程、`repository_dispatch` 與建立 PR 的 GitHub Actions。
-3. 驗證 X 事件來源後才實作 Collector、SQLite 去重與 dispatch。
-4. 在同一條處理流程加入每日補漏、重試與失敗復原。
-5. 資料穩定後再啟用自動採用門檻、監控與備份。
+1. 在 GitHub 啟用 Pages、設定 Secrets／Variables 及 Actions 建立 PR 的權限。
+2. 確認 X 帳號具有單篇貼文、近期貼文與 Filtered Stream 的實際存取權；adapter 可替換，不保證帳號權限與費用。
+3. 使用真實貼文與週表圖片驗證 AI 分類與辨識品質，再手動 dispatch 確認 PR 和 Pages 的完整流程。
+4. 在 Pi 安裝 systemd 範本，確認重啟、斷線、心跳、補漏及日誌。
+5. 維持 `REVIEW_ALL=true`，待解析結果穩定後才考慮啟用高信心自動採用。
 
-真實 AI 解析需要 Provider 的 API Key；fixture、資料驗證、網站建置與測試不需要。X rate limit、Collector 媒體下載、持久化重試與 push conflict 處理屬於後續外部整合範圍。
+真實 AI 解析需要 Provider 的 API Key；fixture、資料驗證、網站建置與測試不需要。YouTube／Twitch 的獨立資料來源 adapter、外部告警服務及跨機備援尚未加入。

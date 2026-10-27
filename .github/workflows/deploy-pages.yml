@@ -8,12 +8,13 @@ on:
       - 'data/**'
       - 'schemas/**'
       - 'processor/**'
+      - 'ingestion/**'
       - 'scripts/**'
       - 'tests/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
   workflow_run:
-    workflows: ['Process X post']
+    workflows: ['Process X post', 'Process ingestion']
     types: [completed]
     branches: [main]
 
@@ -26,30 +27,57 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       ((github.event.workflow_run.name == 'Process ingestion' && vars.SCHEDULE_CSV_URL != '') ||
+        (github.event.workflow_run.name == 'Process X post' && vars.ENABLE_LEGACY_API_PIPELINE == 'true')))
     permissions:
       contents: read
       pages: read
     runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.changes.outputs.deploy }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
+      - name: Check published data changes
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          BEFORE: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ] && [ "$WORKFLOW_NAME" = "Process ingestion" ] &&
+             git diff --quiet "$BEFORE" HEAD -- data/members.json data/schedule.json; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
+        if: steps.changes.outputs.deploy == 'true'
         with:
           python-version: '3.11'
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.deploy == 'true'
         with:
           node-version: '22'
       - run: python -m unittest discover -s tests -v
+        if: steps.changes.outputs.deploy == 'true'
       - run: node --test tests/test_site.cjs
+        if: steps.changes.outputs.deploy == 'true'
       - run: python -m scripts.build_site
+        if: steps.changes.outputs.deploy == 'true'
       - uses: actions/configure-pages@v5
+        if: steps.changes.outputs.deploy == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.changes.outputs.deploy == 'true'
         with:
           path: dist
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.deploy == 'true'
     needs: build
     permissions:
       pages: write

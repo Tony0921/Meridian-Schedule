@@ -15,6 +15,10 @@ class MergeResult:
     decision: str
 
 
+class MergeConflict(ValidationError):
+    """來源已通過格式驗證，但需要人工指定要修改的事件。"""
+
+
 def _minutes(value):
     hour, minute = map(int, value.split(":"))
     return hour * 60 + minute
@@ -45,10 +49,10 @@ def _find_event(events, match):
         ranked.append((score, event))
     ranked.sort(key=lambda item: item[0], reverse=True)
     if not ranked:
-        raise ValidationError("找不到相符事件")
+        raise MergeConflict("找不到相符事件")
     # 候選過於接近時停止整批合併，避免取消或修改錯誤直播。
     if len(ranked) > 1 and ranked[0][0] - ranked[1][0] < 0.15:
-        raise ValidationError("事件比對不明確，請指定 event id")
+        raise MergeConflict("事件比對不明確，請指定 event id")
     return ranked[0][1]
 
 

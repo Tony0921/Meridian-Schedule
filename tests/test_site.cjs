@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { taipeiDate, weekDates, selectEvents, safeUrl } = require("../site/app.js");
+const { taipeiDate, weekDates, selectEvents, safeUrl, sourceUrl } = require("../site/app.js");
 const members = require("./fixtures/data/members.json");
 const schedule = require("./fixtures/data/schedule.json");
 
@@ -28,4 +28,13 @@ test("不允許腳本與不合法連結", () => {
   assert.equal(safeUrl("javascript:alert(1)"), null);
   assert.equal(safeUrl(null), null);
   assert.equal(safeUrl("https://example.com/live"), "https://example.com/live");
+});
+test("CSV 來源使用原始公開網址，舊資料只為數字 X ID 建立連結", () => {
+  const event = { source_post_id: "csv-hash" };
+  const member = { x_username: "OfficialMiri" };
+  assert.equal(sourceUrl(event, member, { "csv-hash": "https://discord.com/channels/1/2/3" }), "https://discord.com/channels/1/2/3");
+  assert.equal(sourceUrl(event, member), null);
+  assert.equal(sourceUrl(event, member, { "csv-hash": "javascript:alert(1)" }), null);
+  assert.equal(sourceUrl({ source_post_id: "123456789" }, member), "https://x.com/OfficialMiri/status/123456789");
+  assert.equal(sourceUrl({ source_post_id: "demo-post" }, member), null);
 });

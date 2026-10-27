@@ -42,6 +42,14 @@ function safeUrl(value) {
   }
 }
 
+function sourceUrl(event, member, sources = {}) {
+  if (Object.hasOwn(sources, event.source_post_id)) return safeUrl(sources[event.source_post_id]);
+  if (member.x_username && /^[0-9]+$/.test(event.source_post_id)) {
+    return `https://x.com/${encodeURIComponent(member.x_username)}/status/${event.source_post_id}`;
+  }
+  return null;
+}
+
 async function startApp() {
   const dateInput = document.querySelector("#selected-date");
   const memberSelect = document.querySelector("#member");
@@ -118,8 +126,9 @@ async function startApp() {
           const links = element("div", undefined, "event-links");
           addLink(links, "前往直播 ↗", event.url);
           const member = memberMap.get(event.member_id);
-          if (member.x_username && !event.source_post_id.startsWith("demo-")) {
-            addLink(links, "來源貼文 ↗", `https://x.com/${encodeURIComponent(member.x_username)}/status/${encodeURIComponent(event.source_post_id)}`);
+          const source = sourceUrl(event, member, schedule.sources);
+          if (source) {
+            addLink(links, "來源貼文 ↗", source);
           } else {
             links.append(element("span", `來源：${event.source_post_id}`));
           }
@@ -144,6 +153,6 @@ async function startApp() {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { taipeiDate, weekDates, selectEvents, safeUrl };
+  module.exports = { taipeiDate, weekDates, selectEvents, safeUrl, sourceUrl };
 }
 if (typeof document !== "undefined") startApp();

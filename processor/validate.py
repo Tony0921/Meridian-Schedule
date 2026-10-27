@@ -38,15 +38,19 @@ def validate_data(members, schedule, posts, revisions):
         if key in post_ids or post["member_id"] not in member_ids:
             raise ValidationError("post 重複或成員不存在")
         post_ids.add(key)
-        post_members[key] = post["member_id"]
-    # MVP 僅支援 X，事件來源與歷史均必須能回溯至已記錄貼文。
+        post_members.setdefault(post["post_id"], []).append(post["member_id"])
+    # Event 沒有 source 欄位，來源 ID 必須能唯一回溯至同一成員的貼文。
     for event in schedule["events"]:
-        if ("x", event["source_post_id"]) not in post_ids:
+        owners = post_members.get(event["source_post_id"], [])
+        if not owners:
             raise ValidationError(f"event 缺少來源貼文: {event['id']}")
-        if post_members[("x", event["source_post_id"])] != event["member_id"]:
+        if len(owners) != 1:
+            raise ValidationError("event 來源貼文 ID 不唯一")
+        if owners[0] != event["member_id"]:
             raise ValidationError("event 來源貼文屬於其他成員")
     for revision in revisions:
-        if revision["event_id"] not in event_ids or ("x", revision["source_post_id"]) not in post_ids:
+        owners = post_members.get(revision["source_post_id"], [])
+        if revision["event_id"] not in event_ids or len(owners) != 1:
             raise ValidationError("revision 的 event 或來源貼文不存在")
         for snapshot in (revision["before"], revision["after"]):
             if snapshot is None:
@@ -55,5 +59,5 @@ def validate_data(members, schedule, posts, revisions):
             if snapshot["id"] != revision["event_id"]:
                 raise ValidationError("revision 快照的 event id 不一致")
         after = revision["after"]
-        if after["source_post_id"] != revision["source_post_id"] or after["member_id"] != post_members[("x", revision["source_post_id"])]:
+        if after["source_post_id"] != revision["source_post_id"] or after["member_id"] != owners[0]:
             raise ValidationError("revision 的來源貼文不一致")

@@ -1,0 +1,39 @@
+{
+  "posts": [
+    {
+      "ingestion_id": "e736c288-4aef-49f0-8238-a64179731080",
+      "source": "x",
+      "post_id": "fixture-sheet-change",
+      "member_id": "demo-miri",
+      "published_at": "2026-10-16T17:00:00+08:00",
+      "discovered_at": "2026-10-16T17:05:00+08:00",
+      "source_url": "https://example.com/fixtures/sheet-change",
+      "post_text": "今天改九點。",
+      "media_urls": "[]",
+      "classification": "schedule_change",
+      "confidence": 0.97,
+      "status": "new",
+      "processed_at": "",
+      "processor_result": "",
+      "discovery_source": "chatgpt",
+      "source_quality": "unknown"
+    }
+  ],
+  "changes": [
+    {
+      "ingestion_id": "e736c288-4aef-49f0-8238-a64179731080",
+      "change_index": 0,
+      "operation": "update",
+      "member_id": "demo-miri",
+      "date": "2026-10-16",
+      "time": "21:00",
+      "title": "",
+      "platform": "",
+      "url": "",
+      "status": "",
+      "confidence": 0.97,
+      "match_event_id": "demo-miri-20261016-2000-001",
+      "reason": "原始公告明確將今天的直播改為 21:00。"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # 自動化與 Collector 操作手冊
 
+v2.1 主要流程請先閱讀 [公開 CSV 匯入操作手冊](ingestion.md)，只需 `SCHEDULE_CSV_URL`，不需要 Google API 認證、Pi 或人工提案。本頁保留既有採用、備份、復原與**選配 v1 API Pipeline** 的操作方式；`OPENAI_API_KEY`、`X_API_TOKEN` 只適用於下列 API 路徑。`Process X post` 與 `Reconcile X posts` workflows 預設停用，需明確設定 repository Variable `ENABLE_LEGACY_API_PIPELINE=true`；v2.1 不呼叫這些 API。
+
 ## 實作進度與驗收界線
 
 | Phase | 已實作 | 仍需外部驗證 |
@@ -85,7 +87,7 @@ python -m scripts.backup_data restore --snapshot .local/backups/SNAPSHOT.json
 python -m scripts.backup_data recover
 ```
 
-每次採用或 restore 前都會將四份資料與校驗值寫入 `.local/backups/`，restore 也保留還原前的備份。檔案鎖防止並行讀寫；四份 JSON 透過交易日誌連動寫入，失敗時回復原始位元組。程序被強制中止時可能留下 `.transaction.json`；讀取／建置會拒絕不完整交易，先執行 `recover` 回復再重跑。這是程序中斷復原，不宣稱跨檔案瞬間原子性或電源故障下的磁碟耐久保證。
+每次採用、CSV 匯入或 restore 前都會將四份正式資料、存在的 `imported_ids.json` 與校驗值寫入 `.local/backups/`，restore 也保留還原前的備份。檔案鎖防止並行讀寫；JSON 與匯入 ID 透過交易日誌連動寫入，失敗時回復原始位元組。還原不含匯入 ID 的舊版備份時會清空 receipt，避免漏掉需要重匯的行程。程序被強制中止時可能留下 `.transaction.json`；讀取／建置會拒絕不完整交易，先執行 `recover` 回復再重跑。這是程序中斷復原，不宣稱跨檔案瞬間原子性或電源故障下的磁碟耐久保證。
 
 發布腳本以最新 main 建立隔離 checkout，重新 merge，再提交資料。預設以固定貼文分支建立 PR；已存在的 PR 直接回報。不 force-push；自動提交遇到推送衝突時最多取最新資料重算 3 次。若提案要修改的同一欄位已被更新，則停止，避免較舊公告覆蓋較新異動。比對歧義或權限錯誤也會停止並保留 artifact。隔離 checkout 的交易備份只保留至該次發布結束，持續保留的版本在 Git 歷史及每日備份 artifact。此腳本會實際 commit／push／建立 PR，僅在設定好 Token 且準備發布時執行。
 

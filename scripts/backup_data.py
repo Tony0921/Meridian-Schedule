@@ -22,7 +22,10 @@ def main(argv=None):
             elif args.action == "recover":
                 result = recover_unlocked(args.data_dir)
             else:
-                result = str(write_data_unlocked(args.data_dir, load_snapshot(args.snapshot)["data"], args.backup_dir))
+                restored = load_snapshot(args.snapshot)["data"]
+                # 舊版備份沒有 receipt；還原時清空，避免行程退回後仍略過已撤回的匯入。
+                restored.setdefault("imported_ids", [])
+                result = str(write_data_unlocked(args.data_dir, restored, args.backup_dir))
         print(json.dumps({"result": "success", "action": args.action, "backup": result}))
         return 0
     except (ValueError, OSError, KeyError, TypeError):

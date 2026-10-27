@@ -23,6 +23,8 @@ def _load_context(post, data_dir, timestamp):
         "source", "post_id", "member_id", "published_at", "source_url", "media"
     }:
         raise ValidationError("post 必須且只能包含 source、post_id、member_id、published_at、source_url、media")
+    if post["source"] != "x":
+        raise ValidationError("舊版貼文 Parser 僅支援 X；其他公開來源請使用 CSV 匯入")
     validate_schema([{**post, "processed_at": timestamp, "type": "unknown", "status": "manual_review"}], "posts")
     values = read_data(data_dir)
     members, schedule, posts, revisions = [values[name] for name in ("members", "schedule", "posts", "revisions")]

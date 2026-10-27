@@ -6,12 +6,12 @@
     "additionalProperties": false,
     "required": ["source", "post_id", "member_id", "published_at", "processed_at", "type", "status", "source_url", "media"],
     "properties": {
-      "source": {"type": "string", "const": "x"},
+      "source": {"type": "string", "enum": ["x", "discord", "other"]},
       "post_id": {"type": "string", "minLength": 1},
       "member_id": {"type": "string", "minLength": 1},
       "published_at": {"type": "string", "format": "date-time"},
       "processed_at": {"type": "string", "format": "date-time"},
-      "type": {"type": "string", "enum": ["weekly_schedule", "schedule_change", "sudden_stream", "cancellation", "postponement", "irrelevant", "unknown"]},
+      "type": {"type": "string", "enum": ["weekly_schedule", "schedule_change", "sudden_stream", "cancellation", "postponement", "day_off", "irrelevant", "unknown"]},
       "status": {"type": "string", "enum": ["processed", "pending_review", "ignored", "failed", "manual_review"]},
       "source_url": {"type": "string", "format": "uri"},
       "media": {

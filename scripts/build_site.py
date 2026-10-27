@@ -20,8 +20,13 @@ def build_site(output):
     for name in ("index.html", "app.js", "style.css"):
         copy2(ROOT / "site" / name, output / name)
     (output / "data").mkdir(exist_ok=True)
+    source_urls = {post["post_id"]: post["source_url"] for post in values["posts"]}
+    public_schedule = {**values["schedule"], "sources": {
+        event["source_post_id"]: source_urls[event["source_post_id"]]
+        for event in values["schedule"]["events"]
+    }}
     for name in ("members", "schedule"):
-        atomic_json(values[name], output / "data" / f"{name}.json")
+        atomic_json(public_schedule if name == "schedule" else values[name], output / "data" / f"{name}.json")
     (output / ".nojekyll").touch()
     print(f"靜態網站建置完成：{output}")
 

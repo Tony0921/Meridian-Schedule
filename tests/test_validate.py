@@ -88,6 +88,10 @@ class ValidationTests(unittest.TestCase):
             build_site(output)
             self.assertEqual({path.relative_to(output).as_posix() for path in output.rglob("*") if path.is_file()},
                              {"index.html", "app.js", "style.css", ".nojekyll", "data/members.json", "data/schedule.json"})
+            published = load_json(output / "data/schedule.json")
+            sources = {post["post_id"]: post["source_url"] for post in load_json(ROOT / "data/posts.json")}
+            self.assertEqual(published["sources"], {event["source_post_id"]: sources[event["source_post_id"]]
+                                                    for event in published["events"]})
 
     def test_build_cannot_overwrite_source(self):
         for directory in (ROOT, ROOT / "site", ROOT / "data/nested"):

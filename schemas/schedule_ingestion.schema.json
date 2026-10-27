@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized schedule_ingestion CSV row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "member_id", "date", "time", "title", "source_url", "created_at"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "member_id": {"type": "string", "minLength": 1},
+    "date": {"type": "string", "format": "date"},
+    "time": {"type": "string", "pattern": "^(([01][0-9]|2[0-3]):[0-5][0-9]|tbd|day_off|working_day)$"},
+    "title": {"type": "string", "minLength": 1},
+    "source_url": {"type": "string", "format": "uri"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "status": {"type": "string", "enum": ["", "pending", "imported", "invalid"]}
+  }
+}

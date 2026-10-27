@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   reconcile:
+    if: vars.ENABLE_LEGACY_API_PIPELINE == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

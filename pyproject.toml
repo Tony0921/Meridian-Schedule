@@ -1,6 +1,6 @@
 [project]
 name = "meridian-schedule"
-version = "0.1.0"
-description = "VTuber 行程聚合器 MVP 骨架"
+version = "0.2.1"
+description = "VTuber 行程聚合器：公開 CSV 匯入、儲存庫去重與 GitHub Pages"
 requires-python = ">=3.11"
 dependencies = []

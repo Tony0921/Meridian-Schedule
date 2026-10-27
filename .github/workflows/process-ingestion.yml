@@ -1,0 +1,58 @@
+name: Process ingestion
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [new_ingestion]
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: process-ingestion
+  cancel-in-progress: false
+
+jobs:
+  import:
+    if: vars.SCHEDULE_CSV_URL != '' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SCHEDULE_CSV_URL: ${{ vars.SCHEDULE_CSV_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s tests -v
+      - run: node --test tests/test_site.cjs
+      - name: Download and import public CSV
+        run: python -m scripts.import_schedule
+      - run: python -m scripts.validate_data
+      - run: python -m scripts.build_site
+      - name: Commit changed data
+        run: |
+          git add -- data/schedule.json data/posts.json data/revisions.json data/imported_ids.json
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update schedule data"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ingestion-backup-${{ github.run_id }}
+          path: .local/backups/*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 30

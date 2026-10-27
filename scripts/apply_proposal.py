@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ingestion.normalize import observation_policy, to_fixture
 from processor.classify import ConfidencePolicy
 from processor.schemas import ValidationError, load_json, validate_schema
 from processor.storage import NAMES, data_lock, fingerprint, read_unlocked, write_data_unlocked
@@ -25,6 +26,11 @@ def apply_proposal(bundle, directory, backup_dir, *, approve=False, policy=None,
             raise ValidationError("提案已過期，請重新解析或重新產生提案")
         if any((item["source"], item["post_id"]) == (post["source"], post["post_id"]) for item in values["posts"]):
             raise ValidationError("貼文已記錄，不可重複採用")
+        if "observation" in bundle:
+            fixture = to_fixture(bundle["observation"])
+            if fixture != {"post": post, "proposal": bundle["proposal"]}:
+                raise ValidationError("Observation 與提案不一致，請重新匯入")
+            policy = observation_policy(bundle["observation"], values["members"], policy)
         candidate = _build_proposal(post, bundle["proposal"], [values[name] for name in NAMES], stamp, policy)
         if rebase and bundle.get("base_hash") != fingerprint(values):
             baseline = bundle.get("base", {})

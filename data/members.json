@@ -6,5 +6,109 @@
     "youtube": "https://www.youtube.com/@%E7%92%83Miri",
     "twitch": "miri_aetris",
     "enabled": true
+  },
+  {
+    "id": "998rrr_",
+    "name": "998rrr_",
+    "x_username": "998rrr_",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "mizukivtubertw",
+    "name": "MizukiVtuberTW",
+    "x_username": "MizukiVtuberTW",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "reirei_neon",
+    "name": "Reirei_Neon",
+    "x_username": "Reirei_Neon",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "yuzumi_neon",
+    "name": "Yuzumi_Neon",
+    "x_username": "Yuzumi_Neon",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "kirali_neon",
+    "name": "Kirali_Neon",
+    "x_username": "Kirali_Neon",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "iruni_ianvs",
+    "name": "iruni_ianvs",
+    "x_username": "iruni_ianvs",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "itsuki_ianvs",
+    "name": "itsuki_ianvs",
+    "x_username": "itsuki_ianvs",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "sachi_teraz",
+    "name": "Sachi_TeRaz",
+    "x_username": "Sachi_TeRaz",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "koyuki_teraz",
+    "name": "Koyuki_TeRaz",
+    "x_username": "Koyuki_TeRaz",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "hiyori_teraz",
+    "name": "Hiyori_TeRaz",
+    "x_username": "Hiyori_TeRaz",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "hitomi_teraz",
+    "name": "Hitomi_TeRaz",
+    "x_username": "Hitomi_TeRaz",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "ichii_aetris",
+    "name": "Ichii_Aetris",
+    "x_username": "Ichii_Aetris",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
+  },
+  {
+    "id": "iseri_aetris",
+    "name": "Iseri_Aetris",
+    "x_username": "Iseri_Aetris",
+    "youtube": null,
+    "twitch": null,
+    "enabled": true
   }
 ]

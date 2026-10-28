@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-16T08:37:43+00:00",
+  "updated_at": "2026-10-28T08:47:55+00:00",
   "events": [
     {
       "member_id": "miri",
@@ -120,6 +120,96 @@
       "source_post_id": "2109291418233827667",
       "confidence": 0.9,
       "updated_at": "2026-10-16T08:37:43+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-10-26",
+      "time": "19:00",
+      "title": "【開箱】生日信件part.2之希望我念的完",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261026-6c61600b9a46",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-10-27",
+      "time": "21:00",
+      "title": "【特戰英豪】瓦瓦！",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261027-8b5333225a2b",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-10-28",
+      "time": "19:00",
+      "title": "【雜談】整理遊戲最後一關…？",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261028-51b3dcce1023",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-10-29",
+      "time": "21:00",
+      "title": "【特戰英豪】好想…上分…",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261029-a22909de44d3",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-10-31",
+      "time": "21:00",
+      "title": "【鬥陣特攻】爐心超載啦！！",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261031-9cdb16d6147d",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
+    },
+    {
+      "member_id": "miri",
+      "date": "2026-11-01",
+      "time": "19:00",
+      "title": "【璃我一下】水母大餐？",
+      "platform": null,
+      "url": null,
+      "status": "scheduled",
+      "id": "miri-20261101-f8ce4b7debbe",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T08:47:55+00:00"
     }
   ]
 }

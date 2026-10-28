@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass
 class Member:
     id: str
     name: str
+    group: str
+    group_name: str
     x_username: str | None
     youtube: str | None
     twitch: str | None

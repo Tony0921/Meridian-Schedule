@@ -1,15 +1,9 @@
 [
   {
-    "id": "miri_aetris",
-    "name": "璃 Miri",
-    "x_username": "Miri_Aetris",
-    "youtube": "https://www.youtube.com/@%E7%92%83Miri",
-    "twitch": "https://www.twitch.tv/miri_aetris",
-    "enabled": true
-  },
-  {
     "id": "998rrr_",
     "name": "玖玖巴 Jojoba",
+    "group": "other",
+    "group_name": "其他",
     "x_username": "998rrr_",
     "youtube": "https://www.youtube.com/@%E7%8E%96%E7%8E%96%E5%B7%B4",
     "twitch": "https://www.twitch.tv/998rrr",
@@ -18,6 +12,8 @@
   {
     "id": "mizukivtubertw",
     "name": "浠 Mizuki",
+    "group": "other",
+    "group_name": "其他",
     "x_username": "MizukiVtuberTW",
     "youtube": "https://www.youtube.com/c/%E6%B5%A0MizukiChannel",
     "twitch": "https://www.twitch.tv/mizukimilk723",
@@ -26,6 +22,8 @@
   {
     "id": "reirei_neon",
     "name": "澪 Rei",
+    "group": "neon",
+    "group_name": "霓 NEO(n)",
     "x_username": "Reirei_Neon",
     "youtube": "https://www.youtube.com/@%E6%BE%AARei",
     "twitch": "https://www.twitch.tv/reirei_neon",
@@ -34,6 +32,8 @@
   {
     "id": "yuzumi_neon",
     "name": "橙 Yuzumi",
+    "group": "neon",
+    "group_name": "霓 NEO(n)",
     "x_username": "Yuzumi_Neon",
     "youtube": "https://www.youtube.com/@%E6%A9%99Yuzumi",
     "twitch": "https://www.twitch.tv/yuzumi_neon",
@@ -42,6 +42,8 @@
   {
     "id": "kirali_neon",
     "name": "煌 Kirali",
+    "group": "neon",
+    "group_name": "霓 NEO(n)",
     "x_username": "Kirali_Neon",
     "youtube": "https://www.youtube.com/@Kirali_Neon",
     "twitch": "https://www.twitch.tv/kirali_neon",
@@ -50,6 +52,8 @@
   {
     "id": "iruni_ianvs",
     "name": "祈 Iruni",
+    "group": "ianvs",
+    "group_name": "扉暮 IANVS",
     "x_username": "iruni_ianvs",
     "youtube": "https://www.youtube.com/@IruniIanvs",
     "twitch": "https://www.twitch.tv/iruni_ianvs",
@@ -58,6 +62,8 @@
   {
     "id": "itsuki_ianvs",
     "name": "玥 Itsuki",
+    "group": "ianvs",
+    "group_name": "扉暮 IANVS",
     "x_username": "itsuki_ianvs",
     "youtube": "https://www.youtube.com/@ItsukiIanvs",
     "twitch": "https://www.twitch.tv/itsuki_ianvs",
@@ -66,6 +72,8 @@
   {
     "id": "sachi_teraz",
     "name": "幸 Sachi",
+    "group": "teraz",
+    "group_name": "序境 TeRaź",
     "x_username": "Sachi_TeRaz",
     "youtube": "https://www.youtube.com/@SachiTeRaz",
     "twitch": "https://www.twitch.tv/sachi_teraz",
@@ -74,6 +82,8 @@
   {
     "id": "koyuki_teraz",
     "name": "雪 Koyuki",
+    "group": "teraz",
+    "group_name": "序境 TeRaź",
     "x_username": "Koyuki_TeRaz",
     "youtube": "https://www.youtube.com/@%E9%9B%AAKoyuki",
     "twitch": "https://www.twitch.tv/koyuki_teraz",
@@ -82,6 +92,8 @@
   {
     "id": "hiyori_teraz",
     "name": "煦 Hiyori",
+    "group": "teraz",
+    "group_name": "序境 TeRaź",
     "x_username": "Hiyori_TeRaz",
     "youtube": "https://www.youtube.com/@%E7%85%A6Hiyori",
     "twitch": "https://www.twitch.tv/hiyori_teraz",
@@ -90,6 +102,8 @@
   {
     "id": "hitomi_teraz",
     "name": "実 Hitomi",
+    "group": "teraz",
+    "group_name": "序境 TeRaź",
     "x_username": "Hitomi_TeRaz",
     "youtube": "https://www.youtube.com/@%E5%AE%9FHitomi",
     "twitch": "https://www.twitch.tv/hitomi_teraz",
@@ -98,6 +112,8 @@
   {
     "id": "ichii_aetris",
     "name": "莓 Ichii",
+    "group": "aetris",
+    "group_name": "沉珀 Aetris",
     "x_username": "Ichii_Aetris",
     "youtube": "https://www.youtube.com/@%E8%8E%93Ichii",
     "twitch": "https://www.twitch.tv/ichii_aetris",
@@ -106,9 +122,21 @@
   {
     "id": "iseri_aetris",
     "name": "宓 Iseri",
+    "group": "aetris",
+    "group_name": "沉珀 Aetris",
     "x_username": "Iseri_Aetris",
     "youtube": "https://www.youtube.com/channel/UC8XL4U2dRKDi4DcjsPnc4Zg",
     "twitch": "https://www.twitch.tv/iseri_aetris",
+    "enabled": true
+  },
+  {
+    "id": "miri_aetris",
+    "name": "璃 Miri",
+    "group": "aetris",
+    "group_name": "沉珀 Aetris",
+    "x_username": "Miri_Aetris",
+    "youtube": "https://www.youtube.com/@%E7%92%83Miri",
+    "twitch": "https://www.twitch.tv/miri_aetris",
     "enabled": true
   }
 ]

@@ -4,7 +4,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from processor.schemas import ValidationError, load_json, validate_schema
-from processor.validate import validate_data, validate_schedule
+from processor.validate import validate_data, validate_members, validate_schedule
 from scripts.build_site import build_site
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +18,28 @@ class ValidationTests(unittest.TestCase):
 
     def test_demo_data_valid(self):
         validate_data(self.members, self.schedule, self.posts, self.revisions)
+
+    def test_member_groups_are_preserved(self):
+        self.members[0].update(group="neon", group_name="霓 NEO(n)")
+        self.members[1].update(group="other", group_name="其他")
+        members = validate_members(self.members)
+        self.assertEqual([(member.group, member.group_name) for member in members],
+                         [("neon", "霓 NEO(n)"), ("other", "其他")])
+
+    def test_member_group_fields_are_required_and_valid(self):
+        for member in self.members:
+            member.update(group="other", group_name="其他")
+        for key in ("group", "group_name"):
+            candidate = deepcopy(self.members)
+            del candidate[0][key]
+            with self.subTest(missing=key), self.assertRaisesRegex(ValidationError, key):
+                validate_members(candidate)
+        for key, value in (("group", ""), ("group", None), ("group", "NEO(n)"),
+                           ("group_name", ""), ("group_name", None)):
+            candidate = deepcopy(self.members)
+            candidate[0][key] = value
+            with self.subTest(key=key, value=value), self.assertRaisesRegex(ValidationError, key):
+                validate_members(candidate)
 
     def test_invalid_event_fields(self):
         invalids = {"date": "2026-02-30", "time": "24:00", "timezone": "UTC", "status": "sudden",
@@ -88,6 +110,7 @@ class ValidationTests(unittest.TestCase):
             build_site(output)
             self.assertEqual({path.relative_to(output).as_posix() for path in output.rglob("*") if path.is_file()},
                              {"index.html", "app.js", "style.css", ".nojekyll", "data/members.json", "data/schedule.json"})
+            self.assertEqual(load_json(output / "data/members.json"), load_json(ROOT / "data/members.json"))
             published = load_json(output / "data/schedule.json")
             sources = {post["post_id"]: post["source_url"] for post in load_json(ROOT / "data/posts.json")}
             self.assertEqual(published["sources"], {event["source_post_id"]: sources[event["source_post_id"]]

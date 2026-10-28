@@ -292,5 +292,26 @@
       "confidence": 0.7,
       "updated_at": "2026-10-28T08:47:55+00:00"
     }
+  },
+  {
+    "event_id": "miri-20261030-173c09ce7a6a",
+    "timestamp": "2026-10-28T09:31:48+00:00",
+    "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+    "before": null,
+    "after": {
+      "member_id": "miri",
+      "date": "2026-10-30",
+      "time": null,
+      "title": "目前璃線中！",
+      "platform": null,
+      "url": null,
+      "status": "day_off",
+      "id": "miri-20261030-173c09ce7a6a",
+      "timezone": "Asia/Taipei",
+      "origin": "day_off",
+      "source_post_id": "csv-d212b098a04cd79f5678b23eba8f2fdeb64d15c088b9706265efe359a1919504",
+      "confidence": 0.7,
+      "updated_at": "2026-10-28T09:31:48+00:00"
+    }
   }
 ]

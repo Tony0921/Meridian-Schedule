@@ -11,7 +11,7 @@
       "name": {"type": "string", "minLength": 1},
       "x_username": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_]+$"},
       "youtube": {"type": ["string", "null"], "format": "uri"},
-      "twitch": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_]+$"},
+      "twitch": {"type": ["string", "null"], "format": "uri"},
       "enabled": {"type": "boolean"}
     }
   }

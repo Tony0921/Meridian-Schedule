@@ -6,6 +6,7 @@ on:
     types: [new_ingestion]
   schedule:
     - cron: '17 * * * *'
+      timezone: 'Asia/Taipei'
 
 permissions:
   contents: write

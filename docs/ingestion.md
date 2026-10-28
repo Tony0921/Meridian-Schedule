@@ -77,7 +77,7 @@ python -m scripts.build_site
 1. 在 Settings → Secrets and variables → Actions → Variables 新增 `SCHEDULE_CSV_URL`，填公開 CSV 網址。不需要 Google Secrets、PAT 或額外 API Key。
 2. 確認內建 `GITHUB_TOKEN` 可寫入 repository；分支保護若禁止 bot 直接推送，需由管理者調整允許的自動化寫入方式，流程不繞過保護。
 3. Settings → Pages 的 Source 選 GitHub Actions。
-4. 推送程式後手動執行 **Process ingestion**，驗證一次；之後排程設定為每小時第 17 分鐘執行（`17 * * * *`），避開整點高峰，並保留 `workflow_dispatch` 與 `new_ingestion` dispatch。只有設定 CSV URL 且位於 main 才執行；實際觸發仍可能因 GitHub 排程負載而延遲或漏跑。
+4. 推送程式後手動執行 **Process ingestion**，驗證一次；之後排程設定為台灣時間每小時第 17 分鐘執行（`cron: '17 * * * *'`、`timezone: 'Asia/Taipei'`），避開整點高峰，並保留 `workflow_dispatch` 與 `new_ingestion` dispatch。只有設定 CSV URL 且位於 main 才執行；實際觸發仍可能因 GitHub 排程負載而延遲或漏跑。
 
 流程依序測試、下載／匯入、資料驗證、網站建置，再檢查暫存差異。只提交 `schedule.json`、`posts.json`、`revisions.json`、`imported_ids.json` 的實際差異；沒有變化則成功結束，不 commit。推送失敗會明確失敗，下次從遠端 main 重新匯入。不要同時部署其他會寫相同正式資料的 importer。
 

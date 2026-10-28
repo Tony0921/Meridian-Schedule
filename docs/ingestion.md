@@ -13,7 +13,7 @@
 
 ```csv
 id,member_id,date,time,title,source_url,created_at
-miri_20261028_01,miri,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00
+miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00
 ```
 
 | 欄位 | 規則 |
@@ -26,6 +26,8 @@ miri_20261028_01,miri,2026-10-28,20:00,雜談直播,https://example.com/public-s
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
+
+成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
 
 時間不明請明確填 `tbd`／`待定`／`未定`／`時間未定`；休息填 `day_off`／`休息`／`休息日`；工作日填 `working_day`／`工作日`／`作業日`。匯入後使用現有狀態與 `time: null`，空白時間不會自行推論。所有行程均為台灣時間。
 

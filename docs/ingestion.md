@@ -12,8 +12,8 @@
 建議欄位（順序可調整）：
 
 ```csv
-id,member_id,date,time,title,source_url,created_at,platform
-miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00,youtube
+id,member_id,date,time,title,source_url,created_at,platform,group
+miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00,youtube,aetris
 ```
 
 | 欄位 | 規則 |
@@ -26,15 +26,18 @@ miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://exampl
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
 | `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
+| `group` | 選填團體識別碼，依 `member_id` 從 `members.json` 的 `group` 欄導入；僅供 Sheet 查閱，匯入時忽略欄值 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
+
+`group` 使用 `neon`、`ianvs`、`teraz`、`aetris`、`none`、`collaborators` 等識別碼，不使用 `group_name` 顯示名稱。每次新增資料時依最新成員名單填寫；成員分組仍以 `members.json` 為準，Sheet 欄位不會覆寫成員、事件或 Revision。既有七欄／八欄 CSV 仍可使用，僅改動 `group` 不會觸發行程更新。
 
 行程卡片中的成員名稱會依 `x_username` 連到對應的 X 個人頁，並於新分頁開啟；未設定帳號時維持純文字。
 
 `platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。休息或已確認不開台填 `none`；平台無法確認填 `unknown`，工作日若仍可能突發開台也填 `unknown`。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision；網站以紅色 YouTube、紫色 Twitch、灰色「平台未確認」徽章顯示平台，`none` 或休息日不顯示平台徽章。YouTube／Twitch 徽章分別連到該成員 `youtube`／`twitch` 欄位的頻道並於新分頁開啟；缺少有效網址或平台未確認時維持純文字徽章。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
 
-既有線上工作表新增 `platform` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
+既有線上工作表新增 `platform` 或 `group` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 
 時間不明請明確填 `tbd`／`待定`／`未定`／`時間未定`；休息填 `day_off`／`休息`／`休息日`；工作日填 `working_day`／`工作日`／`作業日`。匯入後使用現有狀態與 `time: null`，空白時間不會自行推論。所有行程均為台灣時間。
 

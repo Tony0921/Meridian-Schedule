@@ -32,7 +32,7 @@ def row(**updates):
 
 def csv_text(rows, columns=None):
     stream = io.StringIO(newline="")
-    columns = columns or (*COLUMNS, *(key for key in ("platform", "status") if any(key in item for item in rows)))
+    columns = columns or (*COLUMNS, *(key for key in ("platform", "group", "status") if any(key in item for item in rows)))
     writer = csv.DictWriter(stream, fieldnames=columns)
     writer.writeheader()
     writer.writerows(rows)
@@ -83,6 +83,17 @@ class ScheduleCSVTests(unittest.TestCase):
             result = self.run_import([row(status="imported"), row(id="invalid", status="invalid", time="22:00")])
         self.assertEqual((result["imported"], result["invalid"]), (1, 1))
         self.assertEqual(load_json(self.data / "imported_ids.json"), [row()["id"]])
+
+    def test_optional_group_is_informational_and_does_not_override_members(self):
+        members = load_json(self.data / "members.json")
+        result = self.run_import([row(group="neon"), row(group="aetris")])
+        self.assertEqual((result["imported"], result["duplicates"], result["invalid"]), (1, 1, 0))
+        values = read_data(self.data)
+        self.assertEqual(values["members"], members)
+        self.assertNotIn("group", values["schedule"]["events"][-1])
+        before = self.files()
+        self.assertFalse(self.run_import([row(group="collaborators")])["changed"])
+        self.assertEqual(self.files(), before)
 
     def test_platform_is_normalized_and_saved_in_event_and_revision(self):
         for index, (value, expected) in enumerate(((" YouTube ", "youtube"), ("Twitch", "twitch"),

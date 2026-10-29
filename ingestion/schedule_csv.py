@@ -70,7 +70,7 @@ def parse_csv(text):
         reader = csv.reader(io.StringIO(text.lstrip("\ufeff"), newline=""), strict=True)
         headers = [value.strip() for value in next(reader)]
         if (len(headers) != len(set(headers)) or not set(COLUMNS) <= set(headers)
-                or set(headers) - set(COLUMNS) - {"platform", "status"}):
+                or set(headers) - set(COLUMNS) - {"platform", "group", "status"}):
             raise ValidationError("CSV 欄位不符 schedule_ingestion schema")
         rows = []
         for values in reader:

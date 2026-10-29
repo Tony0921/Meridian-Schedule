@@ -30,6 +30,8 @@ h3 { font-size: .9rem; color: #506459; }
 .event-time { color: #284f43; font-size: 1.3rem; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }
 .event-body { min-width: 0; overflow-wrap: anywhere; }
 .member-name { color: #606d64; font-size: .85rem; margin: 0 0 4px; }
+.member-name a { color: inherit; text-decoration: none; }
+.member-name a:hover { text-decoration: underline; }
 h4 { font-size: 1.15rem; margin: 0 0 12px; }
 .metadata, .event-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: .8rem; }
 .badge { background: #edf3ec; border-radius: 6px; padding: 2px 9px; }

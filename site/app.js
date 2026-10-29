@@ -118,7 +118,10 @@ async function startApp() {
           const card = element("article", undefined, `event-card status-${event.status}`);
           card.append(element("p", event.time || (event.status === "day_off" ? "全天" : "時間待定"), "event-time"));
           const body = element("div", undefined, "event-body");
-          body.append(element("p", member.name, "member-name"));
+          const memberName = element("p", undefined, "member-name");
+          const profile = member.x_username ? `https://x.com/${encodeURIComponent(member.x_username)}` : null;
+          if (!addLink(memberName, member.name, profile)) memberName.textContent = member.name;
+          body.append(memberName);
           body.append(element("h4", event.title));
           const metadata = element("div", undefined, "metadata");
           metadata.append(element("span", STATUS_LABELS[event.status] || event.status, "badge"));

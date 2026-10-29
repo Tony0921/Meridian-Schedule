@@ -19,6 +19,7 @@ from processor.storage import (NAMES, atomic_json, data_lock, load_snapshot, rea
 from processor.validate import validate_data
 from scripts.backup_data import main as backup_main
 from scripts.import_schedule import main
+from scripts.process_post import process_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 STAMP = "2026-10-28T08:00:00+08:00"
@@ -62,6 +63,7 @@ class ScheduleCSVTests(unittest.TestCase):
         values = read_data(self.data)
         events = [item for item in values["schedule"]["events"] if item["date"] >= "2026-10-28"]
         self.assertEqual([item["status"] for item in events], ["scheduled", "day_off"])
+        self.assertEqual([item["id"] for item in events], [row()["id"], "second"])
         self.assertIsNone(events[1]["time"])
         self.assertEqual(len(values["posts"]), len(json.loads(self.before["posts.json"])) + 1)
         self.assertEqual(len(values["revisions"]), 2)
@@ -134,7 +136,7 @@ class ScheduleCSVTests(unittest.TestCase):
     def test_platform_update_keeps_event_id_and_revision(self):
         self.run_import([row()])
         original = read_data(self.data)["schedule"]["events"][-1]
-        self.assertTrue(self.run_import([row(id="platform-correction", platform="youtube")])["schedule_changed"])
+        self.assertTrue(self.run_import([row(platform="youtube")])["schedule_changed"])
         values = read_data(self.data)
         changed = values["schedule"]["events"][-1]
         self.assertEqual(changed["id"], original["id"])
@@ -179,17 +181,15 @@ class ScheduleCSVTests(unittest.TestCase):
                 self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["platform"], platform)
         self.assertEqual(len(read_data(self.data)["revisions"]), 5)
 
-    def test_imported_id_platform_update_preserves_other_fields_and_states(self):
+    def test_imported_id_platform_update_preserves_terminal_states(self):
         self.run_import([row(platform="unknown")])
-        for status in ("cancelled", "postponed", "live", "finished", "day_off", "unknown", "tbd"):
+        for status in ("cancelled", "postponed", "live", "finished"):
             with self.subTest(status=status):
                 values = read_data(self.data)
                 before = values["schedule"]["events"][-1]
-                before.update(status=status, platform="unknown", time=None if status in
-                              {"day_off", "unknown", "tbd"} else "20:00")
+                before.update(status=status, platform="unknown")
                 atomic_json(values["schedule"], self.data / "schedule.json")
-                result = self.run_import([row(title="不應覆寫原標題", time="tbd" if before["time"] is None
-                                              else "20:00", platform="twitch")])
+                result = self.run_import([row(platform="twitch")])
                 self.assertTrue(result["schedule_changed"])
                 after = read_data(self.data)["schedule"]["events"][-1]
                 self.assertEqual(after, {**before, "platform": "twitch", "updated_at": STAMP})
@@ -214,34 +214,26 @@ class ScheduleCSVTests(unittest.TestCase):
                 self.assertEqual(values["revisions"][-1]["source_post_id"], before["source_post_id"])
                 self.assertEqual(values["posts"], posts)
 
-    def test_imported_id_platform_update_requires_unique_event_and_same_source(self):
+    def test_same_id_uses_identity_even_when_multiple_events_share_time(self):
         self.run_import([row(platform="unknown")])
-        before = self.files()
-        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
-            result = self.run_import([row(platform="youtube", source_url="https://example.com/other")])
-        self.assertEqual(result["invalid"], 1)
-        self.assertEqual(self.files(), before)
         values = read_data(self.data)
-        values["schedule"]["events"].append({**values["schedule"]["events"][-1], "id": "ambiguous-copy"})
+        other = {**values["schedule"]["events"][-1], "id": "other-event", "title": "遊戲直播"}
+        values["schedule"]["events"].append(other)
         atomic_json(values["schedule"], self.data / "schedule.json")
-        before = self.files()
-        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
-            result = self.run_import([row(platform="youtube")])
-        self.assertEqual(result["invalid"], 1)
-        self.assertEqual(self.files(), before)
+        self.assertTrue(self.run_import([row(platform="youtube")])["schedule_changed"])
+        events = {event["id"]: event for event in read_data(self.data)["schedule"]["events"]}
+        self.assertEqual(events[row()["id"]]["platform"], "youtube")
+        self.assertEqual(events["other-event"], other)
 
-    def test_imported_id_platform_update_never_inserts_missing_event(self):
-        self.run_import([row(platform="unknown")])
-        before = self.files()
-        result = self.run_import([row(time="21:00", platform="youtube")])
-        self.assertFalse(result["changed"])
-        self.assertEqual(result["duplicates"], 1)
-        self.assertEqual(self.files(), before)
+    def test_receipt_does_not_prevent_inserting_absent_event(self):
+        atomic_json([row()["id"]], self.data / "imported_ids.json")
+        self.assertTrue(self.run_import([row()])["schedule_changed"])
+        self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["id"], row()["id"])
 
     def test_imported_id_platform_noops_do_not_clear_or_rewrite_data(self):
         self.run_import([row(platform="twitch")])
         before = self.files()
-        for item in (row(), row(platform=""), row(platform="TWITCH"), row(title="不應更新標題")):
+        for item in (row(), row(platform=""), row(platform="TWITCH"), row(created_at="2027-01-01T00:00:00Z")):
             with self.subTest(item=item):
                 result = self.run_import([item])
                 self.assertFalse(result["changed"])
@@ -277,7 +269,7 @@ class ScheduleCSVTests(unittest.TestCase):
 
     def test_missing_or_blank_platform_preserves_known_platform(self):
         self.run_import([row(platform="twitch")])
-        for item in (row(id="legacy-row"), row(id="blank-platform", platform="")):
+        for item in (row(), row(platform="")):
             self.assertFalse(self.run_import([item])["schedule_changed"])
             self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["platform"], "twitch")
         self.assertEqual(len(read_data(self.data)["revisions"]), 1)
@@ -332,10 +324,10 @@ class ScheduleCSVTests(unittest.TestCase):
 
     def test_duplicate_ids_and_natural_keys_do_not_duplicate_events(self):
         result = self.run_import([row(), row(), row(id="another-id")])
-        self.assertEqual((result["imported"], result["duplicates"]), (2, 1))
+        self.assertEqual((result["imported"], result["duplicates"]), (1, 2))
         values = read_data(self.data)
         self.assertEqual(len(values["revisions"]), 1)
-        self.assertEqual(len(load_json(self.data / "imported_ids.json")), 2)
+        self.assertEqual(load_json(self.data / "imported_ids.json"), [row()["id"]])
 
     def test_conflicting_duplicate_id_skips_all_versions(self):
         with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
@@ -347,7 +339,7 @@ class ScheduleCSVTests(unittest.TestCase):
     def test_title_update_uses_existing_id_and_keeps_revision(self):
         self.run_import([row()])
         original = read_data(self.data)["schedule"]["events"][-1]
-        self.run_import([row(id="new-source-row", title="改標題", source_url="https://discord.com/channels/1/2/3")])
+        self.run_import([row(title="改標題", source_url="https://discord.com/channels/1/2/3")])
         values = read_data(self.data)
         changed = values["schedule"]["events"][-1]
         self.assertEqual(changed["id"], original["id"])
@@ -355,26 +347,145 @@ class ScheduleCSVTests(unittest.TestCase):
         self.assertEqual(values["revisions"][-1]["before"], original)
         self.assertEqual(values["posts"][-1]["source"], "discord")
 
-    def test_same_time_ambiguity_and_cancelled_event_are_skipped(self):
-        schedule = load_json(self.data / "schedule.json")
-        event = deepcopy(schedule["events"][0])
-        event["id"] = "ambiguous-copy"
-        schedule["events"].append(event)
-        atomic_json(schedule, self.data / "schedule.json")
-        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
-            result = self.run_import([row(date=event["date"], time=event["time"])])
-        self.assertEqual(result["invalid"], 1)
-        schedule["events"].pop()
-        schedule["events"][0]["status"] = "cancelled"
-        atomic_json(schedule, self.data / "schedule.json")
-        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
-            self.assertEqual(self.run_import([row(date=event["date"], time=event["time"])])["invalid"], 1)
-
-    def test_changed_imported_id_is_skipped_as_specified(self):
-        self.run_import([row()])
+    def test_new_id_similar_event_warns_without_overwriting_or_receipt(self):
+        self.run_import([row(platform="youtube")])
         before = self.files()
-        self.assertEqual(self.run_import([row(time="21:00")])["duplicates"], 1)
+        for updates in ({"title": "雜談直播！"}, {"platform": "twitch"}):
+            with self.subTest(updates=updates), self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+                result = self.run_import([row(**{"id": "new-id", "platform": "youtube", **updates})])
+            self.assertEqual((result["imported"], result["invalid"]), (0, 1))
+            self.assertEqual(self.files(), before)
+        self.assertEqual(len(list(self.backups.glob("*.json"))), 1)
+
+    def test_changed_imported_id_updates_time_and_retains_identity(self):
+        self.run_import([row()])
+        before = read_data(self.data)["schedule"]["events"][-1]
+        self.assertTrue(self.run_import([row(time="21:00")])["schedule_changed"])
+        values = read_data(self.data)
+        self.assertEqual(values["schedule"]["events"][-1]["id"], row()["id"])
+        self.assertEqual(values["schedule"]["events"][-1]["time"], "21:00")
+        self.assertEqual(values["revisions"][-1]["before"], before)
+
+    def test_same_id_updates_all_mutable_fields_and_preserves_creation_time(self):
+        self.run_import([row(platform="youtube")])
+        before = read_data(self.data)["schedule"]["events"][-1]
+        changed = row(date="2026-11-02", time="21:30", title="修正版遊戲直播", platform="twitch",
+                      source_url="https://discord.com/channels/1/2/3", created_at="2026-10-30T12:00:00Z")
+        result = self.run_import([changed])
+        self.assertEqual((result["imported"], result["invalid"]), (1, 0))
+        values = read_data(self.data)
+        event = values["schedule"]["events"][-1]
+        self.assertEqual((event["id"], event["date"], event["time"], event["title"], event["platform"]),
+                         (row()["id"], "2026-11-02", "21:30", "修正版遊戲直播", "twitch"))
+        self.assertEqual(event["created_at"], "2026-10-28T02:10:00+08:00")
+        self.assertEqual(values["revisions"][-1]["before"], before)
+        self.assertEqual(values["revisions"][-1]["after"], event)
+        files = self.files()
+        self.assertFalse(self.run_import([changed])["changed"])
+        self.assertEqual(self.files(), files)
+
+    def test_source_only_update_keeps_old_source_and_revision_urls(self):
+        self.run_import([row()])
+        original = read_data(self.data)
+        result = self.run_import([row(source_url="https://example.com/revised")])
+        self.assertTrue(result["schedule_changed"])
+        values = read_data(self.data)
+        revision = values["revisions"][-1]
+        self.assertEqual(revision["before"]["source_url"], "https://x.com/Demo/status/123456789")
+        self.assertEqual(revision["after"]["source_url"], "https://example.com/revised")
+        self.assertEqual(values["posts"][:-1], original["posts"])
+        self.assertEqual(revision["source_post_id"], values["posts"][-1]["post_id"])
+
+    def test_legacy_proposal_keeps_csv_event_source_url_and_history_consistent(self):
+        self.run_import([row()])
+        fixture = load_json(ROOT / "tests/fixtures/schedule-change.json")
+        fixture["proposal"]["changes"][0]["match"] = {"id": row()["id"], "member_id": "demo-miri"}
+        candidate = process_fixture(fixture, self.data, STAMP)
+        for name in NAMES:
+            atomic_json(candidate[name], self.data / f"{name}.json")
+        values = read_data(self.data)
+        event = values["schedule"]["events"][-1]
+        self.assertEqual(event["source_url"], "https://example.com/fixtures/change")
+        self.assertEqual(event["created_at"], "2026-10-28T02:10:00+08:00")
+        self.assertEqual(values["revisions"][-1]["after"]["source_url"], "https://example.com/fixtures/change")
+        files = self.files()
+        self.assertFalse(self.run_import([row(time="21:00", source_url="https://example.com/fixtures/change")])["changed"])
+        self.assertEqual(self.files(), files)
+
+    def test_short_date_uses_immutable_creation_time_on_update(self):
+        self.run_import([row(date="10/28")])
+        before = self.files()
+        result = self.run_import([row(date="10/28", created_at="2027-10-28T00:00:00Z")])
+        self.assertFalse(result["changed"])
         self.assertEqual(self.files(), before)
+        self.assertTrue(self.run_import([row(date="10/29", created_at="2027-10-28T00:00:00Z")])["changed"])
+        self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["date"], "2026-10-29")
+
+    def test_special_states_can_be_corrected_to_confirmed_times_with_same_id(self):
+        for state, day in (("tbd", "2026-11-01"), ("unknown", "2026-11-02"), ("day_off", "2026-11-03")):
+            with self.subTest(state=state):
+                identity = f"state-{state}"
+                self.run_import([row(id=identity, date=day, time=state)])
+                result = self.run_import([row(id=identity, date=day, time="22:00")])
+                self.assertTrue(result["schedule_changed"])
+                event = next(event for event in read_data(self.data)["schedule"]["events"] if event["id"] == identity)
+                self.assertEqual((event["time"], event["status"]), ("22:00", "changed"))
+        self.assertEqual(len(read_data(self.data)["revisions"]), 6)
+
+    def test_same_id_member_change_is_rejected_and_valid_rows_continue(self):
+        self.run_import([row()])
+        before = read_data(self.data)["schedule"]["events"][-1]
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(member_id="demo-snow"), row(id="valid-next", date="2026-10-29")])
+        self.assertEqual((result["imported"], result["invalid"]), (1, 1))
+        event = next(event for event in read_data(self.data)["schedule"]["events"] if event["id"] == row()["id"])
+        self.assertEqual(event, before)
+
+    def test_date_or_time_update_collision_does_not_change_files(self):
+        self.run_import([row(), row(id="other", date="2026-10-29")])
+        before = self.files()
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(date="2026-10-29")])
+        self.assertEqual(result["invalid"], 1)
+        self.assertEqual(self.files(), before)
+
+    def test_existing_schedule_id_updates_without_receipt_and_keeps_legacy_metadata(self):
+        event = load_json(self.data / "schedule.json")["events"][0]
+        self.assertTrue(self.run_import([row(id=event["id"], date=event["date"], time="21:00")])["schedule_changed"])
+        values = read_data(self.data)
+        changed = next(item for item in values["schedule"]["events"] if item["id"] == event["id"])
+        self.assertEqual((changed["time"], changed["confidence"], changed["origin"]),
+                         ("21:00", 0.98, "weekly_schedule"))
+        self.assertEqual(len(values["schedule"]["events"]), 5)
+        self.assertEqual(values["revisions"][-1]["before"]["source_url"], "https://example.com/demo/weekly-001")
+
+    def test_new_id_exact_duplicate_with_different_source_does_not_write(self):
+        self.run_import([row(platform="youtube")])
+        before = self.files()
+        result = self.run_import([row(id="alias", platform="youtube", source_url="https://example.com/other")])
+        self.assertEqual((result["duplicates"], result["invalid"]), (1, 0))
+        self.assertFalse(result["changed"])
+        self.assertEqual(self.files(), before)
+        self.assertEqual(len(list(self.backups.glob("*.json"))), 1)
+
+    def test_distinct_event_same_slot_is_inserted_without_merging(self):
+        self.run_import([row()])
+        result = self.run_import([row(id="different", title="Minecraft 建築夜")])
+        self.assertEqual(result["imported"], 1)
+        events = read_data(self.data)["schedule"]["events"]
+        self.assertEqual(len(events), 7)
+        self.assertEqual({event["title"] for event in events if event["date"] == "2026-10-28"},
+                         {"雜談直播", "Minecraft 建築夜"})
+
+    def test_removed_csv_rows_do_not_delete_events(self):
+        self.run_import([row(), row(id="other", date="2026-10-29")])
+        before = self.files()
+        self.assertFalse(self.run_import([row()])["changed"])
+        self.assertEqual(self.files(), before)
+
+    def test_status_and_group_changes_do_not_create_conflicts(self):
+        result = self.run_import([row(group="neon", status="pending"), row(group="none", status="imported")])
+        self.assertEqual((result["imported"], result["duplicates"], result["invalid"]), (1, 1, 0))
 
     def test_known_source_still_imports_additional_rows(self):
         self.run_import([row()])

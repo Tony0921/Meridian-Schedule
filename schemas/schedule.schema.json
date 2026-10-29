@@ -26,7 +26,9 @@
         "origin": {"type": "string", "enum": ["weekly_schedule", "schedule_change", "sudden_stream", "cancellation", "postponement", "day_off"]},
         "source_post_id": {"type": "string", "minLength": 1},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-        "updated_at": {"type": "string", "format": "date-time"}
+        "updated_at": {"type": "string", "format": "date-time"},
+        "source_url": {"type": ["string", "null"], "format": "uri"},
+        "created_at": {"type": ["string", "null"], "format": "date-time"}
       }
     }
   }

@@ -40,7 +40,7 @@ def _build_proposal(post, proposal, context, timestamp, policy=None):
     members, schedule, posts, revisions = context
     validate_schema(proposal, "changes")
     result = merge_changes(schedule, proposal, members, source_post_id=post["post_id"],
-                           member_id=post["member_id"], timestamp=timestamp, policy=policy)
+                           member_id=post["member_id"], timestamp=timestamp, policy=policy, source_url=post["source_url"])
     status = {"auto": "processed", "review": "pending_review", "record_only": "manual_review", "ignored": "ignored"}[result.decision]
     record = {**post, "processed_at": timestamp, "type": proposal["classification"], "status": status}
     validate_schema([record], "posts")

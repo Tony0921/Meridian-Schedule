@@ -1,6 +1,6 @@
-# V2.1 公開 CSV 匯入操作手冊
+# V2.2 公開 CSV 匯入操作手冊
 
-依據 [spec v2.1](../VTuber_Schedule_SPEC_v2_1.md)，主要流程為：ChatGPT 搜尋／解析 → Google Sheet `schedule_ingestion` → Publish to Web CSV → GitHub Actions → repository JSON → GitHub Pages。GitHub 端只執行公開 HTTP GET，不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet。正式資料仍在 `data/`，網站不直接查詢 Sheet。
+依據 [spec v2.2](../VTuber_Schedule_SPEC_v2_2.md)，主要流程為：ChatGPT 搜尋／解析 → Google Sheet `schedule_ingestion` → Publish to Web CSV → GitHub Actions → repository JSON → GitHub Pages。GitHub 端只執行公開 HTTP GET，不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet。正式資料仍在 `data/`，網站不直接查詢 Sheet。
 
 ## 建立工作表與公開 CSV
 
@@ -21,7 +21,7 @@ miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube
 
 | 欄位 | 規則 |
 | --- | --- |
-| `id` | 必填、穩定且唯一；建議 `{member_id}_{YYYYMMDD}_{index}`，重跑不得隨機重編 |
+| `id` | 必填，直接作為正式事件 ID；建議 `{member_id}_{YYYYMMDD}_{index}`，同一事件改日期、時間、標題、平台或來源仍沿用原 ID |
 | `member_id` | 必須是 `members.json` 中已啟用的成員 |
 | `group` | 選填團體識別碼，由公式依 `member_id` 自動帶入；僅供 Sheet 查閱，匯入時忽略欄值 |
 | `date` | 正式值為 `YYYY-MM-DD`；也接受 `YYYY/M/D`、`M/D`、`Oct 28`／`October 28, 2026` |
@@ -29,7 +29,7 @@ miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube
 | `title` | 必填，去除前後空白後不可空白 |
 | `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
-| `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
+| `created_at` | 必填，該列初次建立的含時區與秒數 ISO 8601，例如 `2026-10-28T02:10:00+08:00`；後續修正不得重產，匯入時保留事件首次記錄的值 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
@@ -42,11 +42,11 @@ miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube
 
 既有線上工作表新增 `platform` 或 `group` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 
-官方明確表示時間未定時填 `tbd`／`待定`／`未定`／`時間未定`；休息填 `day_off`／`休息`／`休息日`；已知日期與公開來源，但 AI 無法判定時間或行程狀態時填 `unknown`／`未知`。匯入後三者均使用對應狀態與 `time: null`；網站時間欄分別顯示「時間待定」、「全天」、「未知」，狀態徽章分別為「待定」、「休息」、「未知」。未知狀態不代表休息，也不影響 `platform` 欄位的「平台未確認」。空白時間不會自行推論。所有行程均為台灣時間。
+官方明確表示時間未定時填 `tbd`／`待定`／`未定`／`時間未定`；休息填 `day_off`／`休息`／`休息日`；已知日期與公開來源，但 AI 無法判定時間或行程狀態時填 `unknown`／`未知`。匯入後三者均使用對應狀態與 `time: null`；網站時間欄分別顯示「時間待定」、「全天」、「未知」，狀態徽章分別為「待定」、「休息」、「未知」。未知狀態不代表休息，也不影響 `platform` 欄位的「平台未確認」。空白時間不會自行推論。所有行程均為台灣時間。CSV `time` 同時承載時間與行程狀態，是過渡設計；v2.2 不新增特殊值，也不加入新的 event_status 欄位。
 
 已移除 `working_day`／`工作日`／`作業日` 輸入；舊 CSV 請改用 `unknown`，否則該列會被略過。既有正式行程與歷史快照的 `working_day` 狀態代碼統一轉為 `unknown`，原始標題、時間戳與來源保留；這是資料格式轉換，不代表來源公告發生異動。
 
-缺少年份時，以 `created_at` 換算的台灣日期，在前一年、當年、後一年中選最近的有效日期；不使用執行當天日期。跨年結果因此可以重現。建議生產者一律填完整日期。
+缺少年份時，以首次 `created_at` 換算的台灣日期，在前一年、當年、後一年中選最近的有效日期；不使用執行當天日期。既有事件已記錄建立時間時，優先沿用該值，CSV 後續時間戳變動不會改變短日期的年份。跨年結果因此可以重現。建議生產者一律填完整日期。
 
 [CSV schema](../schemas/schedule_ingestion.schema.json) 描述正規化後的一列；Importer 先轉換日期與時間，再驗證。缺欄、重複或未知標題、空檔及無法解析的 CSV 語法會中止整批。UTF-8 BOM、CRLF、引號、標題中的逗號與換行均可處理。單列欄數不符、未知／停用成員、日期／時間／網址不合法則略過並記錄行號警告，其他有效列仍會匯入。下載與本機輸入上限為 10 MiB。
 
@@ -74,19 +74,23 @@ python -m scripts.validate_data
 python -m scripts.build_site
 ```
 
-也可使用 `--url URL`，或以 `--input 檔案.csv` 代替下載。程式不自動讀取 `.env`。CLI 只匯入資料，不執行 Git 操作。輸出包含列數、匯入、重複、無效列、資料變更及行程變更統計；`imported` 也包含已匯入 ID 的平台更新，沒有實際變更的已匯入列計為 `duplicates`。
+也可使用 `--url URL`，或以 `--input 檔案.csv` 代替下載。程式不自動讀取 `.env`。CLI 只匯入資料，不執行 Git 操作。輸出包含列數、匯入、重複、無效列、資料變更及行程變更統計；`imported` 包含新增與同 ID 更新，內容相同的既有列與新 ID 完全重複列計為 `duplicates`，需人工確認的列計為 `invalid` 並警告。
 
 ## 去重與更新界線
 
-- 正式 receipt 是 `data/imported_ids.json`；Sheet 的 `pending`／`imported` 不決定是否已處理，也不由 Actions 修改。標為 `invalid` 的列會略過且不寫 receipt，修正後可重試。
-- 已匯入 ID 再次出現時，僅允許更新明確填寫的 `platform`。先以「成員＋日期＋正規化時間」找到唯一既有事件，並確認來源網址與事件目前來源一致；來源不符或候選不唯一則略過並警告，找不到事件也不新增。同批同 ID 但正規化後內容不同時，整組略過並警告，不依列順序選擇版本。
-- 相同 ID 的平台更新保留 event id、標題、日期與時間，並保存 Revision 前後快照及更新時間；正常排程會標為 `changed`，休息、未知、待定、取消、延期、直播中與已結束狀態均保持不變。平台缺欄、空白或與既有值相同時不寫檔、不改時間戳、不新增備份；`none`、`unknown` 是明確值，可用來修正既有平台。ID 清單沒有新增時，實際平台變更仍會寫入備份與正式 JSON。
-- 新 ID 以「成員＋日期＋正規化時間」比對正式行程。完全相同的內容只補 receipt；唯一匹配的標題／明確平台／特殊時間狀態變更會更新原事件並保留 Revision。已有多筆同時段事件時略過，不能任選對象。
+- 正式 receipt 是 `data/imported_ids.json`，代表已見過的 ingestion row／event ID，不是永久鎖定更新。是否新增或更新只看 `schedule.json` 是否存在該 ID；receipt 已存在但事件不存在時，仍走新事件檢查。Sheet 的 `pending`／`imported` 不決定合併，也不由 Actions 修改。標為 `invalid` 的列會略過且不寫 receipt，修正後可重試。
+- 相同 ID 可更新 `date`、`time`、`title`、明確填寫的 `platform` 與 `source_url`，包含來源換成另一篇貼文；不同 `member_id` 則拒絕並警告。`id` 與已記錄的 `created_at` 保持不變，`group` 忽略。同批同 ID 但正規化後內容不同時，整組略過並警告，不依列順序選擇版本。
+- 所有實際更新保存 Revision 的事件 ID、時間、來源與完整前後快照（含 `source_url`），並保留舊來源紀錄。正常排程異動標為 `changed`，`tbd`／`unknown`／`day_off` 可直接改成確定時間；取消、延期、直播中、已結束事件的一般欄位修正保留其狀態。平台缺欄或空白保留既有值；`none`、`unknown` 是可覆寫的明確值。
+- 內容相同時完全 no-op：不更新時間戳、不新增 Revision、不寫檔、不建立備份，也不為了補 receipt 產生變更。僅改 `group`、`pending`／`imported` 或 `created_at` 不會更新事件。
+- 新 ID 的「成員＋日期＋正規化時間＋標題＋平台」及特殊時間狀態完全相同時略過，不新增第二筆事件，也不額外記 receipt；來源網址不同不影響此判定。同成員、日期、時間且標題接近（沿用專案 `SequenceMatcher`、忽略大小寫，相似度至少 0.6）時警告並略過，不自行合併。相同時段但標題不同且未達門檻可新增另一場事件；此防護不等於判斷兩個邏輯事件必然相同。
+- 同 ID 修改後若與另一筆事件內容明確重複，該列停止更新並警告，其他有效列繼續處理。
 - 同一來源的多列行程共用貼文紀錄，不會因來源 URL 已出現而略過整張週表。X／Twitter 分享網址會統一並移除追蹤參數。
-- MVP 不提供 operation、revision 或 schedule_version 欄位。已匯入 ID 的其他欄位更動不會套用；改時間、取消或整張週表替換須人工確認正式資料，不要把新時間以另一個 ID 直接加入後就視為已取代舊行程。
-- 不會因 CSV 列被刪除或暫時缺少就刪除既有行程；不會將已取消、延期、直播中、已結束事件改回正常排程。
+- CSV 不提供 operation、revision 或 schedule_version 欄位，也不支援 explicit delete／cancel、整張週表替換或 AI fuzzy auto-merge。修正同一事件必須沿用原 ID，不要另建 ID 企圖取代它。
+- 不會因 CSV 列被刪除或暫時缺少就刪除既有行程。
 
-為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新 ID 合併使用 `0.70` 作格式相容值，並非 AI 信心評估；已匯入 ID 的純平台修正保留事件原本的 confidence 與來源 ID。v2.1 直接匯入不套用舊版 REVIEW_ALL／提案策略，也不因原有 confidence 較低而略過平台修正。新行程的平台未提供或留空時為 `null`；直播網址維持 `null`。
+為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新事件使用 `0.70` 作格式相容值，並非 AI 信心評估；既有事件修正保留原本的 confidence、origin 與直播網址。v2.2 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址為 `null`。
+
+事件 schema 新增選填 `source_url` 與 `created_at`，既有 JSON 與歷史仍可驗證，不會批次改寫正式資料或 ID。舊事件首次實際 CSV 更新時，`created_at` 取該列的首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入。保留的手動提案流程更新 CSV 事件時，也會同步目前來源 URL 與 Revision 快照。**v2.1 曾依內容產生正式 ID，可能與 Sheet ID 不同；更新這些事件前，先確認並使用 `schedule.json` 的正式 ID。** receipt 是字串清單，無法可靠反推舊 ID 的對應，因此不自動重新命名或依 natural key 遷移。若新 Sheet ID 與既有事件完全重複則略過，疑似重複則警告。
 
 ## GitHub Actions 與 Pages
 
@@ -109,7 +113,7 @@ CSV 下載或語法／標題驗證失敗，不更動正式資料。單筆錯誤�
 python -m scripts.backup_data recover
 ```
 
-一般備份／還原使用既有 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。舊 v2 OAuth／posts+changes adapters 與提案程式保留供相容使用，不屬於 v2.1 主流程，Actions 不再呼叫或設定它們；舊版付費 API workflows 仍預設停用。
+一般備份／還原使用既有 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。舊 v2 OAuth／posts+changes adapters 與提案程式保留供相容使用，不屬於 v2.2 主流程，Actions 不再呼叫或設定它們；舊版付費 API workflows 仍預設停用。
 
 ## 尚待外部設定與驗證
 

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="V2.1 schedule_ingestion CSV 匯入")
+    parser = argparse.ArgumentParser(description="V2.2 schedule_ingestion CSV 匯入")
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--input", type=Path, help="本機 UTF-8 CSV")
     source.add_argument("--url", help="Publish to Web CSV URL；預設讀 SCHEDULE_CSV_URL")

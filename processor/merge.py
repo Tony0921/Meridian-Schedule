@@ -56,7 +56,7 @@ def _find_event(events, match):
     return ranked[0][1]
 
 
-def merge_changes(schedule, proposal, members, *, source_post_id, member_id, timestamp, policy=None):
+def merge_changes(schedule, proposal, members, *, source_post_id, member_id, timestamp, policy=None, source_url=None):
     validate_schedule(schedule, members)
     validate_schema(proposal, "changes")
     if not isinstance(source_post_id, str) or not source_post_id.strip():
@@ -112,6 +112,11 @@ def merge_changes(schedule, proposal, members, *, source_post_id, member_id, tim
             event.update(changes)
             if operation == "update" and "status" not in fields and event["status"] in {"scheduled", "changed"}:
                 event["status"] = "changed"
+        if "source_url" in event:
+            if source_url is not None:
+                event["source_url"] = source_url
+            elif event["source_post_id"] != source_post_id:
+                event.pop("source_url")
         event.update(source_post_id=source_post_id, confidence=proposal["confidence"], updated_at=timestamp)
         revisions.append({
             "event_id": event["id"], "timestamp": timestamp, "source_post_id": source_post_id,

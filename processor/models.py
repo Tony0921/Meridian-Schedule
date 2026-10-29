@@ -28,6 +28,8 @@ class Event:
     source_post_id: str
     confidence: float
     updated_at: str
+    source_url: str | None = None
+    created_at: str | None = None
 
     def to_dict(self):
         return asdict(self)

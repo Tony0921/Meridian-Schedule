@@ -1,5 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
 const { taipeiDate, weekDates, selectEvents, safeUrl, sourceUrl } = require("../site/app.js");
 const members = require("./fixtures/data/members.json");
 const schedule = require("./fixtures/data/schedule.json");
@@ -37,4 +40,92 @@ test("CSV 來源使用原始公開網址，舊資料只為數字 X ID 建立連�
   assert.equal(sourceUrl(event, member, { "csv-hash": "javascript:alert(1)" }), null);
   assert.equal(sourceUrl({ source_post_id: "123456789" }, member), "https://x.com/OfficialMiri/status/123456789");
   assert.equal(sourceUrl({ source_post_id: "demo-post" }, member), null);
+});
+
+function themePage({ saved = null, dark = false, blockRead = false, blockWrite = false } = {}) {
+  const document = new EventTarget();
+  document.documentElement = { dataset: {} };
+  const toggle = new EventTarget();
+  toggle.checked = false;
+  document.querySelector = () => toggle;
+  const media = new EventTarget();
+  media.matches = dark;
+  const storage = new Map(saved === null ? [] : [["meridian-theme", saved]]);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../site/theme.js"), "utf8"), {
+    document,
+    window: { matchMedia: () => media },
+    localStorage: {
+      getItem(key) {
+        if (blockRead) throw new Error("儲存空間無法讀取");
+        return storage.get(key) ?? null;
+      },
+      setItem(key, value) {
+        if (blockWrite) throw new Error("儲存空間無法寫入");
+        storage.set(key, value);
+      },
+    },
+  });
+  const initialTheme = document.documentElement.dataset.theme;
+  document.dispatchEvent(new Event("DOMContentLoaded"));
+  return {
+    root: document.documentElement, toggle, storage, initialTheme,
+    changeSystem(value) {
+      media.matches = value;
+      media.dispatchEvent(new Event("change"));
+    },
+    changeToggle(value) {
+      toggle.checked = value;
+      toggle.dispatchEvent(new Event("change"));
+    },
+  };
+}
+
+test("首次載入在頁面內容出現前套用系統色系，無效偏好回到系統設定", () => {
+  for (const [options, expected] of [
+    [{}, "light"], [{ dark: true }, "dark"], [{ saved: "invalid", dark: true }, "dark"],
+  ]) {
+    const page = themePage(options);
+    assert.equal(page.initialTheme, expected);
+    assert.equal(page.toggle.checked, expected === "dark");
+  }
+});
+
+test("手動切換深淺色並儲存，重新載入時優先採用使用者偏好", () => {
+  const page = themePage();
+  page.changeToggle(true);
+  assert.equal(page.root.dataset.theme, "dark");
+  assert.equal(page.storage.get("meridian-theme"), "dark");
+  const reloaded = themePage({ saved: page.storage.get("meridian-theme") });
+  assert.equal(reloaded.initialTheme, "dark");
+  assert.equal(reloaded.toggle.checked, true);
+  reloaded.changeToggle(false);
+  assert.equal(reloaded.root.dataset.theme, "light");
+  assert.equal(reloaded.storage.get("meridian-theme"), "light");
+  assert.equal(themePage({ saved: "light", dark: true }).initialTheme, "light");
+});
+
+test("未手動選擇時即時跟隨系統，手動選擇後維持使用者色系", () => {
+  const page = themePage();
+  page.changeSystem(true);
+  assert.equal(page.root.dataset.theme, "dark");
+  assert.equal(page.toggle.checked, true);
+  page.changeToggle(false);
+  page.changeSystem(false);
+  page.changeSystem(true);
+  assert.equal(page.root.dataset.theme, "light");
+  assert.equal(page.toggle.checked, false);
+});
+
+test("瀏覽器封鎖偏好讀取或寫入時仍可切換色系", () => {
+  const page = themePage({ dark: true, blockRead: true, blockWrite: true });
+  assert.equal(page.initialTheme, "dark");
+  page.changeToggle(false);
+  assert.equal(page.root.dataset.theme, "light");
+  page.changeSystem(false);
+  page.changeSystem(true);
+  assert.equal(page.root.dataset.theme, "light");
+  const readOnly = themePage({ saved: "light", dark: true, blockWrite: true });
+  assert.equal(readOnly.initialTheme, "light");
+  readOnly.changeToggle(true);
+  assert.equal(readOnly.root.dataset.theme, "dark");
 });

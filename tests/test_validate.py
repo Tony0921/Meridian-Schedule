@@ -109,7 +109,7 @@ class ValidationTests(unittest.TestCase):
             output = Path(temp) / "public"
             build_site(output)
             self.assertEqual({path.relative_to(output).as_posix() for path in output.rglob("*") if path.is_file()},
-                             {"index.html", "app.js", "style.css", ".nojekyll", "data/members.json", "data/schedule.json"})
+                             {"index.html", "app.js", "theme.js", "style.css", ".nojekyll", "data/members.json", "data/schedule.json"})
             self.assertEqual(load_json(output / "data/members.json"), load_json(ROOT / "data/members.json"))
             published = load_json(output / "data/schedule.json")
             sources = {post["post_id"]: post["source_url"] for post in load_json(ROOT / "data/posts.json")}

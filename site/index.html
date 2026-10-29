@@ -3,15 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <title>VTuber 行程聚合器</title>
-  <link rel="stylesheet" href="./style.css?v=6">
+  <script src="./theme.js?v=1"></script>
+  <link rel="stylesheet" href="./style.css?v=7">
   <script src="./app.js?v=6" defer></script>
 </head>
 <body>
   <main>
     <header class="hero">
-      <p class="eyebrow">VTUBER SCHEDULE</p>
+      <div class="hero-top">
+        <p class="eyebrow">VTUBER SCHEDULE</p>
+        <label class="theme-toggle">
+          <span>深色模式</span>
+          <span class="theme-control">
+            <input type="checkbox" id="theme-toggle" role="switch">
+            <span class="theme-track" aria-hidden="true"></span>
+          </span>
+        </label>
+      </div>
       <h1>今天，想看誰？</h1>
       <p>把喜歡的直播，留一個時間。</p>
       <p class="notice">行程依來源貼文整理 · 最新異動以官方公告為準</p>

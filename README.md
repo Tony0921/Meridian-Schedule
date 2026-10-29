@@ -73,6 +73,8 @@ python -m http.server 8000 --bind 127.0.0.1 --directory dist
 
 開啟 <http://localhost:8000>。請透過 HTTP 開啟，直接雙擊 HTML 的 `file://` 模式無法正常載入 JSON。
 
+頁首「深色模式」撥動開關可切換深／淺色。初次使用跟隨系統色系，手動切換後將偏好儲存在此瀏覽器，下次開啟時沿用；若瀏覽器封鎖儲存，仍可在本次瀏覽切換。
+
 若 Windows 的 `python` 指令連到未安裝的 Microsoft Store 執行別名，請將上述 `python` 換成實際 Python 執行檔路徑；PowerShell 的寫法為 `& '完整路徑\python.exe' -m scripts.build_site`。
 
 ## 舊版相容：手動測試變更流程
@@ -180,6 +182,7 @@ API 格式依 [OpenAI 圖片輸入文件](https://developers.openai.com/api/docs
 ```sh
 python -m unittest discover -s tests -v
 node --check site/app.js
+node --check site/theme.js
 node --test tests/test_site.cjs
 python -m scripts.validate_data
 python -m scripts.build_site
@@ -187,7 +190,9 @@ python -m scripts.build_site
 
 Python 測試涵蓋 v2.1 CSV 欄位、格式正規化、跨年、無效列略過、ID／行程去重、標題更新、來源關聯、下載失敗、無變更不寫入、receipt 與行程一併回滾／復原；也保留既有六種 spec 情境、Parser、SQLite、Collector 與提案測試。外部服務均以 mock 驗證，不呼叫真實 API，也不實際 commit／push。JavaScript 測試涵蓋台灣日期、跨年週範圍、排序、成員篩選、空資料與不安全連結。
 
-手動 UI 驗證：以 375px 手機寬度確認無橫向捲動；切換今日／本週及成員；查看休息、待定、取消、突發狀態；停止伺服器後重新整理確認載入錯誤訊息。瀏覽器整合與真實 API 行為不包含於單元測試。
+色系測試涵蓋系統預設、手動切換與重新載入、系統色系變動及儲存遭封鎖。
+
+手動 UI 驗證：以 375px 手機寬度確認無橫向捲動；切換今日／本週及成員；查看休息、待定、取消、突發狀態；切換深／淺色後重新整理，並以 Tab、空白鍵操作開關；停止伺服器後重新整理確認載入錯誤訊息與色系開關仍可使用。瀏覽器整合與真實 API 行為不包含於單元測試。
 
 ## GitHub Pages 部署
 

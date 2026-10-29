@@ -17,7 +17,7 @@ def build_site(output):
         raise ValueError("請使用獨立的建置目錄，例如 dist")
     values = read_data(ROOT / "data")
     output.mkdir(parents=True, exist_ok=True)
-    for name in ("index.html", "app.js", "style.css"):
+    for name in ("index.html", "app.js", "theme.js", "style.css"):
         copy2(ROOT / "site" / name, output / name)
     (output / "data").mkdir(exist_ok=True)
     source_urls = {post["post_id"]: post["source_url"] for post in values["posts"]}

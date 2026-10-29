@@ -47,7 +47,7 @@
         "title": {"type": "string", "minLength": 1},
         "platform": {"type": ["string", "null"], "enum": ["youtube", "twitch", "none", "unknown", "other", null]},
         "url": {"type": ["string", "null"], "format": "uri"},
-        "status": {"type": "string", "enum": ["scheduled", "changed", "cancelled", "postponed", "live", "finished", "day_off", "working_day", "tbd"]}
+        "status": {"type": "string", "enum": ["scheduled", "changed", "cancelled", "postponed", "live", "finished", "day_off", "unknown", "tbd"]}
       }
     }
   }

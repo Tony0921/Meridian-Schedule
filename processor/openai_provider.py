@@ -18,7 +18,8 @@ INSTRUCTIONS = """你是 VTuber 行程解析器，只輸出符合提供 Schema �
 不得以目前系統日期推算。無法確定週表日期、年份或時區時降低 confidence，不猜測日期。
 週表新增多筆 insert，未出現在圖片的既有行程不得自行取消或刪除。
 insert 的 set 必須包含 member_id、date、time、title、platform、url、status。
-不知道平台或網址使用 null；時間待定使用 time:null、status:tbd；休息日使用 day_off。
+不知道平台或網址使用 null；官方時間未定使用 time:null、status:tbd；休息日使用 day_off。
+已知日期但無法判定時間或行程狀態時使用 time:null、status:unknown，不猜測或推定休息。
 update / cancel 的 match 必須包含 member_id，優先使用既有 event id，否則指定 date，
 可加 title、platform、time 消除歧義。update.set 只提供要修改的欄位；cancel 不提供 set。
 延後但沒有新時間時使用 postponed；突發直播分類使用 sudden_stream。

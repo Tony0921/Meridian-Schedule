@@ -167,6 +167,7 @@ API 格式依 [OpenAI 圖片輸入文件](https://developers.openai.com/api/docs
 
 - MVP 僅支援 `Asia/Taipei`；`date` 為 `YYYY-MM-DD`，`time` 為 `HH:MM` 或 `null`。
 - `scheduled`、`changed`、`live`、`finished` 必須有時間；時間尚未確定請使用 `tbd`。休息日可用 `day_off` 與 `time: null`。
+- AI 無法判定時間或行程狀態時，CSV 的 `time` 填 `unknown`（也接受「未知」），匯入為 `status: unknown` 與 `time: null`；網頁時間欄及徽章皆顯示「未知」。官方明確標示時間未定仍使用 `tbd`。已移除工作日狀態，舊 CSV 的 `working_day` 請改為 `unknown`。
 - `updated_at`、貼文與歷史時間必須含時區；空行程可用 `updated_at: null`。
 - `youtube`、`twitch` 成員欄位為完整頻道 URL 或 `null`；`x_username` 為帳號名稱或 `null`。
 - 成員必須提供 `group`（團體識別碼）與 `group_name`（團體顯示名稱）。目前使用 `neon`／`霓 NEO(n)`、`ianvs`／`扉暮 IANVS`、`teraz`／`序境 TeRaź`、`aetris`／`沉珀 Aetris`；沒有團體時 `group` 填 `none`，`group_name` 直接填成員的 `name`；合作藝人填 `collaborators`／`合作藝人`。

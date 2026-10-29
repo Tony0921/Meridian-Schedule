@@ -75,11 +75,18 @@ class ValidationTests(unittest.TestCase):
         self.schedule["events"][0]["time"] = None
         with self.assertRaises(ValidationError):
             validate_schedule(self.schedule, self.members)
-        self.schedule["events"][0]["status"] = "tbd"
-        validate_schedule(self.schedule, self.members)
+        for status in ("tbd", "unknown"):
+            with self.subTest(status=status):
+                self.schedule["events"][0]["status"] = status
+                validate_schedule(self.schedule, self.members)
 
     def test_empty_schedule_allowed(self):
         validate_schedule({"updated_at": None, "events": []}, self.members)
+
+    def test_removed_working_day_status_rejected(self):
+        self.schedule["events"][0].update(time=None, status="working_day")
+        with self.assertRaises(ValidationError):
+            validate_schedule(self.schedule, self.members)
 
     def test_missing_post_rejected(self):
         with self.assertRaises(ValidationError):

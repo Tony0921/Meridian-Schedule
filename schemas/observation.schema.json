@@ -31,7 +31,7 @@
         "title": {"type": "string", "minLength": 1},
         "platform": {"type": ["string", "null"], "enum": ["youtube", "twitch", "other", null]},
         "url": {"type": ["string", "null"], "format": "uri"},
-        "status": {"type": "string", "enum": ["scheduled", "changed", "cancelled", "postponed", "live", "finished", "day_off", "working_day", "tbd"]},
+        "status": {"type": "string", "enum": ["scheduled", "changed", "cancelled", "postponed", "live", "finished", "day_off", "unknown", "tbd"]},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
         "match_event_id": {"type": "string", "minLength": 1},
         "reason": {"type": "string", "minLength": 1}

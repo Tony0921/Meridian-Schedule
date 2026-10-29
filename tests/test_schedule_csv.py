@@ -181,12 +181,12 @@ class ScheduleCSVTests(unittest.TestCase):
 
     def test_imported_id_platform_update_preserves_other_fields_and_states(self):
         self.run_import([row(platform="unknown")])
-        for status in ("cancelled", "postponed", "live", "finished", "day_off", "working_day", "tbd"):
+        for status in ("cancelled", "postponed", "live", "finished", "day_off", "unknown", "tbd"):
             with self.subTest(status=status):
                 values = read_data(self.data)
                 before = values["schedule"]["events"][-1]
                 before.update(status=status, platform="unknown", time=None if status in
-                              {"day_off", "working_day", "tbd"} else "20:00")
+                              {"day_off", "unknown", "tbd"} else "20:00")
                 atomic_json(values["schedule"], self.data / "schedule.json")
                 result = self.run_import([row(title="不應覆寫原標題", time="tbd" if before["time"] is None
                                               else "20:00", platform="twitch")])
@@ -391,10 +391,14 @@ class ScheduleCSVTests(unittest.TestCase):
 
     def test_generic_public_source_and_special_times_are_valid_for_site(self):
         self.run_import([row(source_url="https://example.com/public", time="TBD"),
-                         row(id="working", source_url="https://example.com/public", date="2026/10/29", time="作業日")])
+                         row(id="unknown", source_url="https://example.com/public", date="2026/10/29", time="unknown")])
         values = read_data(self.data)
         self.assertEqual(values["posts"][-1]["source"], "other")
-        self.assertEqual([event["status"] for event in values["schedule"]["events"][-2:]], ["tbd", "working_day"])
+        self.assertEqual([event["status"] for event in values["schedule"]["events"][-2:]], ["tbd", "unknown"])
+        self.assertIsNone(values["schedule"]["events"][-1]["time"])
+        self.assertEqual(values["revisions"][-1]["after"]["status"], "unknown")
+        self.assertFalse(self.run_import([row(id="unknown", source_url="https://example.com/public",
+                                             date="2026/10/29", time="unknown")])["changed"])
 
     def test_missing_or_ambiguous_non_x_source_is_rejected(self):
         self.run_import([row(source_url="https://discord.com/channels/1/2/3")])
@@ -472,9 +476,11 @@ class CSVNormalizationTests(unittest.TestCase):
             self.assertEqual(normalize_time(value), "20:00")
         for value, expected in (("12 AM", "00:00"), ("12 PM", "12:00"), ("上午十二點", "00:00"),
                                 ("下午三點半", "15:30"), ("凌晨一點五分", "01:05"), ("晚上十二點", "00:00"),
-                                ("TBD", "tbd"), ("休息日", "day_off")):
+                                ("TBD", "tbd"), ("休息日", "day_off"),
+                                ("unknown", "unknown"), (" UNKNOWN ", "unknown"), ("未知", "unknown")):
             self.assertEqual(normalize_time(value), expected)
-        for value in ("24:00", "8:60 PM", "0 PM", "25 PM", "", "?", "下班後"):
+        for value in ("24:00", "8:60 PM", "0 PM", "25 PM", "", "?", "下班後",
+                      "working_day", "工作日", "作業日"):
             with self.subTest(value=value), self.assertRaises(ValidationError):
                 normalize_time(value)
 

@@ -25,7 +25,7 @@ MAX_CSV_BYTES = 10 * 1024 * 1024
 TAIPEI = timezone(timedelta(hours=8))
 SPECIAL_TIMES = {"tbd": "tbd", "待定": "tbd", "未定": "tbd", "時間未定": "tbd",
                  "day_off": "day_off", "休息": "day_off", "休息日": "day_off",
-                 "working_day": "working_day", "工作日": "working_day", "作業日": "working_day"}
+                 "unknown": "unknown", "未知": "unknown"}
 MONTHS = {name: index for index, name in enumerate(
     ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
 MONTHS.update({name: index for index, name in enumerate(
@@ -149,7 +149,7 @@ def normalize_time(value):
             if period in {"中午", "下午", "晚上", "晚間"} and not (period in {"晚上", "晚間"} and hour == 0):
                 hour += 12
     else:
-        raise ValidationError("時間格式無法辨識；未知時間請明確填 tbd")
+        raise ValidationError("時間格式無法辨識；官方時間未定請填 tbd，無法判定請填 unknown")
     if not 0 <= hour <= 23 or not 0 <= minute <= 59:
         raise ValidationError("時間超出範圍")
     return f"{hour:02d}:{minute:02d}"

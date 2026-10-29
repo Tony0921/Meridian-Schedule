@@ -2,7 +2,7 @@
 
 const STATUS_LABELS = Object.freeze({
   scheduled: "正常", changed: "已異動", cancelled: "已取消", postponed: "延期",
-  live: "直播中", finished: "已結束", day_off: "休息", working_day: "工作日", tbd: "待定",
+  live: "直播中", finished: "已結束", day_off: "休息", unknown: "未知", tbd: "待定",
 });
 
 function taipeiDate(now = new Date()) {
@@ -116,7 +116,8 @@ async function startApp() {
         for (const event of daily) {
           const member = memberMap.get(event.member_id);
           const card = element("article", undefined, `event-card status-${event.status}`);
-          card.append(element("p", event.time || (event.status === "day_off" ? "全天" : "時間待定"), "event-time"));
+          const timeLabel = event.status === "day_off" ? "全天" : event.status === "unknown" ? "未知" : "時間待定";
+          card.append(element("p", event.time || timeLabel, "event-time"));
           const body = element("div", undefined, "event-body");
           const memberName = element("p", undefined, "member-name");
           const profile = member.x_username ? `https://x.com/${encodeURIComponent(member.x_username)}` : null;

@@ -12,8 +12,8 @@
 建議欄位（順序可調整）：
 
 ```csv
-id,member_id,date,time,title,source_url,created_at
-miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00
+id,member_id,date,time,title,source_url,created_at,platform
+miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00,youtube
 ```
 
 | 欄位 | 規則 |
@@ -25,9 +25,14 @@ miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://exampl
 | `title` | 必填，去除前後空白後不可空白 |
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
+| `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`other`，不區分大小寫；空白表示未知 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
+
+`platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。未知、休息日或工作日留空；`other` 僅用於已確認的其他平台。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
+
+既有線上工作表新增 `platform` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 
 時間不明請明確填 `tbd`／`待定`／`未定`／`時間未定`；休息填 `day_off`／`休息`／`休息日`；工作日填 `working_day`／`工作日`／`作業日`。匯入後使用現有狀態與 `time: null`，空白時間不會自行推論。所有行程均為台灣時間。
 
@@ -65,12 +70,12 @@ python -m scripts.build_site
 
 - 正式 receipt 是 `data/imported_ids.json`；Sheet 的 `pending`／`imported` 不決定是否已處理，也不由 Actions 修改。標為 `invalid` 的列會略過且不寫 receipt，修正後可重試。
 - 相同 ID 再次出現一律略過，包含已匯入後在 Sheet 編輯內容的情況。同批同 ID 但內容不同時，整組略過並警告，不依列順序選擇版本。
-- 新 ID 以「成員＋日期＋正規化時間」比對正式行程。完全相同的內容只補 receipt；唯一匹配的標題／明確特殊時間狀態變更會更新原事件並保留 Revision。已有多筆同時段事件時略過，不能任選對象。
+- 新 ID 以「成員＋日期＋正規化時間」比對正式行程。完全相同的內容只補 receipt；唯一匹配的標題／明確平台／特殊時間狀態變更會更新原事件並保留 Revision。已有多筆同時段事件時略過，不能任選對象。
 - 同一來源的多列行程共用貼文紀錄，不會因來源 URL 已出現而略過整張週表。X／Twitter 分享網址會統一並移除追蹤參數。
 - MVP 不提供 operation、revision 或 schedule_version 欄位。改時間、取消或整張週表替換須人工確認正式資料；不要靠改已匯入 ID 的內容更新，也不要把新時間以另一個 ID 直接加入後就視為已取代舊行程。
 - 不會因 CSV 列被刪除或暫時缺少就刪除既有行程；不會將已取消、延期、直播中、已結束事件改回正常排程。
 
-為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，現有必要欄位固定使用 `0.70` 作格式相容值，並非 AI 信心評估；v2.1 直接匯入不套用舊版 REVIEW_ALL／提案策略。未知平台與直播網址維持 `null`。
+為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，現有必要欄位固定使用 `0.70` 作格式相容值，並非 AI 信心評估；v2.1 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址維持 `null`。
 
 ## GitHub Actions 與 Pages
 

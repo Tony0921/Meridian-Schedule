@@ -32,7 +32,7 @@ def row(**updates):
 
 def csv_text(rows, columns=None):
     stream = io.StringIO(newline="")
-    columns = columns or (*COLUMNS, *(("status",) if any("status" in item for item in rows) else ()))
+    columns = columns or (*COLUMNS, *(key for key in ("platform", "status") if any(key in item for item in rows)))
     writer = csv.DictWriter(stream, fieldnames=columns)
     writer.writeheader()
     writer.writerows(rows)
@@ -83,6 +83,51 @@ class ScheduleCSVTests(unittest.TestCase):
             result = self.run_import([row(status="imported"), row(id="invalid", status="invalid", time="22:00")])
         self.assertEqual((result["imported"], result["invalid"]), (1, 1))
         self.assertEqual(load_json(self.data / "imported_ids.json"), [row()["id"]])
+
+    def test_platform_is_normalized_and_saved_in_event_and_revision(self):
+        for index, (value, expected) in enumerate(((" YouTube ", "youtube"), ("Twitch", "twitch"), ("other", "other"))):
+            with self.subTest(platform=value):
+                result = self.run_import([row(id=f"platform-{index}", time=f"{20 + index}:00", platform=value)])
+                self.assertEqual(result["imported"], 1)
+                values = read_data(self.data)
+                event = values["schedule"]["events"][-1]
+                self.assertEqual(event["platform"], expected)
+                self.assertEqual(values["revisions"][-1]["after"], event)
+
+    def test_missing_or_blank_platform_imports_as_unknown(self):
+        for item in (row(), row(id="blank-platform", time="21:00", platform=" ")):
+            self.assertEqual(self.run_import([item])["imported"], 1)
+            self.assertIsNone(read_data(self.data)["schedule"]["events"][-1]["platform"])
+
+    def test_invalid_platform_skips_only_the_bad_row(self):
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(platform="unknown-service"), row(id="valid", time="21:00", platform="twitch")])
+        self.assertEqual((result["imported"], result["invalid"]), (1, 1))
+        self.assertEqual(load_json(self.data / "imported_ids.json"), ["valid"])
+
+    def test_platform_update_keeps_event_id_and_revision(self):
+        self.run_import([row()])
+        original = read_data(self.data)["schedule"]["events"][-1]
+        self.assertTrue(self.run_import([row(id="platform-correction", platform="youtube")])["schedule_changed"])
+        values = read_data(self.data)
+        changed = values["schedule"]["events"][-1]
+        self.assertEqual(changed["id"], original["id"])
+        self.assertEqual((changed["platform"], changed["status"]), ("youtube", "changed"))
+        self.assertEqual(values["revisions"][-1]["before"], original)
+        self.assertEqual(values["revisions"][-1]["after"], changed)
+
+    def test_missing_or_blank_platform_preserves_known_platform(self):
+        self.run_import([row(platform="twitch")])
+        for item in (row(id="legacy-row"), row(id="blank-platform", platform="")):
+            self.assertFalse(self.run_import([item])["schedule_changed"])
+            self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["platform"], "twitch")
+        self.assertEqual(len(read_data(self.data)["revisions"]), 1)
+
+    def test_conflicting_platforms_with_same_row_id_are_skipped(self):
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(platform="youtube"), row(platform="twitch")])
+        self.assertEqual((result["imported"], result["invalid"]), (0, 2))
+        self.assertEqual(self.files(), self.before)
 
     def test_invalid_rows_warn_and_allow_valid_rows_and_later_correction(self):
         invalids = [{"id": ""}, {"member_id": "missing"}, {"date": "2026-02-30"}, {"time": "25:00"},

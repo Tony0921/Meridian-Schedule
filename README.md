@@ -32,7 +32,7 @@ CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復�
 | --- | --- |
 | `ingestion/schedule_csv.py`、`scripts/import_schedule.py` | v2.1 公開 CSV 下載、驗證、正規化與合併 |
 | `schemas/schedule_ingestion.schema.json`、`imported_ids.schema.json` | 正規化 CSV 列與儲存庫匯入 ID 格式 |
-| `examples/schedule-ingestion.csv` | 單一工作表的七欄離線範例 |
+| `examples/schedule-ingestion.csv` | 單一工作表的八欄離線範例，含選填開台平台 |
 | `ingestion/` 其餘模組、`scripts/import_sheet.py`、`reconcile_posts.py` | 保留的 v2 Observation／OAuth Queue 與公開來源補漏 |
 | `examples/ingestion*`、`meridian-*` | 保留的 v2 Queue 與 systemd 範本，不屬於 v2.1 主流程 |
 | `docs/ingestion.md`、`docs/chatgpt-task.md` | v2.1 公開 CSV 設定與 ChatGPT 寫入提示 |

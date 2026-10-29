@@ -69,7 +69,7 @@ def parse_csv(text):
         reader = csv.reader(io.StringIO(text.lstrip("\ufeff"), newline=""), strict=True)
         headers = [value.strip() for value in next(reader)]
         if (len(headers) != len(set(headers)) or not set(COLUMNS) <= set(headers)
-                or set(headers) - set(COLUMNS) - {"status"}):
+                or set(headers) - set(COLUMNS) - {"platform", "status"}):
             raise ValidationError("CSV 欄位不符 schedule_ingestion schema")
         rows = []
         for values in reader:
@@ -168,6 +168,7 @@ def normalize_row(row):
     reference = reference.astimezone(TAIPEI)
     normalized = {key: row[key] for key in COLUMNS}
     normalized.update(date=normalize_date(row["date"], reference.date()), time=normalize_time(row["time"]))
+    normalized["platform"] = row.get("platform", "").strip().lower() or None
     validate_schema(normalized, "schedule_ingestion")
     normalized["created_at"] = reference.isoformat(timespec="seconds")
     parts = public_url(row["source_url"])
@@ -189,6 +190,8 @@ def _merge_row(row, values, timestamp):
     if matches:
         event = matches[0]
         fields = {"title": row["title"], "status": status}
+        if row["platform"] is not None:
+            fields["platform"] = row["platform"]
         if status == "scheduled" and event["status"] == "changed":
             fields["status"] = "changed"
         if all(event[key] == value for key, value in fields.items()):
@@ -201,7 +204,7 @@ def _merge_row(row, values, timestamp):
     else:
         change = {"operation": "insert", "set": {
             "member_id": row["member_id"], "date": row["date"], "time": time,
-            "title": row["title"], "platform": None, "url": None, "status": status,
+            "title": row["title"], "platform": row["platform"], "url": None, "status": status,
         }}
     known = [post for post in values["posts"] if post["source_url"] == row["source_url"]
              and post["member_id"] == row["member_id"]]

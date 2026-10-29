@@ -67,14 +67,15 @@ async function startApp() {
     return node;
   }
 
-  function addLink(parent, label, value) {
+  function addLink(parent, label, value, className) {
     const url = safeUrl(value);
     if (!url) return;
-    const link = element("a", label);
+    const link = element("a", label, className);
     link.href = url;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     parent.append(link);
+    return true;
   }
 
   try {
@@ -113,23 +114,28 @@ async function startApp() {
         const daily = events.filter((event) => event.date === date);
         if (!daily.length) group.append(element("p", "尚無行程", "empty-day"));
         for (const event of daily) {
+          const member = memberMap.get(event.member_id);
           const card = element("article", undefined, `event-card status-${event.status}`);
           card.append(element("p", event.time || (event.status === "day_off" ? "全天" : "時間待定"), "event-time"));
           const body = element("div", undefined, "event-body");
-          body.append(element("p", memberMap.get(event.member_id).name, "member-name"));
+          body.append(element("p", member.name, "member-name"));
           body.append(element("h4", event.title));
           const metadata = element("div", undefined, "metadata");
           metadata.append(element("span", STATUS_LABELS[event.status] || event.status, "badge"));
           if (event.origin === "sudden_stream") metadata.append(element("span", "突發", "badge sudden"));
           if (event.platform && event.platform !== "none" && event.status !== "day_off") {
-            metadata.append(element("span", {
+            const label = {
               youtube: "YouTube", twitch: "Twitch", unknown: "平台未確認", other: "其他",
-            }[event.platform], `badge platform-${event.platform}`));
+            }[event.platform];
+            const className = `badge platform-${event.platform}`;
+            const channel = ["youtube", "twitch"].includes(event.platform) ? member[event.platform] : null;
+            if (!addLink(metadata, label, channel, className)) {
+              metadata.append(element("span", label, className));
+            }
           }
           body.append(metadata);
           const links = element("div", undefined, "event-links");
           addLink(links, "前往直播 ↗", event.url);
-          const member = memberMap.get(event.member_id);
           const source = sourceUrl(event, member, schedule.sources);
           if (source) {
             addLink(links, "來源貼文 ↗", source);

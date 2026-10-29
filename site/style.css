@@ -40,6 +40,8 @@ h4 { font-size: 1.15rem; margin: 0 0 12px; }
 .badge.platform-youtube { background: #ff0033; color: #fff; }
 .badge.platform-twitch { background: #9146ff; color: #fff; }
 .badge.platform-unknown, .badge.platform-other { background: #6b7280; color: #fff; }
+.metadata a.badge { text-decoration: none; }
+.metadata a.badge:hover { text-decoration: underline; }
 .event-links { margin-top: 12px; color: #68746c; }
 a { color: #29614e; text-underline-offset: 3px; }
 .empty-day { font-size: .85rem; color: #69766d; padding: 12px 0; border-top: 1px dashed #cfd9ce; }

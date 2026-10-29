@@ -37,7 +37,7 @@ h4 { font-size: 1.15rem; margin: 0 0 12px; }
 .status-cancelled { background: #f9f6f5; }
 .status-cancelled .badge { color: #8d453c; background: #f8e4df; }
 .status-changed .badge, .status-postponed .badge { background: #fff0d6; color: #765314; }
-.badge.platform-youtube { background: #ff0033; color: #111; }
+.badge.platform-youtube { background: #ff0033; color: #fff; }
 .badge.platform-twitch { background: #9146ff; color: #fff; }
 .badge.platform-unknown, .badge.platform-other { background: #6b7280; color: #fff; }
 .event-links { margin-top: 12px; color: #68746c; }

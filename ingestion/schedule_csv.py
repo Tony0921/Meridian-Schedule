@@ -14,6 +14,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
+from processor.classify import ConfidencePolicy
 from processor.merge import merge_changes
 from processor.schemas import ValidationError, load_json, validate_schema
 from processor.storage import data_lock, read_unlocked, write_data_unlocked
@@ -180,7 +181,9 @@ def normalize_row(row):
     return normalized
 
 
-def _merge_row(row, values, timestamp):
+def _merge_row(row, values, timestamp, *, platform_only=False):
+    if platform_only and row["platform"] is None:
+        return False
     time = None if row["time"] in SPECIAL_TIMES else row["time"]
     status = row["time"] if time is None else "scheduled"
     matches = [event for event in values["schedule"]["events"]
@@ -189,18 +192,26 @@ def _merge_row(row, values, timestamp):
         raise ValidationError("同成員、日期與時間有多筆事件，無法唯一比對")
     if matches:
         event = matches[0]
-        fields = {"title": row["title"], "status": status}
-        if row["platform"] is not None:
-            fields["platform"] = row["platform"]
-        if status == "scheduled" and event["status"] == "changed":
-            fields["status"] = "changed"
+        if platform_only:
+            if not any(post["post_id"] == event["source_post_id"] and post["source_url"] == row["source_url"]
+                       and post["member_id"] == row["member_id"] for post in values["posts"]):
+                raise ValidationError("已匯入列與既有事件的來源不符")
+            fields = {"platform": row["platform"]}
+        else:
+            fields = {"title": row["title"], "status": status}
+            if row["platform"] is not None:
+                fields["platform"] = row["platform"]
+            if status == "scheduled" and event["status"] == "changed":
+                fields["status"] = "changed"
         if all(event[key] == value for key, value in fields.items()):
             return False
-        if status == "scheduled" and event["status"] in {"cancelled", "postponed", "live", "finished"}:
+        if not platform_only and status == "scheduled" and event["status"] in {"cancelled", "postponed", "live", "finished"}:
             raise ValidationError("既有事件已取消、延期、直播中或結束，請人工確認")
-        if fields["status"] == event["status"]:
+        if fields.get("status") == event["status"]:
             fields.pop("status")
         change = {"operation": "update", "match": {"id": event["id"], "member_id": row["member_id"]}, "set": fields}
+    elif platform_only:
+        return False
     else:
         change = {"operation": "insert", "set": {
             "member_id": row["member_id"], "date": row["date"], "time": time,
@@ -210,13 +221,17 @@ def _merge_row(row, values, timestamp):
              and post["member_id"] == row["member_id"]]
     host = urlsplit(row["source_url"]).hostname.lower()
     source = "x" if host == "x.com" else "discord" if host in {"discord.com", "www.discord.com", "discordapp.com"} else "other"
-    post_id = known[0]["post_id"] if known else "csv-" + sha256(
-        (row["member_id"] + "\n" + row["source_url"]).encode()).hexdigest()
-    # CSV 沒有信心欄位；0.70 僅用於相容舊 schema，匯入採用不經舊版信心審核策略。
+    if platform_only:
+        post_id = event["source_post_id"]
+    else:
+        post_id = known[0]["post_id"] if known else "csv-" + sha256(
+            (row["member_id"] + "\n" + row["source_url"]).encode()).hexdigest()
+    # CSV 直接匯入不套用舊版信心門檻；平台修正保留原值，其餘以 0.70 相容舊 schema。
     proposal = {"classification": "day_off" if status == "day_off" else "weekly_schedule",
-                "confidence": 0.70, "changes": [change], "reason": "schedule_ingestion CSV"}
+                "confidence": event["confidence"] if platform_only else 0.70,
+                "changes": [change], "reason": "schedule_ingestion CSV"}
     result = merge_changes(values["schedule"], proposal, values["members"], source_post_id=post_id,
-                           member_id=row["member_id"], timestamp=timestamp)
+                           member_id=row["member_id"], timestamp=timestamp, policy=ConfidencePolicy(review_threshold=0.0))
     if not known:
         values["posts"].append({"source": source, "post_id": post_id, "member_id": row["member_id"],
                                 "source_url": row["source_url"], "published_at": row["created_at"],
@@ -242,9 +257,6 @@ def import_schedule(text, data_dir, backup_dir, *, timestamp=None):
         normalized = {}
         for line, row in rows:
             try:
-                if row is not None and row.get("id") in seen:
-                    report["duplicates"] += 1
-                    continue
                 item = normalize_row(row)
                 if item["member_id"] not in enabled:
                     raise ValidationError("成員不存在或未啟用")
@@ -260,18 +272,22 @@ def import_schedule(text, data_dir, backup_dir, *, timestamp=None):
                 continue
             report["duplicates"] += len(versions) - 1
             candidate = deepcopy(values)
+            already_imported = identity in seen
             try:
-                changed = _merge_row(row, candidate, timestamp)
+                changed = _merge_row(row, candidate, timestamp, platform_only=already_imported)
                 validate_data(candidate["members"], candidate["schedule"], candidate["posts"], candidate["revisions"])
             except ValidationError:
                 report["invalid"] += 1
                 LOGGER.warning("CSV 第 %s 行無法安全合併，已略過；請檢查既有行程", line)
                 continue
+            if already_imported and not changed:
+                report["duplicates"] += 1
+                continue
             values = candidate
             seen.add(identity)
             report["imported"] += 1
             report["schedule_changed"] |= changed
-        if seen != set(imported_ids):
+        if seen != set(imported_ids) or report["schedule_changed"]:
             values["imported_ids"] = sorted(seen)
             write_data_unlocked(data_dir, values, backup_dir)
             report["changed"] = True

@@ -131,6 +131,139 @@ class ScheduleCSVTests(unittest.TestCase):
         self.assertEqual(values["revisions"][-1]["before"], original)
         self.assertEqual(values["revisions"][-1]["after"], changed)
 
+    def test_imported_id_platform_update_is_saved_with_history_and_idempotent(self):
+        self.run_import([row(platform="unknown")])
+        original = read_data(self.data)
+        before = original["schedule"]["events"][-1]
+        receipt = (self.data / "imported_ids.json").read_bytes()
+        updated_at = "2026-10-29T08:00:00+08:00"
+        result = import_schedule(csv_text([row(platform="YouTube")]), self.data, self.backups,
+                                 timestamp=updated_at)
+        self.assertTrue(result["changed"])
+        self.assertTrue(result["schedule_changed"])
+        self.assertEqual((result["imported"], result["duplicates"], result["invalid"]), (1, 0, 0))
+        values = read_data(self.data)
+        after = values["schedule"]["events"][-1]
+        self.assertEqual(after, {**before, "platform": "youtube", "status": "changed", "updated_at": updated_at})
+        self.assertEqual(len(values["schedule"]["events"]), len(original["schedule"]["events"]))
+        self.assertEqual(values["posts"], original["posts"])
+        self.assertEqual(values["schedule"]["updated_at"], updated_at)
+        self.assertEqual(len(values["revisions"]), 2)
+        self.assertEqual(values["revisions"][-1]["before"], before)
+        self.assertEqual(values["revisions"][-1]["after"], after)
+        self.assertEqual((self.data / "imported_ids.json").read_bytes(), receipt)
+        files = self.files()
+        result = import_schedule(csv_text([row(platform="youtube")]), self.data, self.backups,
+                                 timestamp="2026-10-30T08:00:00+08:00")
+        self.assertFalse(result["changed"])
+        self.assertEqual(result["duplicates"], 1)
+        self.assertEqual(self.files(), files)
+        self.assertEqual(len(list(self.backups.glob("*.json"))), 2)
+
+    def test_imported_id_can_fill_missing_platform_and_change_known_platform(self):
+        self.run_import([row()])
+        for platform in ("youtube", "twitch", "none", "unknown"):
+            with self.subTest(platform=platform):
+                self.assertTrue(self.run_import([row(platform=platform)])["schedule_changed"])
+                self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["platform"], platform)
+        self.assertEqual(len(read_data(self.data)["revisions"]), 5)
+
+    def test_imported_id_platform_update_preserves_other_fields_and_states(self):
+        self.run_import([row(platform="unknown")])
+        for status in ("cancelled", "postponed", "live", "finished", "day_off", "working_day", "tbd"):
+            with self.subTest(status=status):
+                values = read_data(self.data)
+                before = values["schedule"]["events"][-1]
+                before.update(status=status, platform="unknown", time=None if status in
+                              {"day_off", "working_day", "tbd"} else "20:00")
+                atomic_json(values["schedule"], self.data / "schedule.json")
+                result = self.run_import([row(title="不應覆寫原標題", time="tbd" if before["time"] is None
+                                              else "20:00", platform="twitch")])
+                self.assertTrue(result["schedule_changed"])
+                after = read_data(self.data)["schedule"]["events"][-1]
+                self.assertEqual(after, {**before, "platform": "twitch", "updated_at": STAMP})
+
+    def test_imported_id_platform_update_preserves_source_metadata(self):
+        self.run_import([row(platform="unknown")])
+        posts = load_json(self.data / "posts.json")
+        posts.insert(0, {**posts[-1], "post_id": "same-url-alias"})
+        atomic_json(posts, self.data / "posts.json")
+        for confidence in (0.98, 0.40):
+            with self.subTest(confidence=confidence):
+                values = read_data(self.data)
+                before = values["schedule"]["events"][-1]
+                before.update(platform="unknown", confidence=confidence)
+                atomic_json(values["schedule"], self.data / "schedule.json")
+                self.assertTrue(self.run_import([row(platform="twitch")])["schedule_changed"])
+                values = read_data(self.data)
+                after = values["schedule"]["events"][-1]
+                self.assertEqual(after, {**before, "platform": "twitch", "status": "changed", "updated_at": STAMP})
+                self.assertEqual(values["revisions"][-1]["before"], before)
+                self.assertEqual(values["revisions"][-1]["after"], after)
+                self.assertEqual(values["revisions"][-1]["source_post_id"], before["source_post_id"])
+                self.assertEqual(values["posts"], posts)
+
+    def test_imported_id_platform_update_requires_unique_event_and_same_source(self):
+        self.run_import([row(platform="unknown")])
+        before = self.files()
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(platform="youtube", source_url="https://example.com/other")])
+        self.assertEqual(result["invalid"], 1)
+        self.assertEqual(self.files(), before)
+        values = read_data(self.data)
+        values["schedule"]["events"].append({**values["schedule"]["events"][-1], "id": "ambiguous-copy"})
+        atomic_json(values["schedule"], self.data / "schedule.json")
+        before = self.files()
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(platform="youtube")])
+        self.assertEqual(result["invalid"], 1)
+        self.assertEqual(self.files(), before)
+
+    def test_imported_id_platform_update_never_inserts_missing_event(self):
+        self.run_import([row(platform="unknown")])
+        before = self.files()
+        result = self.run_import([row(time="21:00", platform="youtube")])
+        self.assertFalse(result["changed"])
+        self.assertEqual(result["duplicates"], 1)
+        self.assertEqual(self.files(), before)
+
+    def test_imported_id_platform_noops_do_not_clear_or_rewrite_data(self):
+        self.run_import([row(platform="twitch")])
+        before = self.files()
+        for item in (row(), row(platform=""), row(platform="TWITCH"), row(title="不應更新標題")):
+            with self.subTest(item=item):
+                result = self.run_import([item])
+                self.assertFalse(result["changed"])
+                self.assertEqual(result["duplicates"], 1)
+                self.assertEqual(self.files(), before)
+        self.assertEqual(len(list(self.backups.glob("*.json"))), 1)
+
+    def test_imported_id_conflicting_or_invalid_platforms_leave_data_unchanged(self):
+        self.run_import([row(platform="unknown")])
+        before = self.files()
+        for items, invalid in (([row(platform="youtube"), row(platform="twitch")], 2),
+                               ([row(platform="other")], 1),
+                               ([row(platform="youtube", status="invalid")], 1)):
+            with self.subTest(items=items), self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+                result = self.run_import(items)
+            self.assertEqual(result["invalid"], invalid)
+            self.assertEqual(self.files(), before)
+
+    def test_imported_id_platform_write_failure_rolls_back_without_new_receipt(self):
+        self.run_import([row(platform="unknown")])
+        before = self.files()
+        real = atomic_json
+
+        def fail_history(value, path):
+            if Path(path).name == "revisions.json":
+                raise OSError("simulated full disk")
+            real(value, path)
+
+        with patch("processor.storage.atomic_json", side_effect=fail_history), self.assertRaises(OSError):
+            self.run_import([row(platform="youtube")])
+        self.assertEqual(self.files(), before)
+        self.assertFalse((self.data / ".transaction.json").exists())
+
     def test_missing_or_blank_platform_preserves_known_platform(self):
         self.run_import([row(platform="twitch")])
         for item in (row(id="legacy-row"), row(id="blank-platform", platform="")):

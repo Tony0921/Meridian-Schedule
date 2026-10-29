@@ -66,18 +66,19 @@ python -m scripts.validate_data
 python -m scripts.build_site
 ```
 
-也可使用 `--url URL`，或以 `--input 檔案.csv` 代替下載。程式不自動讀取 `.env`。CLI 只匯入資料，不執行 Git 操作。輸出包含列數、匯入、重複、無效列、資料變更及行程變更統計。
+也可使用 `--url URL`，或以 `--input 檔案.csv` 代替下載。程式不自動讀取 `.env`。CLI 只匯入資料，不執行 Git 操作。輸出包含列數、匯入、重複、無效列、資料變更及行程變更統計；`imported` 也包含已匯入 ID 的平台更新，沒有實際變更的已匯入列計為 `duplicates`。
 
 ## 去重與更新界線
 
 - 正式 receipt 是 `data/imported_ids.json`；Sheet 的 `pending`／`imported` 不決定是否已處理，也不由 Actions 修改。標為 `invalid` 的列會略過且不寫 receipt，修正後可重試。
-- 相同 ID 再次出現一律略過，包含已匯入後在 Sheet 編輯內容的情況。同批同 ID 但內容不同時，整組略過並警告，不依列順序選擇版本。
+- 已匯入 ID 再次出現時，僅允許更新明確填寫的 `platform`。先以「成員＋日期＋正規化時間」找到唯一既有事件，並確認來源網址與事件目前來源一致；來源不符或候選不唯一則略過並警告，找不到事件也不新增。同批同 ID 但正規化後內容不同時，整組略過並警告，不依列順序選擇版本。
+- 相同 ID 的平台更新保留 event id、標題、日期與時間，並保存 Revision 前後快照及更新時間；正常排程會標為 `changed`，休息、工作日、待定、取消、延期、直播中與已結束狀態均保持不變。平台缺欄、空白或與既有值相同時不寫檔、不改時間戳、不新增備份；`none`、`unknown` 是明確值，可用來修正既有平台。ID 清單沒有新增時，實際平台變更仍會寫入備份與正式 JSON。
 - 新 ID 以「成員＋日期＋正規化時間」比對正式行程。完全相同的內容只補 receipt；唯一匹配的標題／明確平台／特殊時間狀態變更會更新原事件並保留 Revision。已有多筆同時段事件時略過，不能任選對象。
 - 同一來源的多列行程共用貼文紀錄，不會因來源 URL 已出現而略過整張週表。X／Twitter 分享網址會統一並移除追蹤參數。
-- MVP 不提供 operation、revision 或 schedule_version 欄位。改時間、取消或整張週表替換須人工確認正式資料；不要靠改已匯入 ID 的內容更新，也不要把新時間以另一個 ID 直接加入後就視為已取代舊行程。
+- MVP 不提供 operation、revision 或 schedule_version 欄位。已匯入 ID 的其他欄位更動不會套用；改時間、取消或整張週表替換須人工確認正式資料，不要把新時間以另一個 ID 直接加入後就視為已取代舊行程。
 - 不會因 CSV 列被刪除或暫時缺少就刪除既有行程；不會將已取消、延期、直播中、已結束事件改回正常排程。
 
-為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，現有必要欄位固定使用 `0.70` 作格式相容值，並非 AI 信心評估；v2.1 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址維持 `null`。
+為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新 ID 合併使用 `0.70` 作格式相容值，並非 AI 信心評估；已匯入 ID 的純平台修正保留事件原本的 confidence 與來源 ID。v2.1 直接匯入不套用舊版 REVIEW_ALL／提案策略，也不因原有 confidence 較低而略過平台修正。新行程的平台未提供或留空時為 `null`；直播網址維持 `null`。
 
 ## GitHub Actions 與 Pages
 

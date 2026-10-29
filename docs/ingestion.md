@@ -10,6 +10,7 @@
 4. 在「檔案 → 共用 → 發布到網路」選擇該工作表與 CSV，複製產生的公開網址。一般的編輯／共用網址或登入頁不是 CSV endpoint。
 5. 如需自動帶入 `group`，建立隱藏工作表 `members_lookup`：A:D 分別放入 `members.json` 的 `id`、`group`、`group_name`、`enabled`，D 欄使用布林值。E1 填 `enabled_member_id`，E2 填 `=IFNA(FILTER(A2:A,A2:A<>"",D2:D=TRUE),"")`。將主表 B2:B1000 的資料驗證設為來自 `members_lookup!E2:E100` 的下拉選單；成員資料異動時同步更新對照表 A:D。
 6. 主表依序為 `id,member_id,group,date,time,title,platform,source_url,created_at`。清空 C2:C1000 的既有值，在 C2 填入 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`。C 欄由公式自動計算，不提供手動下拉；新增行程分別寫入 A:B 與 D:I，保留 C2 公式及其展開範圍。
+7. 將整個 C 欄設為「保護工作表和範圍」，選擇「限制可編輯這個範圍的使用者」並只保留維護帳號，避免其他編輯者覆寫公式或結果；不要只設定編輯警告。保護範圍不會阻止公式依 B 欄更新，但 Google Sheets 的擁有者仍可修改受保護範圍。
 
 建議欄位（順序可調整）：
 

@@ -1,4 +1,4 @@
 [
-  {"id": "demo-miri", "name": "示範璃", "group": "other", "group_name": "其他", "x_username": null, "youtube": null, "twitch": null, "enabled": true},
-  {"id": "demo-snow", "name": "示範雪", "group": "other", "group_name": "其他", "x_username": null, "youtube": null, "twitch": null, "enabled": true}
+  {"id": "demo-miri", "name": "示範璃", "group": "none", "group_name": "示範璃", "x_username": null, "youtube": null, "twitch": null, "enabled": true},
+  {"id": "demo-snow", "name": "示範雪", "group": "none", "group_name": "示範雪", "x_username": null, "youtube": null, "twitch": null, "enabled": true}
 ]

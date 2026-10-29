@@ -21,14 +21,14 @@ class ValidationTests(unittest.TestCase):
 
     def test_member_groups_are_preserved(self):
         self.members[0].update(group="neon", group_name="霓 NEO(n)")
-        self.members[1].update(group="other", group_name="其他")
+        self.members[1].update(group="collaborators", group_name="合作藝人")
         members = validate_members(self.members)
         self.assertEqual([(member.group, member.group_name) for member in members],
-                         [("neon", "霓 NEO(n)"), ("other", "其他")])
+                         [("neon", "霓 NEO(n)"), ("collaborators", "合作藝人")])
 
     def test_member_group_fields_are_required_and_valid(self):
         for member in self.members:
-            member.update(group="other", group_name="其他")
+            member.update(group="none", group_name=member["name"])
         for key in ("group", "group_name"):
             candidate = deepcopy(self.members)
             del candidate[0][key]

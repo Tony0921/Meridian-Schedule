@@ -1,19 +1,9 @@
 [
   {
-    "id": "998rrr_",
-    "name": "玖玖巴 Jojoba",
-    "group": "other",
-    "group_name": "其他",
-    "x_username": "998rrr_",
-    "youtube": "https://www.youtube.com/@%E7%8E%96%E7%8E%96%E5%B7%B4",
-    "twitch": "https://www.twitch.tv/998rrr",
-    "enabled": true
-  },
-  {
     "id": "mizukivtubertw",
     "name": "浠 Mizuki",
-    "group": "other",
-    "group_name": "其他",
+    "group": "none",
+    "group_name": "浠 Mizuki",
     "x_username": "MizukiVtuberTW",
     "youtube": "https://www.youtube.com/c/%E6%B5%A0MizukiChannel",
     "twitch": "https://www.twitch.tv/mizukimilk723",
@@ -138,5 +128,25 @@
     "youtube": "https://www.youtube.com/@%E7%92%83Miri",
     "twitch": "https://www.twitch.tv/miri_aetris",
     "enabled": true
+  },
+  {
+    "id": "998rrr_",
+    "name": "玖玖巴 Jojoba",
+    "group": "collaborators",
+    "group_name": "合作藝人",
+    "x_username": "998rrr_",
+    "youtube": "https://www.youtube.com/@%E7%8E%96%E7%8E%96%E5%B7%B4",
+    "twitch": "https://www.twitch.tv/998rrr",
+    "enabled": true
+  },
+  {
+    "id": "ksp",
+    "name": "KSP",
+    "group": "collaborators",
+    "group_name": "合作藝人",
+    "x_username": "KSPKSP01",
+    "youtube": "https://www.youtube.com/@KSPKSP",
+    "twitch": "https://www.twitch.tv/kspksp",
+    "enabled": false
   }
 ]

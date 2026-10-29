@@ -169,7 +169,8 @@ API 格式依 [OpenAI 圖片輸入文件](https://developers.openai.com/api/docs
 - `scheduled`、`changed`、`live`、`finished` 必須有時間；時間尚未確定請使用 `tbd`。休息日可用 `day_off` 與 `time: null`。
 - `updated_at`、貼文與歷史時間必須含時區；空行程可用 `updated_at: null`。
 - `youtube`、`twitch` 成員欄位為完整頻道 URL 或 `null`；`x_username` 為帳號名稱或 `null`。
-- 成員必須提供 `group`（團體識別碼）與 `group_name`（團體顯示名稱）。目前使用 `neon`／`霓 NEO(n)`、`ianvs`／`扉暮 IANVS`、`teraz`／`序境 TeRaź`、`aetris`／`沉珀 Aetris`；沒有團體時填 `other`／`其他`。
+- 成員必須提供 `group`（團體識別碼）與 `group_name`（團體顯示名稱）。目前使用 `neon`／`霓 NEO(n)`、`ianvs`／`扉暮 IANVS`、`teraz`／`序境 TeRaź`、`aetris`／`沉珀 Aetris`；沒有團體時 `group` 填 `none`，`group_name` 直接填成員的 `name`；合作藝人填 `collaborators`／`合作藝人`。
+- 成員依 `data/members.json` 的陣列順序排列，合作藝人放在最後。KSP 保留成員資料與頻道連結，因不發布週表，預設為 `enabled: false`。
 - 所有行程與 revision 均須有對應的 `posts` 來源，且來源 ID 唯一並屬於同一成員。來源可為 `x`、`discord`、`other`；舊版 Parser 仍只接受 X。Revision 儲存完整 Event 快照，新增事件的 `before` 為 `null`。
 - `data/imported_ids.json` 保存 v2.1 已匯入的 row ID；Sheet 的 status 不作正式 receipt。CSV 欄位、更新限制與相容欄位的假設見匯入操作手冊。
 - `tests/fixtures/data/revisions.json` 為空陣列，代表測試初始基準；正式 `data/revisions.json` 已包含 Miri 週表新增事件的完整快照。

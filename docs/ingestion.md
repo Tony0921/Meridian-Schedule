@@ -8,30 +8,32 @@
 2. 複製 `examples/schedule-ingestion.csv` 的標題列；範例成員是虛構測試資料，上線請使用正式 `data/members.json` 中已啟用的 ID。
 3. 將 ID、日期、時間、網址與時間戳欄位設為純文字，避免試算表自行轉換格式。每個行程一列；同篇週表可有多列。
 4. 在「檔案 → 共用 → 發布到網路」選擇該工作表與 CSV，複製產生的公開網址。一般的編輯／共用網址或登入頁不是 CSV endpoint。
+5. 如需自動帶入 `group`，建立隱藏工作表 `members_lookup`：A:D 分別放入 `members.json` 的 `id`、`group`、`group_name`、`enabled`，D 欄使用布林值。E1 填 `enabled_member_id`，E2 填 `=IFNA(FILTER(A2:A,A2:A<>"",D2:D=TRUE),"")`。將主表 B2:B1000 的資料驗證設為來自 `members_lookup!E2:E100` 的下拉選單；成員資料異動時同步更新對照表 A:D。
+6. 主表依序為 `id,member_id,group,date,time,title,platform,source_url,created_at`。清空 C2:C1000 的既有值，在 C2 填入 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`。C 欄由公式自動計算，不提供手動下拉；新增行程分別寫入 A:B 與 D:I，保留 C2 公式及其展開範圍。
 
 建議欄位（順序可調整）：
 
 ```csv
-id,member_id,date,time,title,source_url,created_at,platform,group
-miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://example.com/public-source,2026-10-28T02:10:00+08:00,youtube,aetris
+id,member_id,group,date,time,title,platform,source_url,created_at
+miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube,https://example.com/public-source,2026-10-28T02:10:00+08:00
 ```
 
 | 欄位 | 規則 |
 | --- | --- |
 | `id` | 必填、穩定且唯一；建議 `{member_id}_{YYYYMMDD}_{index}`，重跑不得隨機重編 |
 | `member_id` | 必須是 `members.json` 中已啟用的成員 |
+| `group` | 選填團體識別碼，由公式依 `member_id` 自動帶入；僅供 Sheet 查閱，匯入時忽略欄值 |
 | `date` | 正式值為 `YYYY-MM-DD`；也接受 `YYYY/M/D`、`M/D`、`Oct 28`／`October 28, 2026` |
 | `time` | 正式值為 `HH:MM`；接受全形冒號、`8:00 PM`、`晚上八點`等格式 |
 | `title` | 必填，去除前後空白後不可空白 |
+| `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
-| `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
-| `group` | 選填團體識別碼，依 `member_id` 從 `members.json` 的 `group` 欄導入；僅供 Sheet 查閱，匯入時忽略欄值 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
 
-`group` 使用 `neon`、`ianvs`、`teraz`、`aetris`、`none`、`collaborators` 等識別碼，不使用 `group_name` 顯示名稱。每次新增資料時依最新成員名單填寫；成員分組仍以 `members.json` 為準，Sheet 欄位不會覆寫成員、事件或 Revision。既有七欄／八欄 CSV 仍可使用，僅改動 `group` 不會觸發行程更新。
+`group` 使用 `neon`、`ianvs`、`teraz`、`aetris`、`none`、`collaborators` 等識別碼，不使用 `group_name` 顯示名稱。選取或更換 `member_id` 後會由隱藏的 `members_lookup` 對照表自動帶入；空白或查無 ID 時留空。對照表是 `members.json` 的匯入副本，來源異動後需同步更新。成員分組仍以 `members.json` 為準，Sheet 欄位不會覆寫成員、事件或 Revision。既有七欄／八欄 CSV 仍可使用，僅改動 `group` 不會觸發行程更新。
 
 行程卡片中的成員名稱會依 `x_username` 連到對應的 X 個人頁，並於新分頁開啟；未設定帳號時維持純文字。
 

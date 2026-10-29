@@ -30,7 +30,7 @@ miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://exampl
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
 
-`platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。休息或已確認不開台填 `none`；平台無法確認填 `unknown`，工作日若仍可能突發開台也填 `unknown`。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision，網站分別顯示「無開台平台」與「平台未確認」。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
+`platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。休息或已確認不開台填 `none`；平台無法確認填 `unknown`，工作日若仍可能突發開台也填 `unknown`。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision；網站以紅色 YouTube、紫色 Twitch、灰色「平台未確認」徽章顯示平台，`none` 或休息日不顯示平台徽章。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
 
 既有線上工作表新增 `platform` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 

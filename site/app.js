@@ -121,9 +121,11 @@ async function startApp() {
           const metadata = element("div", undefined, "metadata");
           metadata.append(element("span", STATUS_LABELS[event.status] || event.status, "badge"));
           if (event.origin === "sudden_stream") metadata.append(element("span", "突發", "badge sudden"));
-          if (event.platform) metadata.append(element("span", {
-            youtube: "YouTube", twitch: "Twitch", none: "無開台平台", unknown: "平台未確認", other: "其他",
-          }[event.platform]));
+          if (event.platform && event.platform !== "none" && event.status !== "day_off") {
+            metadata.append(element("span", {
+              youtube: "YouTube", twitch: "Twitch", unknown: "平台未確認", other: "其他",
+            }[event.platform], `badge platform-${event.platform}`));
+          }
           body.append(metadata);
           const links = element("div", undefined, "event-links");
           addLink(links, "前往直播 ↗", event.url);

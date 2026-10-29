@@ -1,4 +1,4 @@
 id,member_id,date,time,title,source_url,created_at,platform
 demo-miri_20261028_01,demo-miri,2026-10-28,20:00,雜談直播,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00,youtube
-demo-miri_20261029_01,demo-miri,10/29,休息,休息日,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00,
+demo-miri_20261029_01,demo-miri,10/29,休息,休息日,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00,none
 demo-snow_20261028_01,demo-snow,Oct 28,8:00 PM,遊戲直播,https://example.com/public/weekly-snow,2026-10-28T02:10:00+08:00,twitch

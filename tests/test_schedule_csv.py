@@ -85,7 +85,8 @@ class ScheduleCSVTests(unittest.TestCase):
         self.assertEqual(load_json(self.data / "imported_ids.json"), [row()["id"]])
 
     def test_platform_is_normalized_and_saved_in_event_and_revision(self):
-        for index, (value, expected) in enumerate(((" YouTube ", "youtube"), ("Twitch", "twitch"), ("other", "other"))):
+        for index, (value, expected) in enumerate(((" YouTube ", "youtube"), ("Twitch", "twitch"),
+                                                  (" None ", "none"), ("UNKNOWN", "unknown"))):
             with self.subTest(platform=value):
                 result = self.run_import([row(id=f"platform-{index}", time=f"{20 + index}:00", platform=value)])
                 self.assertEqual(result["imported"], 1)
@@ -93,6 +94,20 @@ class ScheduleCSVTests(unittest.TestCase):
                 event = values["schedule"]["events"][-1]
                 self.assertEqual(event["platform"], expected)
                 self.assertEqual(values["revisions"][-1]["after"], event)
+
+    def test_rest_and_unknown_platform_remain_distinct(self):
+        result = self.run_import([row(time="休息", platform="none"),
+                                  row(id="unknown-platform", date="2026-10-29", platform="unknown")])
+        self.assertEqual(result["imported"], 2)
+        events = read_data(self.data)["schedule"]["events"][-2:]
+        self.assertEqual([(event["status"], event["platform"]) for event in events],
+                         [("day_off", "none"), ("scheduled", "unknown")])
+
+    def test_other_platform_is_no_longer_accepted_from_csv(self):
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(platform="other")])
+        self.assertEqual((result["imported"], result["invalid"]), (0, 1))
+        self.assertEqual(self.files(), self.before)
 
     def test_missing_or_blank_platform_imports_as_unknown(self):
         for item in (row(), row(id="blank-platform", time="21:00", platform=" ")):

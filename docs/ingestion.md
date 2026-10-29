@@ -25,12 +25,12 @@ miri_aetris_20261028_01,miri_aetris,2026-10-28,20:00,雜談直播,https://exampl
 | `title` | 必填，去除前後空白後不可空白 |
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，含時區與秒數的 ISO 8601，例如 `2026-10-28T02:10:00+08:00` |
-| `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`other`，不區分大小寫；空白表示未知 |
+| `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
 
-`platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。未知、休息日或工作日留空；`other` 僅用於已確認的其他平台。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
+`platform` 代表該場直播的平台，須由官方行程文字、圖片或直播連結確認；不要把 X 貼文來源當成開台平台，也不要僅因成員有 YouTube／Twitch 頻道就推定每場的平台。休息或已確認不開台填 `none`；平台無法確認填 `unknown`，工作日若仍可能突發開台也填 `unknown`。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision，網站分別顯示「無開台平台」與「平台未確認」。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
 
 既有線上工作表新增 `platform` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 

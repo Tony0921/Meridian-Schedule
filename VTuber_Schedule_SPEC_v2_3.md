@@ -12,10 +12,10 @@
 
 ## 2. CSV 欄位
 
-為保留既有位置、公式與驗證，將新欄位附加在 J 欄：
+event_status 緊接 time，放在 F 欄；原 F:I 移為 G:J，ID、時間與 C 欄公式位置保持不變：
 
 ```csv
-id,member_id,group,date,time,title,platform,source_url,created_at,event_status
+id,member_id,group,date,time,event_status,title,platform,source_url,created_at
 ```
 
 | 欄位 | 規則 |
@@ -25,11 +25,11 @@ id,member_id,group,date,time,title,platform,source_url,created_at,event_status
 | `group` | 僅供顯示，由既有公式計算，匯入時忽略 |
 | `date` | 建議完整 `YYYY-MM-DD`，沿用既有日期正規化 |
 | `time` | `HH:MM` 或空白；沿用既有實際時間格式正規化，禁止在新格式填入狀態 token |
+| `event_status` | 新格式每列必填；允許值見下表 |
 | `title` | 必填 |
 | `platform` | 保留 youtube/twitch/none/unknown；缺欄或空白保留既有平台 |
 | `source_url` | 公開公告來源，不作事件 identity 或更新權限判斷 |
 | `created_at` | 該列首次建立時間；既有事件已記錄時保持不變 |
-| `event_status` | 新格式每列必填；允許值見下表 |
 
 舊有選填 `status=pending/imported/invalid` 屬於 ingestion 控制，不是事件狀態。pending/imported 忽略；invalid 仍作人工停用標記。不要把事件狀態寫入該欄。
 
@@ -77,9 +77,9 @@ CSV 空白時間正規化為 JSON `null`，不是字串 `null`。`event_status` 
 
 ## 6. Sheet 與提示範本
 
-- A:I 保持原欄位位置，C 欄保留 group 的 ARRAYFORMULA。
-- J1 為 event_status，J2:J1000 使用六種狀態的嚴格下拉選單。
-- 新增列寫入 A:B 與 D:J；修正列只更新 D:H 與 J 的異動欄位，保留 ID、member_id 與 created_at。
+- A:E 保持原位置，C 欄保留 group 的 ARRAYFORMULA；以原生欄位移動保留原 F:I 的內容、格式與驗證，移為 G:J。
+- F1 為 event_status，F2:F1000 使用六種狀態的嚴格下拉選單。
+- 新增列寫入 A:B 與 D:J；修正列只更新 D:I 的異動欄位，保留 A:B 的 ID/member_id 與 J 欄 created_at。
 - 取消/延期必須有明確官方證據，不能因來源消失、搜尋不到或排程時間已過而推定。
 - 任何狀態變更都沿用原 ID；不新增另一列取代同一事件。
 
@@ -87,9 +87,9 @@ CSV 空白時間正規化為 JSON `null`，不是字串 `null`。`event_status` 
 
 1. 先部署同時支援舊格式與新格式的程式、schema、測試、範例與提示。
 2. 確認雲端已使用新版程式，舊 CSV 匯入無效列為 0，Pages 部署成功。
-3. 重新讀取並備份 Sheet 的值、公式、格式與驗證，確認 J 欄尚未使用。
+3. 重新讀取並備份 Sheet 的值、公式、格式與驗證；新增的 event_status 放在 F，使用原生欄位移動保留原欄位結構。
 4. 按既有 time 建立 event_status；實際時間維持原值，特殊狀態的 time 改為空白。先以副本匯入預演，確認 ID 與語意不變。
-5. 將 E 欄時間與 J 欄狀態在同一原子 batch 更新，不更動其他欄位或 ID。對應的正式資料已是 time/status 分離時，無須為格式遷移製造 Revision。
+5. 時間與狀態在同一原子 batch 更新，最終 E 欄為 time、F 欄為 event_status；其他欄位僅依上述順序移動，不更動內容或 ID。正式資料已是 time/status 分離時，無須為格式遷移製造 Revision。
 6. 驗證 Sheet 回讀、公開 CSV 與正式重新匯入；比對全部事件 ID、時間、狀態與來源，最後檢查網站。
 
 部署與遷移期間保留舊格式相容，不停用既有排程，不需要新增 Google API 認證到 GitHub Actions。

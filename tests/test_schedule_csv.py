@@ -154,6 +154,15 @@ class ScheduleCSVTests(unittest.TestCase):
         legacy = normalize_row(row(time="待定"))
         self.assertEqual((legacy["time"], legacy["event_status"]), (None, "tbd"))
 
+    def test_explicit_column_order_places_state_after_time_without_reassigning_fields(self):
+        columns = ("id", "member_id", "group", "date", "time", "event_status", "title", "platform", "source_url", "created_at")
+        text = csv_text([row(time="", event_status="unknown", group="none", platform="unknown", title="彩排, 派對")], columns=columns)
+        result = import_schedule(text, self.data, self.backups, timestamp=STAMP)
+        self.assertEqual((result["imported"], result["invalid"]), (1, 0))
+        event = read_data(self.data)["schedule"]["events"][-1]
+        self.assertEqual((event["id"], event["time"], event["status"], event["title"], event["platform"]),
+                         (row()["id"], None, "unknown", "彩排, 派對", "unknown"))
+
     def test_explicit_new_id_cannot_cancel_existing_event_implicitly(self):
         self.run_import([row(event_status="scheduled")])
         before = self.files()

@@ -9,15 +9,15 @@
 3. 將 ID、日期、時間、網址與時間戳欄位設為純文字，避免試算表自行轉換格式。每個行程一列；同篇週表可有多列。
 4. 在「檔案 → 共用 → 發布到網路」選擇該工作表與 CSV，複製產生的公開網址。一般的編輯／共用網址或登入頁不是 CSV endpoint。
 5. 如需自動帶入 `group`，建立隱藏工作表 `members_lookup`：A:D 分別放入 `members.json` 的 `id`、`group`、`group_name`、`enabled`，D 欄使用布林值。E1 填 `enabled_member_id`，E2 填 `=IFNA(FILTER(A2:A,A2:A<>"",D2:D=TRUE),"")`。將主表 B2:B1000 的資料驗證設為來自 `members_lookup!E2:E100` 的下拉選單；成員資料異動時同步更新對照表 A:D。
-6. 主表依序為 `id,member_id,group,date,time,title,platform,source_url,created_at,event_status`。新欄位放在 J，不位移既有 A:I。清空 C2:C1000 的既有值，在 C2 填入 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`。C 欄由公式自動計算，不提供手動下拉；新增行程分別寫入 A:B 與 D:J，修正時只更新 D:H 與 J 的異動欄位，保留 A:B、I 及 C2 公式。
+6. 主表依序為 `id,member_id,group,date,time,event_status,title,platform,source_url,created_at`。event_status 放在 F，緊接 E 欄 time；原 F:I 使用原生欄位移動為 G:J，保留內容、格式與驗證。C 欄由公式自動計算，不提供手動下拉；公式為 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`，既有 Sheet 請保留 C2 公式及其展開範圍，新建 Sheet 才需先清空展開範圍再設定公式。新增行程分別寫入 A:B 與 D:J，修正時只更新 D:I 的異動欄位，保留 A:B 與 J 欄 created_at。
 7. 將整個 C 欄設為「保護工作表和範圍」，選擇「限制可編輯這個範圍的使用者」並只保留維護帳號，避免其他編輯者覆寫公式或結果；不要只設定編輯警告。保護範圍不會阻止公式依 B 欄更新，但 Google Sheets 的擁有者仍可修改受保護範圍。
-8. J2:J1000 設為六種事件狀態的嚴格下拉：`scheduled,tbd,day_off,unknown,cancelled,postponed`。E 欄使用純文字時間或空白，不再填入狀態 token。
+8. F2:F1000 設為六種事件狀態的嚴格下拉：`scheduled,tbd,day_off,unknown,cancelled,postponed`。E 欄使用純文字時間或空白，不再填入狀態 token。
 
 建議欄位（順序可調整）：
 
 ```csv
-id,member_id,group,date,time,title,platform,source_url,created_at,event_status
-miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube,https://example.com/public-source,2026-10-28T02:10:00+08:00,scheduled
+id,member_id,group,date,time,event_status,title,platform,source_url,created_at
+miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,scheduled,雜談直播,youtube,https://example.com/public-source,2026-10-28T02:10:00+08:00
 ```
 
 | 欄位 | 規則 |
@@ -27,11 +27,11 @@ miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,雜談直播,youtube
 | `group` | 選填團體識別碼，由公式依 `member_id` 自動帶入；僅供 Sheet 查閱，匯入時忽略欄值 |
 | `date` | 正式值為 `YYYY-MM-DD`；也接受 `YYYY/M/D`、`M/D`、`Oct 28`／`October 28, 2026` |
 | `time` | `HH:MM` 或空白；仍接受全形冒號、`8:00 PM`、`晚上八點`等實際時間格式；新格式不接受狀態 token |
+| `event_status` | 新格式每列必填；`scheduled`、`tbd`、`day_off`、`unknown`、`cancelled`、`postponed`；去除空白並轉小寫 |
 | `title` | 必填，去除前後空白後不可空白 |
 | `platform` | 選填開台平台，可省略整欄；接受 `youtube`、`twitch`、`none`、`unknown`，不區分大小寫；新資料請明確填寫 |
 | `source_url` | 必填、無帳密的 HTTP(S) 公開來源，可為 X、Discord 或其他公開來源 |
 | `created_at` | 必填，該列初次建立的含時區與秒數 ISO 8601，例如 `2026-10-28T02:10:00+08:00`；後續修正不得重產，匯入時保留事件首次記錄的值 |
-| `event_status` | 新格式每列必填；`scheduled`、`tbd`、`day_off`、`unknown`、`cancelled`、`postponed`；去除空白並轉小寫 |
 | `status` | 選填，可省略整欄；接受空白、`pending`、`imported`、`invalid` |
 
 成員 ID 以 `data/members.json` 為準，Miri 使用 `miri_aetris`。既有行程 ID 與已匯入列 ID 保留原值，不因成員 ID 調整而重編。
@@ -50,7 +50,7 @@ CSV `event_status` 對應既有正式 Event `status`，不新增重複的 JSON �
 
 僅在 CSV **完全沒有 event_status 標題**時，才接受舊七／八／九欄的 time 狀態值與中文別名。Importer 將舊 `tbd/day_off/unknown` 正規化為 time=null 與對應 event_status；舊格式空白 time 仍無效。新增 event_status 標題後，每列狀態必填，time 不得再混入狀態 token，即使兩欄狀態相同也會略過該列並警告。時間與狀態配對檢查在 Importer 執行。
 
-遷移順序：先部署新版程式，確認舊 CSV 雲端匯入正常；備份並預演後，將 E 欄的特殊值改為空白、J 欄填入對應狀態，兩欄使用同一原子 batch 寫入。實際時間填 scheduled 並保持原時間。保留所有 ID、created_at、來源、公式與驗證；正式事件內容相同時，格式遷移不新增 Revision 或備份。完整步驟見 spec v2.3 第 7 節。
+遷移順序：先部署新版程式，確認舊 CSV 雲端匯入正常；備份並預演後，原子拆分時間與狀態，最終 E 欄為時間、F 欄為 event_status。原欄位以原生移動保留格式及驗證，禁止整張表重寫。實際時間填 scheduled 並保持原時間，特殊值的 time 改為空白。保留所有 ID、created_at、來源與公式；正式事件內容相同時，格式遷移不新增 Revision 或備份。完整步驟見 spec v2.3 第 7 節。
 
 已移除 `working_day`／`工作日`／`作業日` 輸入；舊 CSV 請改用 `unknown`，否則該列會被略過。既有正式行程與歷史快照的 `working_day` 狀態代碼統一轉為 `unknown`，原始標題、時間戳與來源保留；這是資料格式轉換，不代表來源公告發生異動。
 
@@ -98,7 +98,7 @@ python -m scripts.build_site
 
 為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新事件使用 `0.70` 作格式相容值，並非 AI 信心評估；既有事件修正保留原本的 confidence、origin 與直播網址。v2.3 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址為 `null`。
 
-事件 schema 新增選填 `source_url` 與 `created_at`，既有 JSON 與歷史仍可驗證，不會批次改寫正式資料或 ID。舊事件首次實際 CSV 更新時，`created_at` 取該列的首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入。保留的手動提案流程更新 CSV 事件時，也會同步目前來源 URL 與 Revision 快照。**v2.1 曾依內容產生正式 ID，可能與 Sheet ID 不同；更新這些事件前，先確認並使用 `schedule.json` 的正式 ID。** receipt 是字串清單，無法可靠反推舊 ID 的對應，因此不自動重新命名或依 natural key 遷移。若新 Sheet ID 與既有事件完全重複則略過，疑似重複則警告。
+事件 schema 的選填 `source_url` 與 `created_at` 保留既有 JSON 和歷史相容。舊事件首次實際 CSV 更新時，`created_at` 取該列首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入；保留的手動提案流程也會同步來源 URL。v2.1 曾依內容產生不同的正式 ID，本專案既有資料已完成一次性人工核對，以原 CSV ID 同步正式事件與歷史引用。**本次 event_status 遷移保留全部既有 ID。** receipt 是字串清單，無法可靠反推對應，未來遇到 ID 不符須人工確認，不自動改寫 Sheet ID 或以 natural key 重新命名事件。
 
 ## GitHub Actions 與 Pages
 

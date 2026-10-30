@@ -1,4 +1,4 @@
-id,member_id,group,date,time,title,platform,source_url,created_at,event_status
-demo-miri_20261028_01,demo-miri,none,2026-10-28,20:00,雜談直播,youtube,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00,scheduled
-demo-miri_20261029_01,demo-miri,none,10/29,,休息日,none,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00,day_off
-demo-snow_20261028_01,demo-snow,none,Oct 28,20:00,遊戲直播,twitch,https://example.com/public/weekly-snow,2026-10-28T02:10:00+08:00,scheduled
+id,member_id,group,date,time,event_status,title,platform,source_url,created_at
+demo-miri_20261028_01,demo-miri,none,2026-10-28,20:00,scheduled,雜談直播,youtube,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00
+demo-miri_20261029_01,demo-miri,none,10/29,,day_off,休息日,none,https://example.com/public/weekly-miri,2026-10-28T02:10:00+08:00
+demo-snow_20261028_01,demo-snow,none,Oct 28,20:00,scheduled,遊戲直播,twitch,https://example.com/public/weekly-snow,2026-10-28T02:10:00+08:00

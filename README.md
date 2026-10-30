@@ -24,7 +24,7 @@ flowchart LR
     Build --> Pages[GitHub Pages]
 ```
 
-CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復原，同步保存 `imported_ids.json`。單列錯誤略過並警告，CSV 下載或結構錯誤則保留既有資料；相同輸入重跑不更新時間戳。CSV `id` 就是正式事件 ID，相同 ID 可修正日期、時間、事件狀態、標題、平台與來源，保留初次建立時間並留下 Revision；更換成員會拒絕。v2.3 的 `time` 只填時間或空白，J 欄 `event_status` 明確區分 scheduled/tbd/day_off/unknown/cancelled/postponed，對應既有 JSON `status`；舊 CSV 仍可使用。新 ID 僅作新增或重複防護，不依成員、日期、時間覆寫舊事件。取消、延期與恢復使用同 ID 的明確狀態，刪除與整張週表替換仍未提供。
+CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復原，同步保存 `imported_ids.json`。單列錯誤略過並警告，CSV 下載或結構錯誤則保留既有資料；相同輸入重跑不更新時間戳。CSV `id` 就是正式事件 ID，相同 ID 可修正日期、時間、事件狀態、標題、平台與來源，保留初次建立時間並留下 Revision；更換成員會拒絕。v2.3 的 E 欄 `time` 只填時間或空白，F 欄 `event_status` 明確區分 scheduled/tbd/day_off/unknown/cancelled/postponed，對應既有 JSON `status`；舊 CSV 仍可使用。新 ID 僅作新增或重複防護，不依成員、日期、時間覆寫舊事件。取消、延期與恢復使用同 ID 的明確狀態，刪除與整張週表替換仍未提供。
 
 下方手動提案與 API Parser 章節屬於保留的舊版相容路徑，其信心門檻與審核策略不適用於 v2.3 CSV 匯入。
 

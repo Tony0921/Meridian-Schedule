@@ -42,7 +42,7 @@ test("CSV 來源使用原始公開網址，舊資料只為數字 X ID 建立連�
   assert.equal(sourceUrl({ source_post_id: "demo-post" }, member), null);
 });
 
-test("未知行程的時間與徽章顯示未知，保留待定與休息的文字及排序", async () => {
+test("分開呈現未知、待定、休息、取消及延期的時間與狀態", async () => {
   function element() {
     return {
       children: [], textContent: "", validity: { valid: true },
@@ -53,7 +53,8 @@ test("未知行程的時間與徽章顯示未知，保留待定與休息的文�
   }
   const nodes = new Map(["#selected-date", "#member", "#schedule", "#message", "#today-view",
     "#week-view", "#updated-at", "#range-title"].map((selector) => [selector, element()]));
-  const events = [["unknown", null], ["tbd", null], ["day_off", null], ["scheduled", "20:00"]]
+  const events = [["unknown", null], ["tbd", null], ["day_off", null], ["scheduled", "20:00"],
+    ["cancelled", null], ["postponed", null]]
     .map(([status, time]) => ({ ...schedule.events[0], id: status, date: taipeiDate(), status, time, platform: null }));
   const context = vm.createContext({
     URL,
@@ -62,11 +63,12 @@ test("未知行程的時間與徽章顯示未知，保留待定與休息的文�
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../site/app.js"), "utf8"), context);
   context.document = { querySelector: (selector) => nodes.get(selector), createElement: element };
   await vm.runInContext("startApp()", context);
-  assert.equal(nodes.get("#message").textContent, "共 4 筆行程");
+  assert.equal(nodes.get("#message").textContent, "共 6 筆行程");
   const cards = nodes.get("#schedule").children[0].children.slice(1);
   assert.deepEqual(cards.map((card) => [card.children[0].textContent,
     card.children[1].children[2].children[0].textContent]), [
-    ["20:00", "正常"], ["全天", "休息"], ["時間待定", "待定"], ["未知", "未知"],
+    ["20:00", "正常"], ["已取消", "已取消"], ["全天", "休息"], ["延期", "延期"],
+    ["時間待定", "待定"], ["未知", "未知"],
   ]);
 });
 

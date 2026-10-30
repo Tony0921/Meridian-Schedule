@@ -1,4 +1,4 @@
-"""V2.2 公開 CSV 匯入：以事件 ID 更新，natural key 僅用於重複防護。"""
+"""V2.3 公開 CSV 匯入：時間與事件狀態分開，舊版時間格式保留相容。"""
 
 import csv
 import io
@@ -20,6 +20,7 @@ from processor.storage import data_lock, read_unlocked, write_data_unlocked
 from processor.validate import validate_data
 
 COLUMNS = ("id", "member_id", "date", "time", "title", "source_url", "created_at")
+EVENT_STATUSES = ("scheduled", "tbd", "day_off", "unknown", "cancelled", "postponed")
 MAX_CSV_BYTES = 10 * 1024 * 1024
 TAIPEI = timezone(timedelta(hours=8))
 SPECIAL_TIMES = {"tbd": "tbd", "待定": "tbd", "未定": "tbd", "時間未定": "tbd",
@@ -50,7 +51,7 @@ class PublicRedirect(HTTPRedirectHandler):
 
 def download_csv(url, *, timeout=30):
     public_url(url, https_only=True)
-    request = Request(url, headers={"Accept": "text/csv", "User-Agent": "Meridian-Schedule/2.2"})
+    request = Request(url, headers={"Accept": "text/csv", "User-Agent": "Meridian-Schedule/2.3"})
     try:
         with build_opener(PublicRedirect()).open(request, timeout=timeout) as response:
             body = response.read(MAX_CSV_BYTES + 1)
@@ -69,7 +70,7 @@ def parse_csv(text):
         reader = csv.reader(io.StringIO(text.lstrip("\ufeff"), newline=""), strict=True)
         headers = [value.strip() for value in next(reader)]
         if (len(headers) != len(set(headers)) or not set(COLUMNS) <= set(headers)
-                or set(headers) - set(COLUMNS) - {"platform", "group", "status"}):
+                or set(headers) - set(COLUMNS) - {"platform", "group", "status", "event_status"}):
             raise ValidationError("CSV 欄位不符 schedule_ingestion schema")
         rows = []
         for values in reader:
@@ -167,7 +168,23 @@ def normalize_row(row):
         raise ValidationError("created_at 必須包含時區")
     reference = reference.astimezone(TAIPEI)
     normalized = {key: row[key] for key in COLUMNS}
-    normalized.update(date=normalize_date(row["date"], reference.date()), time=normalize_time(row["time"]))
+    if "event_status" in row:
+        status = row["event_status"].strip().lower()
+        if status not in EVENT_STATUSES:
+            raise ValidationError("event_status 必須是有效的事件狀態")
+        time = normalize_time(row["time"]) if row["time"].strip() else None
+        if time in SPECIAL_TIMES:
+            raise ValidationError("有 event_status 時，time 只能填時間或留空")
+        if status == "scheduled" and time is None:
+            raise ValidationError("scheduled 必須提供時間")
+        if status in {"tbd", "day_off", "unknown"} and time is not None:
+            raise ValidationError("tbd、day_off、unknown 的 time 必須留空")
+    else:
+        time = normalize_time(row["time"])
+        status = time if time in SPECIAL_TIMES else "scheduled"
+        if time in SPECIAL_TIMES:
+            time = None
+    normalized.update(date=normalize_date(row["date"], reference.date()), time=time, event_status=status)
     normalized["platform"] = row.get("platform", "").strip().lower() or None
     validate_schema(normalized, "schedule_ingestion")
     normalized["created_at"] = reference.isoformat(timespec="seconds")
@@ -182,12 +199,11 @@ def normalize_row(row):
 
 def _event_content(event):
     return (event["member_id"], event["date"], event["time"], event["title"], event["platform"],
-            event["status"] if event["time"] is None else None)
+            "scheduled" if event["status"] == "changed" else event["status"])
 
 
-def _merge_row(row, values, timestamp):
-    time = None if row["time"] in SPECIAL_TIMES else row["time"]
-    status = row["time"] if time is None else "scheduled"
+def _merge_row(row, values, timestamp, *, legacy=False):
+    time, status = row["time"], row["event_status"]
     events = values["schedule"]["events"]
     event = next((event for event in events if event["id"] == row["id"]), None)
     fields = {"member_id": row["member_id"], "date": row["date"], "time": time,
@@ -200,14 +216,14 @@ def _merge_row(row, values, timestamp):
         current_post = next(post for post in values["posts"] if post["post_id"] == event["source_post_id"])
         if row["platform"] is None:
             fields["platform"] = event["platform"]
-        if time is not None and event["status"] not in {"tbd", "day_off", "unknown"}:
+        if legacy and time is not None and event["status"] not in {"tbd", "day_off", "unknown"}:
             fields["status"] = event["status"]
         if all(event[key] == value for key, value in fields.items()) and current_post["source_url"] == row["source_url"]:
             return False
-        if any(other["id"] != event["id"] and _event_content(other) == _event_content(fields) for other in events):
+        if any(other["id"] != event["id"] and _event_content(other)[:-1] == _event_content(fields)[:-1] for other in events):
             raise ValidationError("修改後與另一個事件重複")
         before = {**deepcopy(event), "source_url": current_post["source_url"]}
-        if fields["status"] in {"scheduled", "changed"}:
+        if legacy and fields["status"] in {"scheduled", "changed"}:
             fields["status"] = "changed"
     else:
         if any(_event_content(other) == _event_content(fields) for other in events):
@@ -226,7 +242,7 @@ def _merge_row(row, values, timestamp):
     else:
         post_id = known[0]["post_id"] if known else "csv-" + sha256(
             (row["member_id"] + "\n" + row["source_url"]).encode()).hexdigest()
-    classification = "day_off" if status == "day_off" else "weekly_schedule"
+    classification = {"day_off": "day_off", "cancelled": "cancellation", "postponed": "postponement"}.get(status, "weekly_schedule")
     if not known:
         values["posts"].append({"source": source, "post_id": post_id, "member_id": row["member_id"],
                                 "source_url": row["source_url"], "published_at": row["created_at"],
@@ -268,20 +284,20 @@ def import_schedule(text, data_dir, backup_dir, *, timestamp=None):
                 item = normalize_row(row)
                 if item["member_id"] not in enabled:
                     raise ValidationError("成員不存在或未啟用")
-                normalized.setdefault(item["id"], []).append((line, item))
+                normalized.setdefault(item["id"], []).append((line, item, "event_status" not in row))
             except (ValueError, OverflowError, KeyError, TypeError):
                 report["invalid"] += 1
                 LOGGER.warning("CSV 第 %s 行無效，已略過；請檢查欄位、成員、日期、時間與來源", line)
         for identity, versions in normalized.items():
-            line, row = versions[0]
-            if any(item != row for _, item in versions):
+            line, row, legacy = versions[0]
+            if any(item != row for _, item, _ in versions):
                 report["invalid"] += len(versions)
                 LOGGER.warning("CSV 第 %s 行的 id 對應不同內容，整組略過", line)
                 continue
             report["duplicates"] += len(versions) - 1
             candidate = deepcopy(values)
             try:
-                changed = _merge_row(row, candidate, timestamp)
+                changed = _merge_row(row, candidate, timestamp, legacy=legacy)
                 validate_data(candidate["members"], candidate["schedule"], candidate["posts"], candidate["revisions"])
             except ValidationError:
                 report["invalid"] += 1

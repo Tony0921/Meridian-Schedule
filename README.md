@@ -1,8 +1,8 @@
 # Meridian-Schedule — VTuber 行程聚合器
 
-依據 [Technical Spec v2.2](VTuber_Schedule_SPEC_v2_2.md) 調整：ChatGPT 將行程寫入 Google Sheet `schedule_ingestion`，GitHub Actions 每小時透過 Publish to Web 公開 CSV 讀取、驗證、去重及合併，有實際資料差異才提交並更新 Pages。GitHub 端不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet；未新增正式環境相依套件。
+依據 [Technical Spec v2.3](VTuber_Schedule_SPEC_v2_3.md) 調整：ChatGPT 將行程寫入 Google Sheet `schedule_ingestion`，GitHub Actions 每小時透過 Publish to Web 公開 CSV 讀取、驗證、去重及合併，有實際資料差異才提交並更新 Pages。GitHub 端不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet；未新增正式環境相依套件。
 
-v2.2 設定與離線範例見 [公開 CSV 匯入操作手冊](docs/ingestion.md)。Actions 只需 Repository Variable `SCHEDULE_CSV_URL` 與內建 `GITHUB_TOKEN`；CSV 匯入直接採用有效資料，不使用舊版提案／審核流程。既有 v2 OAuth adapter 與 v1 X API／OpenAI Provider 保留供相容使用；付費 API workflows 預設停用，須設定 `ENABLE_LEGACY_API_PIPELINE=true` 才會執行。
+v2.3 設定與離線範例見 [公開 CSV 匯入操作手冊](docs/ingestion.md)。Actions 只需 Repository Variable `SCHEDULE_CSV_URL` 與內建 `GITHUB_TOKEN`；CSV 匯入直接採用有效資料，不使用舊版提案／審核流程。既有 v2 OAuth adapter 與 v1 X API／OpenAI Provider 保留供相容使用；付費 API workflows 預設停用，須設定 `ENABLE_LEGACY_API_PIPELINE=true` 才會執行。
 
 正式 `data/` 已採用 [璃 Miri 的 2026/10/12–10/18 週表](https://x.com/Miri_Aetris/status/2109291418233827667)，由人工依貼文圖片整理，包含 6 場直播與 2 個休息日，保留來源貼文與 8 筆 Revision。這份資料未經 AI API 解析；週三、週六的「目前璃線中！」以休息呈現，未標示的平台與個別直播網址保留 `null`，行程異動仍以官方最新公告為準。
 
@@ -24,18 +24,18 @@ flowchart LR
     Build --> Pages[GitHub Pages]
 ```
 
-CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復原，同步保存 `imported_ids.json`。單列錯誤略過並警告，CSV 下載或結構錯誤則保留既有資料；相同輸入重跑不更新時間戳。CSV `id` 就是正式事件 ID，相同 ID 可修正日期、時間、標題、平台與來源，保留初次建立時間並留下 Revision；更換成員會拒絕。新 ID 僅作新增或重複防護，不依成員、日期、時間自動覆寫舊事件。取消與整張週表替換尚無 CSV 操作。既有 Miri 週表仍是人工整理，本次未修改。
+CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復原，同步保存 `imported_ids.json`。單列錯誤略過並警告，CSV 下載或結構錯誤則保留既有資料；相同輸入重跑不更新時間戳。CSV `id` 就是正式事件 ID，相同 ID 可修正日期、時間、事件狀態、標題、平台與來源，保留初次建立時間並留下 Revision；更換成員會拒絕。v2.3 的 `time` 只填時間或空白，J 欄 `event_status` 明確區分 scheduled/tbd/day_off/unknown/cancelled/postponed，對應既有 JSON `status`；舊 CSV 仍可使用。新 ID 僅作新增或重複防護，不依成員、日期、時間覆寫舊事件。取消、延期與恢復使用同 ID 的明確狀態，刪除與整張週表替換仍未提供。
 
-下方手動提案與 API Parser 章節屬於保留的舊版相容路徑，其信心門檻與審核策略不適用於 v2.2 CSV 匯入。
+下方手動提案與 API Parser 章節屬於保留的舊版相容路徑，其信心門檻與審核策略不適用於 v2.3 CSV 匯入。
 
 | 位置 | 用途 |
 | --- | --- |
-| `ingestion/schedule_csv.py`、`scripts/import_schedule.py` | v2.2 公開 CSV 下載、驗證、正規化與依 ID 更新 |
+| `ingestion/schedule_csv.py`、`scripts/import_schedule.py` | v2.3 公開 CSV 下載、時間／狀態正規化與依 ID 更新 |
 | `schemas/schedule_ingestion.schema.json`、`imported_ids.schema.json` | 正規化 CSV 列與儲存庫匯入 ID 格式 |
-| `examples/schedule-ingestion.csv` | 單一工作表的九欄離線範例，含選填開台平台與團體識別碼 |
+| `examples/schedule-ingestion.csv` | 單一工作表的十欄離線範例，含明確 event_status |
 | `ingestion/` 其餘模組、`scripts/import_sheet.py`、`reconcile_posts.py` | 保留的 v2 Observation／OAuth Queue 與公開來源補漏 |
-| `examples/ingestion*`、`meridian-*` | 保留的 v2 Queue 與 systemd 範本，不屬於 v2.2 主流程 |
-| `docs/ingestion.md`、`docs/chatgpt-task.md` | v2.2 公開 CSV 設定與 ChatGPT 寫入提示 |
+| `examples/ingestion*`、`meridian-*` | 保留的 v2 Queue 與 systemd 範本，不屬於 v2.3 主流程 |
+| `docs/ingestion.md`、`docs/chatgpt-task.md` | v2.3 公開 CSV 設定、先部署後遷移步驟與 ChatGPT 寫入提示 |
 | `schemas/*.schema.json` | 成員、行程、變更提案、貼文與歷史的 JSON Schema |
 | `processor/models.py` | Member／Event dataclass |
 | `processor/schemas.py`、`validate.py` | Schema 驗證與跨檔資料關聯檢查 |
@@ -190,7 +190,7 @@ python -m scripts.validate_data
 python -m scripts.build_site
 ```
 
-Python 測試涵蓋 v2.2 CSV 欄位、格式正規化、跨年、無效列略過、穩定事件 ID、同 ID 所有允許欄位更新、初次建立時間保留、來源異動快照、特殊狀態轉換、ownership 與碰撞拒絕、新 ID 重複防護、無變更不寫入、receipt 與行程一併回滾／復原；也保留既有六種 spec 情境、Parser、SQLite、Collector 與提案測試。外部服務均以 mock 驗證，不呼叫真實 API，也不實際 commit／push。JavaScript 測試涵蓋台灣日期、跨年週範圍、排序、成員篩選、空資料與不安全連結。
+Python 測試涵蓋 v2.3 明確事件狀態、時間配對驗證、取消／延期／恢復、舊 CSV 相容與無變更遷移，也涵蓋欄位、正規化、跨年、無效列略過、穩定 ID、初次建立時間、來源快照、ownership、碰撞、重複防護、no-op 與交易回復；保留既有六種 spec 情境、Parser、SQLite、Collector 與提案測試。外部服務均以 mock 驗證，不呼叫真實 API，也不實際 commit／push。JavaScript 測試涵蓋台灣日期、跨年、排序、篩選、空資料、不安全連結，以及未知／待定／休息／取消／延期的獨立顯示。
 
 色系測試涵蓋系統預設、手動切換與重新載入、系統色系變動及儲存遭封鎖。
 
@@ -214,4 +214,4 @@ Python 測試涵蓋 v2.2 CSV 欄位、格式正規化、跨年、無效列略過
 3. 設定 Repository Variable `SCHEDULE_CSV_URL`、確認內建 Token 的資料寫入權限並啟用 Pages，手動執行 `Process ingestion` 驗證 CSV → JSON → Pages。
 4. 使用相同 CSV 再跑一次，確認沒有額外 commit；測試錯誤單列及 CSV 無法下載時保留原資料。
 
-v2.2 不需要 Pi、Google API 認證或提案／Review UI。舊版選配 API Parser 才需要其 Provider API Key；YouTube／Twitch 的獨立來源、外部告警通知與跨機備援尚未加入。
+v2.3 不需要 Pi、Google API 認證或提案／Review UI。舊版選配 API Parser 才需要其 Provider API Key；YouTube／Twitch 的獨立來源、外部告警通知與跨機備援尚未加入。

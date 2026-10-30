@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
 from ingestion.schedule_csv import (COLUMNS, MAX_CSV_BYTES, PublicRedirect, download_csv,
-                                    import_schedule, normalize_date, normalize_time, parse_csv)
+                                    import_schedule, normalize_date, normalize_row, normalize_time, parse_csv)
 from processor.schemas import ValidationError, load_json
 from processor.storage import (NAMES, atomic_json, data_lock, load_snapshot, read_data,
                                recover_unlocked, snapshot)
@@ -33,7 +33,7 @@ def row(**updates):
 
 def csv_text(rows, columns=None):
     stream = io.StringIO(newline="")
-    columns = columns or (*COLUMNS, *(key for key in ("platform", "group", "status") if any(key in item for item in rows)))
+    columns = columns or (*COLUMNS, *(key for key in ("platform", "group", "status", "event_status") if any(key in item for item in rows)))
     writer = csv.DictWriter(stream, fieldnames=columns)
     writer.writeheader()
     writer.writerows(rows)
@@ -79,6 +79,88 @@ class ScheduleCSVTests(unittest.TestCase):
         self.assertEqual(result["duplicates"], 1)
         self.assertEqual(self.files(), before)
         self.assertEqual(len(list(self.backups.glob("*.json"))), 1)
+
+    def test_explicit_event_status_imports_all_six_states_without_changing_ids(self):
+        states = (("scheduled", "20:00"), ("tbd", ""), ("day_off", ""), ("unknown", ""),
+                  ("cancelled", "21:00"), ("postponed", ""))
+        rows = [row(id=f"state-{state}", date=f"2026-11-{index + 1:02d}", time=time, event_status=state)
+                for index, (state, time) in enumerate(states)]
+        result = self.run_import(rows)
+        self.assertEqual((result["imported"], result["invalid"]), (6, 0))
+        values = read_data(self.data)
+        events = {event["id"]: event for event in values["schedule"]["events"]}
+        for state, time in states:
+            with self.subTest(state=state):
+                self.assertEqual((events[f"state-{state}"]["status"], events[f"state-{state}"]["time"]),
+                                 (state, time or None))
+        self.assertEqual(len(values["revisions"]), 6)
+
+    def test_explicit_state_changes_keep_id_creation_time_and_revision(self):
+        self.run_import([row(event_status="scheduled")])
+        original = read_data(self.data)["schedule"]["events"][-1]
+        for state, time in (("cancelled", "20:00"), ("postponed", ""), ("scheduled", "21:00"),
+                            ("tbd", ""), ("day_off", ""), ("unknown", ""), ("scheduled", "22:00")):
+            with self.subTest(state=state):
+                self.assertTrue(self.run_import([row(event_status=state, time=time)])["schedule_changed"])
+                values = read_data(self.data)
+                event = values["schedule"]["events"][-1]
+                self.assertEqual((event["id"], event["created_at"]), (original["id"], original["created_at"]))
+                self.assertEqual((event["status"], event["time"]), (state, time or None))
+                self.assertEqual(values["revisions"][-1]["after"], event)
+        self.assertEqual(len(read_data(self.data)["revisions"]), 8)
+
+    def test_explicit_content_correction_does_not_replace_event_state_with_changed(self):
+        self.run_import([row(event_status="scheduled")])
+        self.assertTrue(self.run_import([row(event_status="scheduled", title="修正標題")])["changed"])
+        event = read_data(self.data)["schedule"]["events"][-1]
+        self.assertEqual((event["status"], event["title"]), ("scheduled", "修正標題"))
+        self.assertEqual(len(read_data(self.data)["revisions"]), 2)
+
+    def test_legacy_to_explicit_conversion_is_a_noop_and_keeps_receipts(self):
+        self.run_import([row(), row(id="unknown", date="2026-10-29", time="unknown"),
+                         row(id="off", date="2026-10-30", time="day_off"),
+                         row(id="tbd", date="2026-10-31", time="tbd")])
+        before = self.files()
+        result = self.run_import([row(event_status="scheduled"),
+                                  row(id="unknown", date="2026-10-29", time="", event_status="unknown"),
+                                  row(id="off", date="2026-10-30", time="", event_status="day_off"),
+                                  row(id="tbd", date="2026-10-31", time="", event_status="tbd")])
+        self.assertEqual((result["imported"], result["duplicates"], result["invalid"], result["changed"]), (0, 4, 0, False))
+        self.assertEqual(self.files(), before)
+        self.assertEqual(len(list(self.backups.glob("*.json"))), 1)
+
+    def test_invalid_explicit_state_time_pairs_skip_only_bad_rows(self):
+        invalids = (("", "20:00"), ("changed", "20:00"), ("live", "20:00"), ("finished", "20:00"),
+                    ("scheduled", ""), ("unknown", "20:00"), ("day_off", "20:00"), ("tbd", "20:00"),
+                    ("unknown", "unknown"), ("tbd", "tbd"), ("day_off", "休息"), ("cancelled", "unknown"),
+                    ("postponed", "tbd"), ("scheduled", "25:00"))
+        rows = [row(id=f"bad-{index}", time=time, event_status=state)
+                for index, (state, time) in enumerate(invalids)]
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([*rows, row(event_status="scheduled")])
+        self.assertEqual((result["imported"], result["invalid"]), (1, len(invalids)))
+        self.assertEqual(load_json(self.data / "imported_ids.json"), [row()["id"]])
+
+    def test_event_status_is_separate_from_optional_ingestion_status(self):
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(event_status="cancelled", status="imported"),
+                                      row(id="disabled", event_status="scheduled", status="invalid")])
+        self.assertEqual((result["imported"], result["invalid"]), (1, 1))
+        self.assertEqual(read_data(self.data)["schedule"]["events"][-1]["status"], "cancelled")
+
+    def test_explicit_state_normalization_retains_clock_format_compatibility(self):
+        item = normalize_row(row(event_status=" SCHEDULED ", time="晚上八點"))
+        self.assertEqual((item["time"], item["event_status"]), ("20:00", "scheduled"))
+        legacy = normalize_row(row(time="待定"))
+        self.assertEqual((legacy["time"], legacy["event_status"]), (None, "tbd"))
+
+    def test_explicit_new_id_cannot_cancel_existing_event_implicitly(self):
+        self.run_import([row(event_status="scheduled")])
+        before = self.files()
+        with self.assertLogs("ingestion.schedule_csv", level="WARNING"):
+            result = self.run_import([row(id="new-cancel-id", event_status="cancelled")])
+        self.assertEqual(result["invalid"], 1)
+        self.assertEqual(self.files(), before)
 
     def test_optional_status_is_not_a_processing_receipt(self):
         with self.assertLogs("ingestion.schedule_csv", level="WARNING"):

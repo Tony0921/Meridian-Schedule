@@ -116,7 +116,7 @@ async function startApp() {
         for (const event of daily) {
           const member = memberMap.get(event.member_id);
           const card = element("article", undefined, `event-card status-${event.status}`);
-          const timeLabel = event.status === "day_off" ? "全天" : event.status === "unknown" ? "未知" : "時間待定";
+          const timeLabel = { day_off: "全天", unknown: "未知", cancelled: "已取消", postponed: "延期" }[event.status] || "時間待定";
           card.append(element("p", event.time || timeLabel, "event-time"));
           const body = element("div", undefined, "event-body");
           const memberName = element("p", undefined, "member-name");

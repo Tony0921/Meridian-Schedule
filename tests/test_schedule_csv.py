@@ -19,7 +19,6 @@ from processor.storage import (NAMES, atomic_json, data_lock, load_snapshot, rea
 from processor.validate import validate_data
 from scripts.backup_data import main as backup_main
 from scripts.import_schedule import main
-from scripts.process_post import process_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 STAMP = "2026-10-28T08:00:00+08:00"
@@ -486,22 +485,6 @@ class ScheduleCSVTests(unittest.TestCase):
         self.assertEqual(revision["after"]["source_url"], "https://example.com/revised")
         self.assertEqual(values["posts"][:-1], original["posts"])
         self.assertEqual(revision["source_post_id"], values["posts"][-1]["post_id"])
-
-    def test_legacy_proposal_keeps_csv_event_source_url_and_history_consistent(self):
-        self.run_import([row()])
-        fixture = load_json(ROOT / "tests/fixtures/schedule-change.json")
-        fixture["proposal"]["changes"][0]["match"] = {"id": row()["id"], "member_id": "demo-miri"}
-        candidate = process_fixture(fixture, self.data, STAMP)
-        for name in NAMES:
-            atomic_json(candidate[name], self.data / f"{name}.json")
-        values = read_data(self.data)
-        event = values["schedule"]["events"][-1]
-        self.assertEqual(event["source_url"], "https://example.com/fixtures/change")
-        self.assertEqual(event["created_at"], "2026-10-28T02:10:00+08:00")
-        self.assertEqual(values["revisions"][-1]["after"]["source_url"], "https://example.com/fixtures/change")
-        files = self.files()
-        self.assertFalse(self.run_import([row(time="21:00", source_url="https://example.com/fixtures/change")])["changed"])
-        self.assertEqual(self.files(), files)
 
     def test_short_date_uses_immutable_creation_time_on_update(self):
         self.run_import([row(date="10/28")])

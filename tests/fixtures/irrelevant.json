@@ -1,7 +1,0 @@
-{
-  "post": {"source": "x", "post_id": "fixture-irrelevant", "member_id": "demo-miri", "published_at": "2026-10-16T12:00:00+08:00", "source_url": "https://example.com/fixtures/irrelevant", "media": []},
-  "proposal": {
-    "classification": "irrelevant", "confidence": 0.99, "reason": "今天午餐吃拉麵。",
-    "changes": [{"operation": "ignore"}]
-  }
-}

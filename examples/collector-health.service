@@ -1,9 +1,0 @@
-[Unit]
-Description=Check Meridian Schedule Collector health
-
-[Service]
-Type=oneshot
-User=meridian
-WorkingDirectory=/opt/meridian-schedule
-ExecStart=/usr/bin/python3 -m scripts.health_check --db .local/collector.db
-NoNewPrivileges=true

@@ -98,7 +98,7 @@ python -m scripts.build_site
 
 為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新事件使用 `0.70` 作格式相容值，並非 AI 信心評估；既有事件修正保留原本的 confidence、origin 與直播網址。v2.3 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址為 `null`。
 
-事件 schema 的選填 `source_url` 與 `created_at` 保留既有 JSON 和歷史相容。舊事件首次實際 CSV 更新時，`created_at` 取該列首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入；保留的手動提案流程也會同步來源 URL。v2.1 曾依內容產生不同的正式 ID，本專案既有資料已完成一次性人工核對，以原 CSV ID 同步正式事件與歷史引用。**本次 event_status 遷移保留全部既有 ID。** receipt 是字串清單，無法可靠反推對應，未來遇到 ID 不符須人工確認，不自動改寫 Sheet ID 或以 natural key 重新命名事件。
+事件 schema 的選填 `source_url` 與 `created_at` 保留既有 JSON 和歷史相容。舊事件首次實際 CSV 更新時，`created_at` 取該列首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入。v2.1 曾依內容產生不同的正式 ID，本專案既有資料已完成一次性人工核對，以原 CSV ID 同步正式事件與歷史引用。**本次 event_status 遷移保留全部既有 ID。** receipt 是字串清單，無法可靠反推對應，未來遇到 ID 不符須人工確認，不自動改寫 Sheet ID 或以 natural key 重新命名事件。
 
 ## GitHub Actions 與 Pages
 
@@ -121,8 +121,8 @@ CSV 下載或語法／標題驗證失敗，不更動正式資料。單筆錯誤�
 python -m scripts.backup_data recover
 ```
 
-一般備份／還原使用既有 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。舊 v2 OAuth／posts+changes adapters 與提案程式保留供相容使用，不屬於 v2.3 主流程，Actions 不再呼叫或設定它們；舊版付費 API workflows 仍預設停用。
+一般備份／還原使用 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。備份、基本健康檢查與 CSV 匯入只依賴資料核心。OAuth Queue、API 自動 workflows、Pi／RSS、手動 Parser、OpenAI Provider、提案採用及 PR 發佈都已退役；舊提案請人工整理成相同 CSV 格式，不再提供提案 JSON 入口。維運與退役說明見 [操作手冊](operations.md)。
 
 ## 尚待外部設定與驗證
 
-本機測試使用合成 CSV 與網路 mock；實際工作表建立、Publish to Web、ChatGPT 搜尋／圖片理解／寫入、Repository Variable、雲端 Actions 權限與 Pages 部署仍需在實際帳號驗證。本次程式修改不會代為建立外部工作表或排程，也不會自行 commit／push。提示範本見 [chatgpt-task.md](chatgpt-task.md)。
+本機測試使用合成 CSV 與網路 mock；實際工作表建立、Publish to Web、ChatGPT 搜尋／圖片理解／寫入、Repository Variable、雲端 Actions 權限與 Pages 部署仍需在實際帳號驗證。匯入程式不會建立外部工作表或排程，CLI 不執行 Git 操作；資料提交由配置好的 workflow 處理。提示範本見 [chatgpt-task.md](chatgpt-task.md)。

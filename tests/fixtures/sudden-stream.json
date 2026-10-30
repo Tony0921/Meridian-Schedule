@@ -1,7 +1,0 @@
-{
-  "post": {"source": "x", "post_id": "fixture-sudden", "member_id": "demo-miri", "published_at": "2026-10-16T21:30:00+08:00", "source_url": "https://example.com/fixtures/sudden", "media": []},
-  "proposal": {
-    "classification": "sudden_stream", "confidence": 0.98, "reason": "等等 22:00 突發 Apex。",
-    "changes": [{"operation": "insert", "set": {"member_id": "demo-miri", "date": "2026-10-16", "time": "22:00", "title": "Apex", "platform": "youtube", "url": null, "status": "scheduled"}}]
-  }
-}

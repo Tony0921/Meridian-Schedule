@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 
 from processor.storage import data_lock, load_snapshot, recover_unlocked, snapshot, write_data_unlocked
-from scripts.process_post import ROOT
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main(argv=None):

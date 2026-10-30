@@ -14,7 +14,7 @@ on:
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
   workflow_run:
-    workflows: ['Process X post', 'Process ingestion']
+    workflows: ['Process ingestion']
     types: [completed]
     branches: [main]
 
@@ -30,8 +30,7 @@ jobs:
     if: >-
       github.event_name != 'workflow_run' ||
       (github.event.workflow_run.conclusion == 'success' &&
-       ((github.event.workflow_run.name == 'Process ingestion' && vars.SCHEDULE_CSV_URL != '') ||
-        (github.event.workflow_run.name == 'Process X post' && vars.ENABLE_LEGACY_API_PIPELINE == 'true')))
+       github.event.workflow_run.name == 'Process ingestion' && vars.SCHEDULE_CSV_URL != '')
     permissions:
       contents: read
       pages: read

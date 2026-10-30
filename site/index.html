@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light dark">
   <title>VTuber 行程聚合器</title>
   <script src="./theme.js?v=1"></script>
-  <link rel="stylesheet" href="./style.css?v=7">
-  <script src="./app.js?v=7" defer></script>
+  <link rel="stylesheet" href="./style.css?v=8">
+  <script src="./app.js?v=8" defer></script>
 </head>
 <body>
   <main>
@@ -33,6 +33,10 @@
       </div>
       <label>日期<input type="date" id="selected-date" required></label>
       <label>VTuber<select id="member"><option value="">所有成員</option></select></label>
+      <fieldset id="status-filters" class="status-filters">
+        <legend>事件狀態</legend>
+        <div id="status-options" class="status-options"></div>
+      </fieldset>
     </section>
     <section aria-labelledby="range-title">
       <div class="section-heading">

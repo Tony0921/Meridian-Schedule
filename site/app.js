@@ -24,11 +24,11 @@ function weekDates(selectedDate) {
   });
 }
 
-function selectEvents(schedule, members, selectedDate, view, memberId = "") {
+function selectEvents(schedule, members, selectedDate, view, memberId = "", statuses = null) {
   const dates = new Set(view === "week" ? weekDates(selectedDate) : [selectedDate]);
   const enabled = new Set(members.filter((member) => member.enabled).map((member) => member.id));
   return schedule.events.filter((event) => dates.has(event.date) && enabled.has(event.member_id)
-    && (!memberId || event.member_id === memberId))
+    && (!memberId || event.member_id === memberId) && (!statuses || statuses.has(event.status)))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99:99").localeCompare(b.time || "99:99")
       || a.id.localeCompare(b.id));
 }
@@ -53,6 +53,8 @@ function sourceUrl(event, member, sources = {}) {
 async function startApp() {
   const dateInput = document.querySelector("#selected-date");
   const memberSelect = document.querySelector("#member");
+  const statusFilters = document.querySelector("#status-filters");
+  const statusOptions = document.querySelector("#status-options");
   const container = document.querySelector("#schedule");
   const message = document.querySelector("#message");
   const todayButton = document.querySelector("#today-view");
@@ -90,6 +92,17 @@ async function startApp() {
       option.value = member.id;
       memberSelect.append(option);
     }
+    const statusInputs = Object.entries(STATUS_LABELS).map(([status, label]) => {
+      const option = element("label", undefined, "status-option");
+      const input = element("input");
+      input.type = "checkbox";
+      input.name = "event-status";
+      input.value = status;
+      input.checked = true;
+      option.append(input, element("span", label));
+      statusOptions.append(option);
+      return input;
+    });
     document.querySelector("#updated-at").textContent = schedule.updated_at
       ? `最後更新 ${new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", dateStyle: "short", timeStyle: "short" }).format(new Date(schedule.updated_at))}`
       : "尚無更新資料";
@@ -98,13 +111,15 @@ async function startApp() {
       if (!dateInput.value || !dateInput.validity.valid) return;
       const selectedDate = dateInput.value;
       const dates = view === "week" ? weekDates(selectedDate) : [selectedDate];
-      const events = selectEvents(schedule, members, selectedDate, view, memberSelect.value);
+      const statuses = new Set(statusInputs.filter((input) => input.checked).map((input) => input.value));
+      const events = selectEvents(schedule, members, selectedDate, view, memberSelect.value, statuses);
       todayButton.setAttribute("aria-pressed", String(view === "today"));
       weekButton.setAttribute("aria-pressed", String(view === "week"));
       document.querySelector("#range-title").textContent = view === "week"
         ? `${dates[0]} — ${dates[6]}` : `${selectedDate} 行程`;
       container.replaceChildren();
-      message.textContent = events.length ? `共 ${events.length} 筆行程` : "這段時間還沒有行程，換個日期看看吧。";
+      message.textContent = !statuses.size ? "請至少勾選一種事件狀態。"
+        : events.length ? `共 ${events.length} 筆行程` : "目前篩選條件下沒有行程，請調整日期、成員或事件狀態。";
       for (const date of dates) {
         const group = element("section", undefined, "day-group");
         const label = new Intl.DateTimeFormat("zh-TW", {
@@ -112,7 +127,7 @@ async function startApp() {
         }).format(new Date(`${date}T00:00:00Z`));
         group.append(element("h3", label));
         const daily = events.filter((event) => event.date === date);
-        if (!daily.length) group.append(element("p", "尚無行程", "empty-day"));
+        if (!daily.length) group.append(element("p", "沒有符合條件的行程", "empty-day"));
         for (const event of daily) {
           const member = memberMap.get(event.member_id);
           const card = element("article", undefined, `event-card status-${event.status}`);
@@ -156,6 +171,7 @@ async function startApp() {
 
     dateInput.addEventListener("change", render);
     memberSelect.addEventListener("change", render);
+    statusFilters.addEventListener("change", render);
     todayButton.addEventListener("click", () => { view = "today"; render(); });
     weekButton.addEventListener("click", () => { view = "week"; render(); });
     render();

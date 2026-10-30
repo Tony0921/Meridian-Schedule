@@ -23,6 +23,21 @@ test("本週與單一成員篩選，待定時間排最後", () => {
   assert.equal(events.length, 3);
   assert.equal(events.at(-1).time, null);
 });
+test("事件狀態可複選，並維持日期、成員與排序條件", () => {
+  const statuses = new Set(["scheduled", "day_off"]);
+  const events = selectEvents(schedule, members, "2026-10-16", "week", "", statuses);
+  assert.deepEqual(events.map((event) => event.id), [
+    "demo-miri-20261016-2000-001", "demo-miri-20261017-2200-001", "demo-snow-20261017-off-001",
+  ]);
+  assert.equal(selectEvents(schedule, members, "2026-10-16", "today", "", statuses).length, 1);
+  assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", "demo-snow", statuses)
+    .map((event) => event.id), ["demo-snow-20261017-off-001"]);
+});
+test("未勾選任何事件狀態或狀態無符合行程時回傳空清單", () => {
+  for (const statuses of [new Set(), new Set(["live"])]) {
+    assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", "", statuses), []);
+  }
+});
 test("停用成員與無資料日期", () => {
   assert.equal(selectEvents(schedule, members.map((member) => ({ ...member, enabled: false })), "2026-10-16", "week").length, 0);
   assert.equal(selectEvents(schedule, members, "2030-01-01", "today").length, 0);
@@ -42,20 +57,18 @@ test("CSV 來源使用原始公開網址，舊資料只為數字 X ID 建立連�
   assert.equal(sourceUrl({ source_post_id: "demo-post" }, member), null);
 });
 
-test("分開呈現未知、待定、休息、取消及延期的時間與狀態", async () => {
+async function schedulePage(events) {
   function element() {
-    return {
+    return Object.assign(new EventTarget(), {
       children: [], textContent: "", validity: { valid: true },
       append(...children) { this.children.push(...children); },
       replaceChildren(...children) { this.children = children; },
-      setAttribute() {}, addEventListener() {},
-    };
+      setAttribute() {},
+    });
   }
   const nodes = new Map(["#selected-date", "#member", "#schedule", "#message", "#today-view",
-    "#week-view", "#updated-at", "#range-title"].map((selector) => [selector, element()]));
-  const events = [["unknown", null], ["tbd", null], ["day_off", null], ["scheduled", "20:00"],
-    ["cancelled", null], ["postponed", null]]
-    .map(([status, time]) => ({ ...schedule.events[0], id: status, date: taipeiDate(), status, time, platform: null }));
+    "#week-view", "#updated-at", "#range-title", "#status-filters", "#status-options"]
+    .map((selector) => [selector, element()]));
   const context = vm.createContext({
     URL,
     fetch: async (url) => ({ ok: true, json: async () => url.includes("members") ? members : { events } }),
@@ -63,6 +76,14 @@ test("分開呈現未知、待定、休息、取消及延期的時間與狀態",
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../site/app.js"), "utf8"), context);
   context.document = { querySelector: (selector) => nodes.get(selector), createElement: element };
   await vm.runInContext("startApp()", context);
+  return nodes;
+}
+
+test("分開呈現未知、待定、休息、取消及延期的時間與狀態", async () => {
+  const events = [["unknown", null], ["tbd", null], ["day_off", null], ["scheduled", "20:00"],
+    ["cancelled", null], ["postponed", null]]
+    .map(([status, time]) => ({ ...schedule.events[0], id: status, date: taipeiDate(), status, time, platform: null }));
+  const nodes = await schedulePage(events);
   assert.equal(nodes.get("#message").textContent, "共 6 筆行程");
   const cards = nodes.get("#schedule").children[0].children.slice(1);
   assert.deepEqual(cards.map((card) => [card.children[0].textContent,
@@ -70,6 +91,33 @@ test("分開呈現未知、待定、休息、取消及延期的時間與狀態",
     ["20:00", "正常"], ["已取消", "已取消"], ["全天", "休息"], ["延期", "延期"],
     ["時間待定", "待定"], ["未知", "未知"],
   ]);
+});
+
+test("取消勾選即時隱藏行程，全不勾選顯示提示，重新勾選可恢復", async () => {
+  const events = ["scheduled", "unknown"].map((status) => ({
+    ...schedule.events[0], id: status, date: taipeiDate(), status,
+  }));
+  const nodes = await schedulePage(events);
+  const inputs = nodes.get("#status-options").children.map((label) => label.children[0]);
+  const unknown = inputs.find((input) => input.value === "unknown");
+  assert.ok(unknown, "應提供未知狀態的核取方塊");
+  assert.equal(nodes.get("#message").textContent, "共 2 筆行程");
+  unknown.checked = false;
+  nodes.get("#status-filters").dispatchEvent(new Event("change"));
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  assert.equal(nodes.get("#schedule").children[0].children[1].className, "event-card status-scheduled");
+  inputs.forEach((input) => { input.checked = false; });
+  nodes.get("#status-filters").dispatchEvent(new Event("change"));
+  assert.match(nodes.get("#message").textContent, /請.*勾選.*事件狀態/);
+  assert.equal(nodes.get("#schedule").children[0].children.length, 2);
+  assert.equal(nodes.get("#schedule").children[0].children[1].className, "empty-day");
+  unknown.checked = true;
+  nodes.get("#status-filters").dispatchEvent(new Event("change"));
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  assert.equal(nodes.get("#schedule").children[0].children[1].className, "event-card status-unknown");
+  nodes.get("#week-view").dispatchEvent(new Event("click"));
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  assert.equal(nodes.get("#schedule").children.length, 7);
 });
 
 function themePage({ saved = null, dark = false, blockRead = false, blockWrite = false } = {}) {

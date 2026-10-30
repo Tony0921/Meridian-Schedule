@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T08:37:42+00:00",
+  "updated_at": "2026-10-30T10:13:15+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -786,21 +786,6 @@
       "updated_at": "2026-10-29T03:10:36+00:00"
     },
     {
-      "member_id": "mizukivtubertw",
-      "date": "2026-10-29",
-      "time": "20:00",
-      "title": "跟你們一起做戀愛殘酷二選一",
-      "platform": "youtube",
-      "url": null,
-      "status": "scheduled",
-      "id": "mizukivtubertw_20261029_01",
-      "timezone": "Asia/Taipei",
-      "origin": "weekly_schedule",
-      "source_post_id": "csv-4392e8e9f28deec21711394343b6c5a278619d0e78c2748e6dd764e39453a8dc",
-      "confidence": 0.7,
-      "updated_at": "2026-10-29T09:01:39+00:00"
-    },
-    {
       "member_id": "koyuki_teraz",
       "date": "2026-10-29",
       "time": "21:00",
@@ -993,7 +978,7 @@
     {
       "member_id": "iseri_aetris",
       "date": "2026-10-30",
-      "time": "16:00",
+      "time": "15:30",
       "title": "【特戰英豪】試著自己偷偷練槍學看地圖！",
       "platform": "twitch",
       "url": null,
@@ -1001,24 +986,28 @@
       "id": "iseri_aetris_20261030_01",
       "timezone": "Asia/Taipei",
       "origin": "weekly_schedule",
-      "source_post_id": "csv-41721e5ef8abd04da974725e46eaf8c84dfed77f9bde570a8db9f65421d21ce7",
+      "source_post_id": "csv-6130895d68e96c3741a2a683d9b2e72b322347a40a7672c2d7d002225449dc21",
       "confidence": 0.7,
-      "updated_at": "2026-10-29T03:10:36+00:00"
+      "updated_at": "2026-10-30T10:13:15+00:00",
+      "source_url": "https://x.com/Iseri_Aetris/status/2116069235827048489",
+      "created_at": "2026-10-29T02:10:21+08:00"
     },
     {
       "member_id": "sachi_teraz",
       "date": "2026-10-30",
       "time": "17:30",
       "title": "【下班小確幸】聊聊這週和上週都做了什麼",
-      "platform": "youtube",
+      "platform": "none",
       "url": null,
-      "status": "scheduled",
+      "status": "cancelled",
       "id": "sachi_teraz_20261030_01",
       "timezone": "Asia/Taipei",
       "origin": "weekly_schedule",
-      "source_post_id": "csv-ade625428a077047b965f4ed4878cbaa83f580d5ff53e27e331ec45904fb8648",
+      "source_post_id": "csv-19547df5cf26d0d99f24fb7bb54e819e0f655186385dd9a524d2f47687253d43",
       "confidence": 0.7,
-      "updated_at": "2026-10-29T09:01:39+00:00"
+      "updated_at": "2026-10-30T10:13:15+00:00",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2116082935199916188",
+      "created_at": "2026-10-29T01:44:01+08:00"
     },
     {
       "member_id": "998rrr_",
@@ -1035,6 +1024,23 @@
       "confidence": 0.7,
       "updated_at": "2026-10-30T08:37:42+00:00",
       "source_url": "https://x.com/998rrr_/status/2114379484694819038",
+      "created_at": "2026-10-29T02:10:21+08:00"
+    },
+    {
+      "member_id": "mizukivtubertw",
+      "date": "2026-10-30",
+      "time": "21:00",
+      "title": "跟你們一起做戀愛殘酷二選一",
+      "platform": "youtube",
+      "url": null,
+      "status": "scheduled",
+      "id": "mizukivtubertw_20261029_01",
+      "timezone": "Asia/Taipei",
+      "origin": "weekly_schedule",
+      "source_post_id": "csv-8fdd942fd439ae53b1a126726a2f1c9d9a117815aa9df63c3dbf5df26682ef2a",
+      "confidence": 0.7,
+      "updated_at": "2026-10-30T10:13:15+00:00",
+      "source_url": "https://x.com/MizukiVtuberTW/status/2115981149155803481",
       "created_at": "2026-10-29T02:10:21+08:00"
     },
     {

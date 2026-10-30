@@ -168,5 +168,38 @@
     "type": "weekly_schedule",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-19547df5cf26d0d99f24fb7bb54e819e0f655186385dd9a524d2f47687253d43",
+    "member_id": "sachi_teraz",
+    "source_url": "https://x.com/Sachi_TeRaz/status/2116082935199916188",
+    "published_at": "2026-10-29T01:44:01+08:00",
+    "processed_at": "2026-10-30T10:13:15+00:00",
+    "type": "cancellation",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-8fdd942fd439ae53b1a126726a2f1c9d9a117815aa9df63c3dbf5df26682ef2a",
+    "member_id": "mizukivtubertw",
+    "source_url": "https://x.com/MizukiVtuberTW/status/2115981149155803481",
+    "published_at": "2026-10-29T02:10:21+08:00",
+    "processed_at": "2026-10-30T10:13:15+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-6130895d68e96c3741a2a683d9b2e72b322347a40a7672c2d7d002225449dc21",
+    "member_id": "iseri_aetris",
+    "source_url": "https://x.com/Iseri_Aetris/status/2116069235827048489",
+    "published_at": "2026-10-29T02:10:21+08:00",
+    "processed_at": "2026-10-30T10:13:15+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
   }
 ]

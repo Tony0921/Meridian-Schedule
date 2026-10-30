@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-29T19:09:15+00:00",
+  "updated_at": "2026-10-30T08:37:42+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -1025,7 +1025,7 @@
       "date": "2026-10-30",
       "time": "20:00",
       "title": "萬聖節中二歌回！！！",
-      "platform": "youtube",
+      "platform": "twitch",
       "url": null,
       "status": "scheduled",
       "id": "998rrr__20261030_01",
@@ -1033,7 +1033,9 @@
       "origin": "weekly_schedule",
       "source_post_id": "csv-4be4d94b2cec8c46bb72778b83599407d483d280c404395ad20df3ecc3027be2",
       "confidence": 0.7,
-      "updated_at": "2026-10-29T09:01:39+00:00"
+      "updated_at": "2026-10-30T08:37:42+00:00",
+      "source_url": "https://x.com/998rrr_/status/2114379484694819038",
+      "created_at": "2026-10-29T02:10:21+08:00"
     },
     {
       "member_id": "hitomi_teraz",
@@ -1448,7 +1450,7 @@
       "date": "2026-11-01",
       "time": "20:00",
       "title": "週日聊天台！！！",
-      "platform": "youtube",
+      "platform": "twitch",
       "url": null,
       "status": "scheduled",
       "id": "998rrr__20261101_01",
@@ -1456,7 +1458,9 @@
       "origin": "weekly_schedule",
       "source_post_id": "csv-4be4d94b2cec8c46bb72778b83599407d483d280c404395ad20df3ecc3027be2",
       "confidence": 0.7,
-      "updated_at": "2026-10-29T09:01:39+00:00"
+      "updated_at": "2026-10-30T08:37:42+00:00",
+      "source_url": "https://x.com/998rrr_/status/2114379484694819038",
+      "created_at": "2026-10-29T02:10:21+08:00"
     },
     {
       "member_id": "ichii_aetris",

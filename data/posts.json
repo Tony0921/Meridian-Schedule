@@ -201,5 +201,16 @@
     "type": "weekly_schedule",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-c1b766676ea1ca1a9b66363895878f8e7dc2958a98ac5b3c11ed223dc150da4f",
+    "member_id": "mizukivtubertw",
+    "source_url": "https://x.com/MizukiVtuberTW/status/2116818357437812807",
+    "published_at": "2026-11-01T17:53:33+08:00",
+    "processed_at": "2026-11-01T16:04:14+00:00",
+    "type": "day_off",
+    "status": "processed",
+    "media": []
   }
 ]

@@ -212,5 +212,27 @@
     "type": "day_off",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-50f76958ff0ab4a47a1ae0c7fa14d3778da57b20985447b589ce1b8bd808f501",
+    "member_id": "998rrr_",
+    "source_url": "https://x.com/998rrr_/status/2116898572788716006",
+    "published_at": "2026-11-02T05:40:15+08:00",
+    "processed_at": "2026-11-02T00:42:53+00:00",
+    "type": "day_off",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-8ebab9e9d837db21fd621829533ea591901df1f0a32c64e0926826b1d6e78814",
+    "member_id": "hitomi_teraz",
+    "source_url": "https://x.com/Hitomi_TeRaz/status/2116983884038676719",
+    "published_at": "2026-11-02T05:40:15+08:00",
+    "processed_at": "2026-11-02T00:42:53+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
   }
 ]

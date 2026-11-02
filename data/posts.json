@@ -234,5 +234,49 @@
     "type": "weekly_schedule",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-ea39f9a18314a545d35e67e291ec2fbd093d66df50e7bd760a0149041427a1ba",
+    "member_id": "yuzumi_neon",
+    "source_url": "https://x.com/Yuzumi_Neon/status/2117135256101003761",
+    "published_at": "2026-11-02T17:53:33+08:00",
+    "processed_at": "2026-11-02T15:05:51+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-3ec9697ac66073a5398130e17b1186493a3ca155bbe1c8ee17f56e83e010f9af",
+    "member_id": "ichii_aetris",
+    "source_url": "https://x.com/Ichii_Aetris/status/2117062564400210432",
+    "published_at": "2026-11-02T17:53:33+08:00",
+    "processed_at": "2026-11-02T15:05:51+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-6228f3ba1c2143f182358bde829a306778ac5f58e962c5c18e886c93a5f70512",
+    "member_id": "iseri_aetris",
+    "source_url": "https://x.com/Iseri_Aetris/status/2117111651921207622",
+    "published_at": "2026-11-02T17:53:33+08:00",
+    "processed_at": "2026-11-02T15:05:51+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-b0679d29e2215506f325d7b9ff7fa83b893ce733e49e06e5554e7fd127f2138b",
+    "member_id": "miri_aetris",
+    "source_url": "https://x.com/Miri_Aetris/status/2117062287488127470",
+    "published_at": "2026-11-02T17:53:33+08:00",
+    "processed_at": "2026-11-02T15:05:51+00:00",
+    "type": "day_off",
+    "status": "processed",
+    "media": []
   }
 ]

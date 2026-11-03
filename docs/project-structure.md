@@ -1,8 +1,8 @@
 # 專案檔案結構
 
-整理日期：2026-10-30。主樹列出版本控制中的檔案及目前的文件草稿，每份檔案後方以 `#` 簡述用途；本機設定、Git 內部資料、暫存及建置產物另列於下方。
+整理日期：2026-11-03。主樹列出版本控制中的檔案及目前的文件草稿，每份檔案後方以 `#` 簡述用途；本機設定、Git 內部資料、暫存及建置產物另列於下方。
 
-現行只保留：外部 ChatGPT／人工 → Google Sheet 或本機 CSV → 匯入與驗證 → 正式 JSON／來源／Revision → GitHub Pages，以及資料健康檢查、備份、還原與交易復原。Parser／Provider、提案採用／PR、OAuth Queue、API 自動管線及 Pi／RSS 都已退役；舊 spec／計畫僅作歷史紀錄。
+現行只保留：外部 ChatGPT／人工 → Google Sheet 或本機 CSV → 匯入與驗證 → 正式 JSON／來源／Revision → GitHub Pages，以及資料健康檢查、備份、還原與交易復原。Parser／Provider、提案採用／PR、OAuth Queue、API 自動管線及 Pi／RSS 都已退役；舊規格可由 Git 歷史追溯，退役計畫保留供查閱。
 
 ## 原始碼、正式資料與文件
 
@@ -13,12 +13,7 @@ Meridian-Schedule/
 ├── LICENSE                                      # MIT 授權條款
 ├── pyproject.toml                               # Python 版本、專案版本與相依設定
 ├── README.md                                    # 專案入口、執行方式與部署說明
-├── VTuber_Schedule_SPEC.md                      # 第一版完整規格與初始架構
-├── VTuber_Schedule_SPEC_current.md              # 整合歷次修訂的現行完整規格
-├── VTuber_Schedule_SPEC_v2.md                   # v2 外部 AI 與 Sheet Queue 設計
-├── VTuber_Schedule_SPEC_v2_1.md                 # v2.1 公開 CSV 匯入規格
-├── VTuber_Schedule_SPEC_v2_2.md                 # v2.2 穩定事件 ID 與更新規則
-├── VTuber_Schedule_SPEC_v2_3.md                 # v2.3 時間與事件狀態分欄規格
+├── SPEC.md                                      # 整合歷次修訂的現行完整規格
 ├── .github/                                     # GitHub 自動化設定
 │   └── workflows/                               # Actions 工作流程
 │       ├── backup-data.yml                      # 定期驗證資料並上傳備份
@@ -106,4 +101,4 @@ Meridian-Schedule/
 
 Python 執行後也可能在各套件目錄產生 `__pycache__/`；資料讀寫時可能出現 `.update.lock`，中斷交易時可能留下 `.transaction.json`，這些都由 `.gitignore` 排除。網站修改應從 `site/` 進行，再重新建置 `dist/`。
 
-完整行為與資料契約見 [現行完整規格](../VTuber_Schedule_SPEC_current.md)，本機執行與驗證命令見 [README](../README.md)。新增、搬動或移除專案檔案時，請同步更新本文件。
+完整行為與資料契約見 [現行完整規格](../SPEC.md)，本機執行與驗證命令見 [README](../README.md)。新增、搬動或移除專案檔案時，請同步更新本文件。

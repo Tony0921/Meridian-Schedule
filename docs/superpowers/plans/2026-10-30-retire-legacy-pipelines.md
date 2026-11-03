@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11+ 標準函式庫、原生 JavaScript、GitHub Actions。
 
-**Spec:** [現行完整規格](../../../VTuber_Schedule_SPEC_current.md)，加上使用者本輪確認的退役範圍；完成後同步修正規格中的現況。
+**Spec:** [現行完整規格](../../../SPEC.md)，加上使用者本輪確認的退役範圍；完成後同步修正規格中的現況。
 
 ## Global Constraints
 

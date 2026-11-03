@@ -52,4 +52,4 @@ CSV workflow 備份 artifact 保存 30 天；Backup schedule data 每日台灣 0
 
 若曾在其他機器安裝舊服務，須另行停用其 systemd service／timer，避免持續重試已移除的 CLI。遠端 Secrets／Variables 與授權憑證也由管理者依實際使用情況清理；儲存庫更新不會調整遠端服務／憑證配置或本機 `.env`。
 
-來源貼文、Revision、receipt、舊 CSV 格式及歷史規格保留；退役程式不等同刪除資料。未確認的外部排程、工具權限、雲端部署、手機實機與外部備援，仍需另行驗收。
+來源貼文、Revision、receipt 與舊 CSV 相容性均保留。歷版規格可由 Git 歷史追溯。未確認的外部排程、工具權限、雲端部署、手機實機與外部備援，仍需另行驗收。

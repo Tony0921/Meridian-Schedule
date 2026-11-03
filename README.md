@@ -1,6 +1,6 @@
 # Meridian-Schedule — VTuber 行程聚合器
 
-現行完整規格見 [Technical Spec（v2.3 整合版）](VTuber_Schedule_SPEC_current.md)，以第一版為基礎整合後續修訂與目前實作；[v1](VTuber_Schedule_SPEC.md)、[v2](VTuber_Schedule_SPEC_v2.md)、[v2.1](VTuber_Schedule_SPEC_v2_1.md)、[v2.2](VTuber_Schedule_SPEC_v2_2.md)、[v2.3](VTuber_Schedule_SPEC_v2_3.md) 保留供版本追溯。
+現行完整規格見 [SPEC.md](SPEC.md)，以第一版為基礎整合後續修訂與目前實作。
 
 檔案用途與完整目錄樹見 [專案檔案結構](docs/project-structure.md)。
 
@@ -87,8 +87,8 @@ python -m scripts.build_site
 ## 資料約定
 
 - MVP 僅支援 `Asia/Taipei`；`date` 為 `YYYY-MM-DD`，`time` 為 `HH:MM` 或 `null`。
-- `scheduled`、`changed`、`live`、`finished` 必須有時間；時間尚未確定請使用 `tbd`。休息日可用 `day_off` 與 `time: null`。
-- 外部擷取端無法判定時間或行程狀態時，新 CSV 填 `event_status=unknown` 並留空 `time`；只有沒有 `event_status` 標題的舊 CSV 才在 `time` 填 `unknown`／「未知」。匯入為 `status: unknown` 與 `time: null`，網頁時間欄及徽章皆顯示「未知」。官方明確標示時間未定仍使用 `tbd`。已移除工作日狀態，舊 CSV 的 `working_day` 請改為 `unknown`。
+- 正式 JSON 的 `status` 為 `scheduled`、`changed`、`live` 或 `finished` 時，必須有時間。新 CSV 的 `event_status` 只接受 `scheduled`、`tbd`、`day_off`、`unknown`、`cancelled`、`postponed`，時間配對見 [SPEC.md 第 8 節](SPEC.md#8-csv-欄位與狀態契約)。
+- ChatGPT 擷取時，無開台時間但明確突發或該場有平台標示時填 `tbd`。排除明確休息後，其餘無法判定的情況填 `unknown`。兩者的 `time` 都留空，判定順序見 [SPEC.md 第 7 節](SPEC.md#7-外部發現與-sheet-寫入)。舊 CSV 沒有 `event_status` 標題時，可在 `time` 填 `unknown`／「未知」。舊 CSV 的 `working_day` 請改為 `unknown`。
 - `updated_at`、貼文與歷史時間必須含時區；空行程可用 `updated_at: null`。
 - `youtube`、`twitch` 成員欄位為完整頻道 URL 或 `null`；`x_username` 為帳號名稱或 `null`。
 - 成員必須提供 `group`（團體識別碼）與 `group_name`（團體顯示名稱）。目前使用 `neon`／`霓 NEO(n)`、`ianvs`／`扉暮 IANVS`、`teraz`／`序境 TeRaź`、`aetris`／`沉珀 Aetris`；沒有團體時 `group` 填 `none`，`group_name` 直接填成員的 `name`；合作藝人填 `collaborators`／`合作藝人`。

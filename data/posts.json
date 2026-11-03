@@ -278,5 +278,49 @@
     "type": "day_off",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
+    "member_id": "reirei_neon",
+    "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
+    "published_at": "2026-11-03T06:34:37+08:00",
+    "processed_at": "2026-11-03T01:34:34+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-c65ac234c3298623129d09e655364cdc1ca56e175ae686a6a06f049443f4c419",
+    "member_id": "kirali_neon",
+    "source_url": "https://x.com/Kirali_Neon/status/2117232484186456144",
+    "published_at": "2026-11-03T06:34:37+08:00",
+    "processed_at": "2026-11-03T01:34:34+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-a11c48084d40dd163db10492d7948e14b3b03f8ae0304605c943240f83ea8818",
+    "member_id": "koyuki_teraz",
+    "source_url": "https://x.com/Koyuki_TeRaz/status/2117233663897382977",
+    "published_at": "2026-11-03T06:34:37+08:00",
+    "processed_at": "2026-11-03T01:34:34+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-47deb28b9c34fe16ebec9ab7ee0576694e54acc25d39b35ef07aaba943a86951",
+    "member_id": "hiyori_teraz",
+    "source_url": "https://x.com/Hiyori_TeRaz/status/2117220498052628739",
+    "published_at": "2026-11-03T06:34:37+08:00",
+    "processed_at": "2026-11-03T01:34:34+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
   }
 ]

@@ -322,5 +322,16 @@
     "type": "weekly_schedule",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "member_id": "iruni_ianvs",
+    "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+    "published_at": "2026-11-03T17:53:24+08:00",
+    "processed_at": "2026-11-03T17:50:09+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
   }
 ]

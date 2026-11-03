@@ -9889,5 +9889,166 @@
       "source_url": "https://x.com/Hiyori_TeRaz/status/2117220498052628739",
       "updated_at": "2026-11-03T01:34:34+00:00"
     }
+  },
+  {
+    "event_id": "iruni_ianvs_20261102_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261102_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-02",
+      "time": "20:00",
+      "title": "【高流後日談】好多可以分享的故事！（王月台）",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261103_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261103_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-03",
+      "time": null,
+      "title": "圖書館休館中",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261104_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261104_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-04",
+      "time": "21:30",
+      "title": "【高流未來趴歌回】把高流歌單唱一遍！",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261105_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261105_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-05",
+      "time": null,
+      "title": "柯基突發",
+      "platform": "unknown",
+      "status": "tbd",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261106_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261106_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-06",
+      "time": "23:00",
+      "title": "【ASMR】零距離呼呼吹氣與軟綿綿的貼近含耳♡",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261107_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261107_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-07",
+      "time": "21:00",
+      "title": "【還債台】畫畫哈士祈的頭貼！",
+      "platform": "twitch",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
+  },
+  {
+    "event_id": "iruni_ianvs_20261108_01",
+    "timestamp": "2026-11-03T17:50:09+00:00",
+    "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+    "before": null,
+    "after": {
+      "id": "iruni_ianvs_20261108_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-08",
+      "time": "22:00",
+      "title": "【惡靈古堡】但是寶寶模式",
+      "platform": "twitch",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    }
   }
 ]

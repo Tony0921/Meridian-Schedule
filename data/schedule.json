@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03T01:34:34+00:00",
+  "updated_at": "2026-11-03T17:50:09+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -1642,6 +1642,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "iruni_ianvs_20261102_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-02",
+      "time": "20:00",
+      "title": "【高流後日談】好多可以分享的故事！（王月台）",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    },
+    {
       "id": "iseri_aetris_20261102_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -1897,6 +1914,23 @@
       "updated_at": "2026-11-03T01:34:34+00:00"
     },
     {
+      "id": "iruni_ianvs_20261103_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-03",
+      "time": null,
+      "title": "圖書館休館中",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    },
+    {
       "id": "kirali_neon_20261103_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2048,6 +2082,23 @@
       "source_post_id": "csv-8ebab9e9d837db21fd621829533ea591901df1f0a32c64e0926826b1d6e78814",
       "source_url": "https://x.com/Hitomi_TeRaz/status/2116983884038676719",
       "updated_at": "2026-11-02T00:42:53+00:00"
+    },
+    {
+      "id": "iruni_ianvs_20261104_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-04",
+      "time": "21:30",
+      "title": "【高流未來趴歌回】把高流歌單唱一遍！",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
     },
     {
       "id": "iseri_aetris_20261104_01",
@@ -2271,6 +2322,23 @@
       "updated_at": "2026-11-03T01:34:34+00:00"
     },
     {
+      "id": "iruni_ianvs_20261105_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-05",
+      "time": null,
+      "title": "柯基突發",
+      "platform": "unknown",
+      "status": "tbd",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    },
+    {
       "id": "reirei_neon_20261105_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2388,6 +2456,23 @@
       "source_post_id": "csv-ea39f9a18314a545d35e67e291ec2fbd093d66df50e7bd760a0149041427a1ba",
       "source_url": "https://x.com/Yuzumi_Neon/status/2117135256101003761",
       "updated_at": "2026-11-02T15:05:51+00:00"
+    },
+    {
+      "id": "iruni_ianvs_20261106_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-06",
+      "time": "23:00",
+      "title": "【ASMR】零距離呼呼吹氣與軟綿綿的貼近含耳♡",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
     },
     {
       "id": "hiyori_teraz_20261106_01",
@@ -2577,6 +2662,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "iruni_ianvs_20261107_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-07",
+      "time": "21:00",
+      "title": "【還債台】畫畫哈士祈的頭貼！",
+      "platform": "twitch",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
+    },
+    {
       "id": "miri_aetris_20261107_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2745,6 +2847,23 @@
       "source_post_id": "csv-c65ac234c3298623129d09e655364cdc1ca56e175ae686a6a06f049443f4c419",
       "source_url": "https://x.com/Kirali_Neon/status/2117232484186456144",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "iruni_ianvs_20261108_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-03T17:53:24+08:00",
+      "member_id": "iruni_ianvs",
+      "date": "2026-11-08",
+      "time": "22:00",
+      "title": "【惡靈古堡】但是寶寶模式",
+      "platform": "twitch",
+      "status": "scheduled",
+      "source_post_id": "csv-4b035208ad0a4254516a0327d5570aa2205dac060294af1010176f5aa1712dfa",
+      "source_url": "https://x.com/iruni_ianvs/status/2117428635695296949",
+      "updated_at": "2026-11-03T17:50:09+00:00"
     },
     {
       "id": "hitomi_teraz_20261108_01",

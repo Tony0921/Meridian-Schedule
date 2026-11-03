@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03T17:50:09+00:00",
+  "updated_at": "2026-11-03T23:20:48+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -1676,6 +1676,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261102_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-02",
+      "time": "20:00",
+      "title": "高流後日談｜後臺秘辛 ft.高流幫",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "kirali_neon_20261102_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -1776,6 +1793,23 @@
       "source_post_id": "csv-c1b766676ea1ca1a9b66363895878f8e7dc2958a98ac5b3c11ed223dc150da4f",
       "source_url": "https://x.com/MizukiVtuberTW/status/2116818357437812807",
       "updated_at": "2026-11-01T16:04:14+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261102_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-02",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "yuzumi_neon_20261102_02",
@@ -1931,6 +1965,23 @@
       "updated_at": "2026-11-03T17:50:09+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261103_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-03",
+      "time": null,
+      "title": "鍬寶寶出差",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "kirali_neon_20261103_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -1980,6 +2031,23 @@
       "source_post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
       "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261103_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-03",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "yuzumi_neon_20261103_01",
@@ -2135,6 +2203,23 @@
       "updated_at": "2026-11-03T01:34:34+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261104_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-04",
+      "time": null,
+      "title": "鍬寶寶平安出門",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "koyuki_teraz_20261104_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2167,6 +2252,23 @@
       "source_post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
       "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261104_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-04",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "yuzumi_neon_20261104_01",
@@ -2339,6 +2441,23 @@
       "updated_at": "2026-11-03T17:50:09+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261105_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-05",
+      "time": null,
+      "title": "鍬寶寶去旅行",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "reirei_neon_20261105_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2354,6 +2473,23 @@
       "source_post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
       "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261105_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-05",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "yuzumi_neon_20261105_01",
@@ -2509,6 +2645,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261106_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-06",
+      "time": null,
+      "title": "鍬寶寶去旅行",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "kirali_neon_20261106_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2558,6 +2711,23 @@
       "source_post_id": "csv-c1b766676ea1ca1a9b66363895878f8e7dc2958a98ac5b3c11ed223dc150da4f",
       "source_url": "https://x.com/MizukiVtuberTW/status/2116818357437812807",
       "updated_at": "2026-11-01T16:04:14+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261106_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-06",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "iseri_aetris_20261107_01",
@@ -2713,6 +2883,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261107_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-07",
+      "time": null,
+      "title": "鍬寶寶去旅行",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "kirali_neon_20261107_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2762,6 +2949,23 @@
       "source_post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
       "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261107_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-07",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "yuzumi_neon_20261108_01",
@@ -2900,6 +3104,23 @@
       "updated_at": "2026-11-02T15:05:51+00:00"
     },
     {
+      "id": "itsuki_ianvs_20261108_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "itsuki_ianvs",
+      "date": "2026-11-08",
+      "time": null,
+      "title": "鍬寶寶去旅行",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+      "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+      "updated_at": "2026-11-03T23:20:48+00:00"
+    },
+    {
       "id": "koyuki_teraz_20261108_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -2932,6 +3153,23 @@
       "source_post_id": "csv-2298f0abd47c6863b7b4bd2cf4a83881c0e5739140299f15bb088b943743b98c",
       "source_url": "https://x.com/Reirei_Neon/status/2117231100095594584",
       "updated_at": "2026-11-03T01:34:34+00:00"
+    },
+    {
+      "id": "sachi_teraz_20261108_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "day_off",
+      "confidence": 0.7,
+      "created_at": "2026-11-04T06:18:05+08:00",
+      "member_id": "sachi_teraz",
+      "date": "2026-11-08",
+      "time": null,
+      "title": "秘書今天休假",
+      "platform": "none",
+      "status": "day_off",
+      "source_post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+      "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+      "updated_at": "2026-11-03T23:20:48+00:00"
     },
     {
       "id": "998rrr__20261109_01",

@@ -333,5 +333,27 @@
     "type": "weekly_schedule",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-e64926f90b36649db6e0e2e4a59034ca857330e2284dc432877888fcbcb35f44",
+    "member_id": "itsuki_ianvs",
+    "source_url": "https://x.com/itsuki_ianvs/status/2117617057286238606",
+    "published_at": "2026-11-04T06:18:05+08:00",
+    "processed_at": "2026-11-03T23:20:48+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-34b68c1a9a8a498345a319e63d4b4fc18288a6ae92dd7875e58b40c3e22604dd",
+    "member_id": "sachi_teraz",
+    "source_url": "https://x.com/Sachi_TeRaz/status/2117620761955569990",
+    "published_at": "2026-11-04T06:18:05+08:00",
+    "processed_at": "2026-11-03T23:20:48+00:00",
+    "type": "day_off",
+    "status": "processed",
+    "media": []
   }
 ]

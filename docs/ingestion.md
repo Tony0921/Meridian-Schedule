@@ -1,4 +1,4 @@
-# V2.3 公開 CSV 匯入操作手冊
+# 公開 CSV 匯入操作手冊
 
 依據 [現行規格](../SPEC.md)，主要流程為：ChatGPT 搜尋／解析 → Google Sheet `schedule_ingestion` → Publish to Web CSV → GitHub Actions → repository JSON → GitHub Pages。GitHub 端只執行公開 HTTP GET，不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet。正式資料仍在 `data/`，網站不直接查詢 Sheet。
 
@@ -96,9 +96,9 @@ python -m scripts.build_site
 - CSV 不提供 operation、revision 或 schedule_version 欄位，也不支援 explicit delete、整張週表替換或 AI fuzzy auto-merge。取消以 event_status=cancelled 更新；修正同一事件必須沿用原 ID，不要另建 ID 企圖取代它。
 - 不會因 CSV 列被刪除或暫時缺少就刪除既有行程。
 
-為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新事件使用 `0.70` 作格式相容值，並非 AI 信心評估；既有事件修正保留原本的 confidence、origin 與直播網址。v2.3 直接匯入不套用舊版 REVIEW_ALL／提案策略。新行程的平台未提供或留空時為 `null`；直播網址為 `null`。
+為相容現有網站資料，Importer 同步維護 `posts.json` 與 `revisions.json`。CSV 未提供來源發文時間，新增來源紀錄的 `published_at` 使用該列 `created_at`，不代表已驗證的原始發文時間。CSV 未提供 confidence，新事件使用 `0.70` 作格式相容值，並非 AI 信心評估；既有事件修正保留原本的 confidence、origin 與直播網址。驗證通過的資料列依事件 ID 直接匯入。新行程的平台未提供或留空時為 `null`；直播網址為 `null`。
 
-事件 schema 的選填 `source_url` 與 `created_at` 保留既有 JSON 和歷史相容。舊事件首次實際 CSV 更新時，`created_at` 取該列首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入。v2.1 曾依內容產生不同的正式 ID，本專案既有資料已完成一次性人工核對，以原 CSV ID 同步正式事件與歷史引用。**本次 event_status 遷移保留全部既有 ID。** receipt 是字串清單，無法可靠反推對應，未來遇到 ID 不符須人工確認，不自動改寫 Sheet ID 或以 natural key 重新命名事件。
+事件 schema 的選填 `source_url` 與 `created_at` 保留既有 JSON 和歷史相容。舊事件首次實際 CSV 更新時，`created_at` 取該列首次建立時間，Revision 的 `before.source_url` 從原 `posts.json` 補入。遷移至明確狀態欄位時保留全部既有 ID。receipt 是字串清單，無法可靠反推對應。Sheet 與正式資料的 ID 不符時須人工確認，匯入器依收到的 ID 判斷新增或更新。
 
 ## GitHub Actions 與 Pages
 
@@ -121,7 +121,7 @@ CSV 下載或語法／標題驗證失敗，不更動正式資料。單筆錯誤�
 python -m scripts.backup_data recover
 ```
 
-一般備份／還原使用 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。備份、基本健康檢查與 CSV 匯入只依賴資料核心。OAuth Queue、API 自動 workflows、Pi／RSS、手動 Parser、OpenAI Provider、提案採用及 PR 發佈都已退役；舊提案請人工整理成相同 CSV 格式，不再提供提案 JSON 入口。維運與退役說明見 [操作手冊](operations.md)。
+一般備份／還原使用 `scripts.backup_data`，會一併處理 imported IDs；還原沒有 receipt 的舊版備份時，會清空 IDs 以便重新匯入。備份、基本健康檢查與 CSV 匯入只依賴資料核心。備份、復原與健康檢查的命令見 [操作手冊](operations.md)。
 
 ## 尚待外部設定與驗證
 

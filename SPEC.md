@@ -1,29 +1,6 @@
 # Meridian Schedule — VTuber 行程聚合器現行完整規格
 
-> 規格版本：v2.3 整合版
->
-> 整理日期：2026-11-03（Asia/Taipei）
->
-> 實作基準：`1a2cc91`（CSV 單一路徑與最新版 ChatGPT 擷取提示範本）
->
-> 專案版本：`pyproject.toml` 的 `0.2.3`
->
-> 定位：從第一版完整規格向後整合至目前行為，供維護、實作與驗收使用。
-
-本文件可獨立閱讀，包含現行主流程、資料契約、舊版相容範圍、失敗復原及驗收界線。歷版規格可由 Git 歷史追溯。本文件記錄 OAuth Queue、API 自動管線、Pi／RSS、手動 Parser／Provider 及提案／PR 發佈退役，版本號維持不變。文件中的「已實作」表示儲存庫已有對應程式或測試，不代表外部服務已部署或完成端到端驗證。
-
-## 0. 版本演進與適用規則
-
-| 版本／階段 | 延續的基礎 | 對現行規格的影響 |
-| --- | --- | --- |
-| v1 | 官方貼文、文字／圖片理解、結構化資料、確定性合併、來源與 Revision、靜態網站 | 保留目標及資料處理基礎；X API → Pi → AI API 的事件流程已退役 |
-| v2 | 外部 AI discovery、Google Sheets 暫存、正式 JSON 為準、故障保留舊資料 | 核心流程不要求付費 X／AI API；Pi 改為選配補漏。雙表 Queue、OAuth adapter 已退役；手動 Proposal 流程也已退役 |
-| v2.1 | 單一 `schedule_ingestion` 工作表、公開 CSV、Actions 同步 | 主流程使用公開 CSV，GitHub 不需 Google 認證、不回寫 Sheet；有效資料直接匯入，不經提案審核 |
-| v2.2 | 穩定事件 ID、依 ID 修正、完整 Revision、冪等更新 | CSV `id` 即正式 Event ID；natural key 僅防重複，來源網址僅追溯；receipt 不阻止同 ID 更新 |
-| v2.3 | 事件 identity 與交易保護 | `time` 與 `event_status` 分欄，明確支援取消、延期及恢復；保留舊 CSV 相容 |
-| 目前實作補充 | 成員分組、平台資料及網站操作 | 納入 `group/group_name`、平台徽章與頻道連結、成員 X 連結、深淺色、事件狀態複選；`working_day` 已由 `unknown` 取代；現行僅保留 CSV 與資料維運 |
-
-現行主流程以本文為整合入口。歷版規格中的「所有變更必須經 `processor/merge.py`」、「所有外部資料先提案」、「已匯入 ID 一律略過」、「新 ID 依成員／日期／時間覆寫舊事件」及「time 同時表示狀態」均不再適用於新格式 CSV。CSV 變更政策見第 13 節，全部舊流程的退役界線見第 14 節。
+本文件說明現行主流程、資料契約、相容規則、失敗復原及驗收項目。外部排程、Sheet 寫入與 Pages 部署須在實際環境驗證。
 
 ## 1. 專案目標
 
@@ -52,7 +29,7 @@
 - CSV `operation`、`schedule_version`、明確刪除、整張週表替換或模糊比對後自動覆寫。
 - Google 認證、Sheet 狀態回寫、程式內文字／圖片 Parser、AI API Provider、提案採用／PR 發佈或 confidence 核准門檻。
 
-`cancelled`、`postponed` 是正式事件狀態，已由 v2.3 CSV 支援；取消保留事件，不等同刪除。其他平台可作為已由外部確認的公開來源 URL，不表示儲存庫已實作其自動蒐集功能。
+`cancelled`、`postponed` 是正式事件狀態，可透過 CSV 更新；取消保留事件，不等同刪除。其他平台可作為已由外部確認的公開來源 URL，不表示儲存庫已實作其自動蒐集功能。
 
 ## 3. 核心設計原則
 
@@ -96,7 +73,7 @@ flowchart TD
 | GitHub Actions | 測試、匯入、驗證、建置、有差異才提交、協調 Pages 部署 |
 | 靜態前端 | 只讀取建置後的成員與行程；負責顯示與篩選 |
 
-CSV 的確定性合併位於 `ingestion/schedule_csv.py`，使用共用正式資料模型、關聯驗證與 storage。舊提案合併、審核與發布已移除，現行只接受 CSV 事件列。
+CSV 的確定性合併位於 `ingestion/schedule_csv.py`，使用共用正式資料模型、關聯驗證與 storage。匯入入口接收 CSV 事件列。
 
 ## 5. 儲存庫結構
 
@@ -367,20 +344,15 @@ CSV 同一篇週表可產生多個事件，不能因來源 URL 已存在而略�
 
 現行只接受公開或本機 CSV。每筆有效列依事件 ID 新增／更新，經正規化、Schema、ownership、防碰撞及完整資料關聯驗證後直接寫入；不產生審核提案，也沒有 confidence 採用門檻。
 
-人工修正同樣沿用 CSV 的穩定 ID。原始文字／圖片須由外部 ChatGPT 或人工先整理成欄位；舊提案 JSON、Observation 或 Provider 輸出不能直接套用至資料目錄。
+人工修正同樣沿用 CSV 的穩定 ID。原始文字／圖片須由外部 ChatGPT 或人工先整理成欄位。
 
 每次實際變更保留來源與完整 Revision；寫入前備份，失敗回復整批資料與 receipt。相同內容重跑完全 no-op。Git 提交只由 CSV workflow 的既有有差異提交步驟負責，CLI 不進行 Git 操作或發送 PR。
 
-## 14. 已退役功能與相容界線
+## 14. 資料相容範圍
 
-已退役 OAuth／posts+changes Queue、X／AI API 自動處理、Pi／RSS 補漏，以及手動 Parser、OpenAI Provider、提案採用與 PR 發佈。
-
-- 已移除全部 Collector／GitHub 客戶端、Parser／提案模組、相關 CLI／Schema、systemd 範本與專用測試。
-- 不再提供 Google OAuth、AI API Key、提案信心門檻或手動 GitHub Token 設定；GitHub Actions 仍使用平台內建 Token 完成 CSV 資料提交與 Pages 部署。
-- 舊貼文 dispatch、提案 JSON 與 Queue bundle 沒有執行入口；需要保留的內容須人工確認來源後整理為相同 CSV 格式。
-- 外部 ChatGPT／人工 → Sheet／本機 CSV 的作業路徑繼續使用，外部工具權限仍需自行驗證。
-- 既有成員、行程、來源、Revision、receipt、confidence／origin／狀態欄位與舊備份格式保留；程式退役不清除歷史資料。
-- 前輪實作計畫保留供追溯，現行操作以本文件與維運手冊為準。儲存庫修改不會停用外部服務、撤銷憑證或修改本機 `.env`。
+- CSV 相容格式與轉換規則見第 9 節，舊 CSV 遷移步驟見第 22.2 節。
+- 正式 JSON 欄位與歷史快照的相容規則見第 6、11 節。
+- 不含 receipt 的備份還原方式見第 19 節。
 
 ## 15. GitHub 整合與部署
 
@@ -482,7 +454,7 @@ CSV CLI 成功回傳 JSON：`result`、`rows`、`imported`、`duplicates`、`inv
 | CSV push 失敗 | workflow 失敗，下次從最新 main 重新匯入 |
 | 外部 ChatGPT／Sheet 不可用 | 保留正式網站資料，不推定任何事件狀態；外部端回報缺少工具／權限 |
 
-CSV CLI 沒有內建多次下載重試；由人工重跑或等待下一次排程。舊 Parser、Collector 與提案發布器的重試政策已退役，不套用於現行流程。
+CSV CLI 沒有內建多次下載重試；由人工重跑或等待下一次排程。
 
 ## 19. 備份、復原與健康檢查
 
@@ -499,7 +471,7 @@ python -m scripts.health_check
 
 CSV workflow 備份 artifact 保存 30 天，每日備份 workflow 保存 90 天；本機備份不自動清除。Git 歷史與同帳號 artifact 不是獨立外部備援，離線／跨帳號備份須另行安排。
 
-`health_check` 驗證正式資料關聯及 `manual_review/failed` 來源，只有 `--data-dir` 選項；資料無效或有待人工處理來源時回傳非零碼與 JSON 原因。備份、還原、復原及健康檢查可在缺少手動 Parser／Collector／Queue 的隔離副本執行。尚無自動寄信／第三方告警或完整 discovery 心跳。
+`health_check` 驗證正式資料關聯及 `manual_review/failed` 來源，只有 `--data-dir` 選項；資料無效或有待人工處理來源時回傳非零碼與 JSON 原因。備份、還原、復原及健康檢查可在只含資料核心與維運指令的隔離副本執行。尚無自動寄信／第三方告警或完整 discovery 心跳。
 
 ## 20. 測試與驗證
 
@@ -516,10 +488,10 @@ python -m scripts.build_site
 
 | 範圍 | 必要案例與預期 |
 | --- | --- |
-| CSV 批次與修正 | 同來源多列新增、同 ID 改時間、明確取消／延期／恢復、無效列略過及舊資料保留；六份舊提案輸入 fixture 已移除 |
+| CSV 批次與修正 | 同來源多列新增、同 ID 改時間、明確取消／延期／恢復、無效列略過及舊資料保留 |
 | CSV 結構與正規化 | 必要／未知／重複標題、BOM／引號／換行、大小上限、錯誤單列略過、日期時間及跨年可重現 |
-| v2.2 identity | 同 ID 修改允許欄位、保留建立時間、拒絕換成員、來源更新、receipt 不鎖定、防重複及碰撞 |
-| v2.3 狀態 | 六種狀態、時間配對、取消／延期／恢復、新舊格式相容、明確狀態不變 changed、遷移內容相同完全 no-op |
+| 事件識別與更新 | 同 ID 修改允許欄位、保留建立時間、拒絕換成員、來源更新、receipt 不鎖定、防重複及碰撞 |
+| CSV 事件狀態 | 六種狀態、時間配對、取消／延期／恢復、新舊格式相容、明確狀態不變 changed、遷移內容相同完全 no-op |
 | storage | 無變更不寫檔／備份、完整 Revision、來源關聯、鎖、寫入／receipt 失敗回復、中斷復原 |
 | 前端 | 台灣日期、跨年週界、排序、停用成員、日期／成員／狀態複選、全不選與恢復、空資料及載入失敗、來源連結安全 |
 | 色系 | 系統預設、切換保存及重載、系統變動、儲存遭封鎖 |
@@ -531,7 +503,7 @@ python -m scripts.build_site
 
 ## 21. 階段進度與驗收標準
 
-原 v1 的階段順序已由目前架構調整；下表是實作界線，不是重新要求從零建置。
+下表列出儲存庫已有的功能與仍須在實際環境驗收的項目。
 
 | 階段 | 儲存庫已有 | 驗收仍需確認 |
 | --- | --- | --- |
@@ -598,9 +570,9 @@ python -m http.server 8000 --bind 127.0.0.1 --directory dist
 - 儲存庫提供外部 ChatGPT 提示，不會自動建立 ChatGPT 排程，也不能保證背景任務可搜尋、理解圖片或寫 Sheet。須在實際環境驗證並保留人工替代路徑。
 - 搜尋結果與公開 X 介面可能不完整或失效；無法保證發現所有公告。外部 ChatGPT 搜尋／圖片理解與帳號能力不得在未實測前視為穩定。
 - CSV 沒有原始公告時間、獨立 confidence、直播 URL、operation 或 schedule_version；不進行公告新舊排序。人工修正時須避免將舊公告內容寫回相同事件；`created_at` 僅供建立時間及日期推算，不是版本號。
-- CSV 無 `sudden_stream` 分類欄；正式 schema 與既有歷史保留突發 origin，但 CSV 沒有新增此分類的輸入欄位；舊 Parser／Proposal 已退役。
-- Sheet 列／正式事件 ID 不一致時需人工核對。既有資料曾完成一次性 ID 對齊；receipt 不能可靠反推對應，Importer 不自動重編或以 natural key 重新命名。
-- 主流程沒有 Google write-back、完整 discovery 心跳、stuck ingestion 管理或自動告警。v2 的相關設計不能當成現行已部署能力。
+- CSV 無 `sudden_stream` 分類欄；正式 schema 與既有歷史保留突發 origin，但 CSV 沒有新增此分類的輸入欄位。
+- Sheet 列／正式事件 ID 不一致時需人工核對。receipt 不能可靠反推對應，Importer 不自動重編或以 natural key 重新命名。
+- 主流程沒有 Google write-back、完整 discovery 心跳、stuck ingestion 管理或自動告警。
 - 目前沒有刪除、整張週表取代、行程版本仲裁、跨時區、多來源身分查核或公開審核 UI。
 - 真實服務費用／額度、雲端權限與排程準時性、長期運作、手機實機及外部備援須另行驗證；不能以 mock 或文件存在代替。
 
@@ -613,15 +585,4 @@ python -m http.server 8000 --bind 127.0.0.1 --directory dist
 - 執行與範圍相符的既有驗證並檢查最終 `git diff`；純文件修改不要求完整測試。沒有執行的驗證不得宣稱通過。
 - 交付列明修改檔案、實際命令與結果、重要假設、未驗證與待處理事項。不得輸出或提交機密。
 - 除非使用者明確要求，不自行 commit、push、rebase、force-push 或建立 PR。此限制適用於維護工作，不取代已由部署者配置的自動資料 workflow。
-- 行為變更同步更新本整合規格及必要操作文件；歷版規格由 Git 歷史追溯。新的版本號應由實際契約變更決定，不因純整理另開版本。
-
-## 附錄：第一版章節的延續位置
-
-| v1 範圍 | 本整合版 |
-| --- | --- |
-| 1～5 目標、非目標、原則、架構、結構 | 第 1～5 節；事件驅動主流程改為 CSV 定時匯入，原自動架構已退役，界線見第 14 節 |
-| 6 資料模型、7 AI Processor、8 Merge、9 Revision | 第 6～13 節；補齊 CSV、穩定 ID、狀態分欄與主／舊流程差異 |
-| 10 Collector、11 Reconciliation、12 GitHub、13 安全更新 | 第 12～15 節；CSV 直接匯入政策與舊流程退役界線 |
-| 14 Pages、15 UI、16 Secrets、17 Logging、18 Error、19 Retry | 第 15～19 節；加入現行 UI、設定與備份復原 |
-| 20 測試、21 Milestones、22 Acceptance、23 PoC | 第 20～23 節；以 CSV／storage 測試承接共用行為，提案專屬情境已退役 |
-| 24 實作規則、25 首個任務、26 建議順序、27 目標流程 | 第 4、21、22、24 節；首版從零建置指令轉為現況、部署與維護契約 |
+- 行為變更時同步更新本規格與相關操作文件。

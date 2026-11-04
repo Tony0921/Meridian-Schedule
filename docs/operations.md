@@ -1,6 +1,6 @@
 # CSV 維運、備份與復原操作手冊
 
-現行自動流程為公開 CSV → repository JSON → GitHub Pages，設定見 [匯入手冊](ingestion.md)。OAuth Queue、X／AI API 自動管線及 Pi／RSS 補漏已退役；手動 Parser、OpenAI Provider、提案採用與 PR 發佈也已退役；本文只說明 CSV 與資料維運。
+現行自動流程為公開 CSV → repository JSON → GitHub Pages，設定見 [匯入手冊](ingestion.md)。
 
 ## CSV 與 GitHub 設定
 
@@ -19,7 +19,7 @@ python -m scripts.health_check
 
 兩者都會讀取並驗證正式資料；健康檢查另檢查來源中 `manual_review` 或 `failed` 的筆數。正常回傳 `result=healthy` 及結束碼 0；資料損壞或待人工來源回傳 `result=unhealthy`、原因及非零碼。
 
-可用 `--data-dir` 指定資料目錄。健康檢查不再接受 Collector／Queue／補漏參數，不建立 SQLite，也不呼叫 AI 或提案功能。它不代表已驗證最近一次 ChatGPT 搜尋或外部工具權限。
+可用 `--data-dir` 指定資料目錄。ChatGPT 搜尋與外部工具權限須在排程環境驗證。
 
 ## 備份、還原與中斷復原
 
@@ -42,14 +42,10 @@ CSV workflow 備份 artifact 保存 30 天；Backup schedule data 每日台灣 0
 
 需要補入或修正資料時，使用相同 CSV 欄位，沿用既有事件 ID，再執行匯入／驗證／建置。工作表故障時可使用本機 `--input`；完整隔離範例見 [匯入手冊](ingestion.md)。
 
-程式不再接受原始貼文／圖片或舊提案 JSON。先前待處理的提案可由人工核對官方來源後整理成 CSV；不能直接採用提案或從程式發送 PR。
+人工補入時先核對官方來源，再將貼文或圖片中的行程整理成 CSV。
 
-既有 JSON 的 `confidence`、`origin`、歷史狀態與來源仍保留，確保驗證、瀏覽及舊備份可用。健康檢查對既有 `manual_review/failed` 來源的提示仍保留，代表需人工查核，不代表提案功能仍存在。
+既有 JSON 的 `confidence`、`origin`、歷史狀態與來源仍保留，確保驗證、瀏覽及舊備份可用。健康檢查若回報 `manual_review` 或 `failed` 來源，請人工查核來源紀錄。
 
-## 舊部署退役界線
+## 舊部署清理
 
-儲存庫已移除 OAuth 雙表 Queue、X／AI API 自動 workflows、Pi Collector、RSS 補漏、相關 SQLite 狀態程式、systemd 範本與專用測試；本輪再移除手動 Parser／Provider、提案採用／發佈與剩餘 GitHub 客戶端。`ENABLE_LEGACY_API_PIPELINE`、`X_API_TOKEN`、`X_PUBLIC_FEEDS`、`POST_SOURCE`、`RECONCILE_HOURS` 不再啟用舊流程。`OPENAI_API_KEY`、`OPENAI_MODEL`、提案信心門檻及手動發佈用的 Token 設定也不再由儲存庫程式讀取；CSV workflow 仍使用 GitHub 自動提供的內建 Token。
-
-若曾在其他機器安裝舊服務，須另行停用其 systemd service／timer，避免持續重試已移除的 CLI。遠端 Secrets／Variables 與授權憑證也由管理者依實際使用情況清理；儲存庫更新不會調整遠端服務／憑證配置或本機 `.env`。
-
-來源貼文、Revision、receipt 與舊 CSV 相容性均保留。歷版規格可由 Git 歷史追溯。未確認的外部排程、工具權限、雲端部署、手機實機與外部備援，仍需另行驗收。
+若曾在其他機器部署舊流程，請在該機器停用對應的 systemd service／timer。遠端 Secrets、Variables 與授權憑證由管理者依實際使用情況清理。

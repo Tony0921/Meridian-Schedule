@@ -93,6 +93,28 @@ test("分開呈現未知、待定、休息、取消及延期的時間與狀態",
   ]);
 });
 
+test("保留原開台時間並在卡片及篩選顯示已取消和延期", async () => {
+  const cases = [
+    { status: "cancelled", time: "18:00", label: "已取消" },
+    { status: "postponed", time: "20:00", label: "延期" },
+  ];
+  const date = taipeiDate();
+  const events = cases.map(({ status, time }) => ({ ...schedule.events[0], id: status, date, status, time }));
+  const nodes = await schedulePage(events);
+  const cards = nodes.get("#schedule").children[0].children.slice(1);
+  const options = nodes.get("#status-options").children;
+  assert.equal(cards.length, cases.length);
+  for (const [index, { status, time, label }] of cases.entries()) {
+    const card = cards[index];
+    assert.equal(card.className, `event-card status-${status}`);
+    assert.equal(card.children[0].textContent, time);
+    assert.equal(card.children[1].children[2].children[0].textContent, label);
+    const option = options.find(({ children: [input] }) => input.value === status);
+    assert.ok(option);
+    assert.equal(option.children[1].textContent, label);
+  }
+});
+
 test("取消勾選即時隱藏行程，全不勾選顯示提示，重新勾選可恢復", async () => {
   const events = ["scheduled", "unknown"].map((status) => ({
     ...schedule.events[0], id: status, date: taipeiDate(), status,

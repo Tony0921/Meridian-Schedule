@@ -1,6 +1,6 @@
 # 專案檔案結構
 
-整理日期：2026-11-03。主樹列出版本控制中的檔案及目前的文件草稿，每份檔案後方以 `#` 簡述用途；本機設定、Git 內部資料、暫存及建置產物另列於下方。
+整理日期為 2026-11-04。主樹列出專案檔案，每份檔案後方以 `#` 簡述用途。本機設定、Git 內部資料、暫存及建置產物另列於下方。
 
 現行只保留：外部 ChatGPT／人工 → Google Sheet 或本機 CSV → 匯入與驗證 → 正式 JSON／來源／Revision → GitHub Pages，以及資料健康檢查、備份、還原與交易復原。Parser／Provider、提案採用／PR、OAuth Queue、API 自動管線及 Pi／RSS 都已退役；舊規格可由 Git 歷史追溯，退役計畫保留供查閱。
 
@@ -31,10 +31,12 @@ Meridian-Schedule/
 │   │   └── plans/                               # 已確認工作的實作步驟與驗證範圍
 │   │       ├── 2026-10-30-csv-only-retirement.md # 本輪 Parser／Provider／提案／PR 退役計畫
 │   │       └── 2026-10-30-retire-legacy-pipelines.md # 第一階段自動流程退役紀錄，手動功能後續也已退役
-│   ├── chatgpt-task.md                          # 外部 ChatGPT 搜尋與 Sheet 寫入提示
+│   ├── chatgpt-task.md                          # ChatGPT 排程設定與精簡提示
 │   ├── ingestion.md                             # 公開 CSV 設定、匯入及遷移手冊
 │   ├── operations.md                            # CSV 維運、備份、還原與交易復原
-│   └── project-structure.md                     # 本文件：檔案目錄樹與用途
+│   ├── project-structure.md                     # 本文件：檔案目錄樹與用途
+│   ├── schedule-rules-design.md                 # 規則集中管理的原始方案
+│   └── schedule-rules.md                        # ChatGPT 排程的現行業務規則
 ├── examples/                                    # CSV 輸入範例
 │   └── schedule-ingestion.csv                   # 主流程：十欄 CSV 離線範例
 ├── ingestion/                                   # 公開 CSV 行程匯入

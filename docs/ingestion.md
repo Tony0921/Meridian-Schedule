@@ -9,7 +9,7 @@
 3. 將 ID、日期、時間、網址與時間戳欄位設為純文字，避免試算表自行轉換格式。每個行程一列；同篇週表可有多列。
 4. 在「檔案 → 共用 → 發布到網路」選擇該工作表與 CSV，複製產生的公開網址。一般的編輯／共用網址或登入頁不是 CSV endpoint。
 5. 如需自動帶入 `group`，建立隱藏工作表 `members_lookup`：A:D 分別放入 `members.json` 的 `id`、`group`、`group_name`、`enabled`，D 欄使用布林值。E1 填 `enabled_member_id`，E2 填 `=IFNA(FILTER(A2:A,A2:A<>"",D2:D=TRUE),"")`。將主表 B2:B1000 的資料驗證設為來自 `members_lookup!E2:E100` 的下拉選單；成員資料異動時同步更新對照表 A:D。
-6. 主表依序為 `id,member_id,group,date,time,event_status,title,platform,source_url,created_at`。event_status 放在 F，緊接 E 欄 time；原 F:I 使用原生欄位移動為 G:J，保留內容、格式與驗證。C 欄由公式自動計算，不提供手動下拉；公式為 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`，既有 Sheet 請保留 C2 公式及其展開範圍，新建 Sheet 才需先清空展開範圍再設定公式。ChatGPT 只新增行程，分別寫入 A:B 與 D:J。人工修正時只更新 D:I 的異動欄位，保留 A:B 與 J 欄 created_at。
+6. 主表依序為 `id,member_id,group,date,time,event_status,title,platform,source_url,created_at`。event_status 放在 F，緊接 E 欄 time；原 F:I 使用原生欄位移動為 G:J，保留內容、格式與驗證。C 欄由公式自動計算，不提供手動下拉；公式為 `=ARRAYFORMULA(IF(TRIM(B2:B)="","",IFNA(VLOOKUP(TRIM(B2:B),members_lookup!A2:B,2,FALSE),"")))`，既有 Sheet 請保留 C2 公式及其展開範圍，新建 Sheet 才需先清空展開範圍再設定公式。ChatGPT 的新增、修正與回讀驗證見 [排程規則](schedule-rules.md)。人工修正時只更新 D:I 的異動欄位，保留 A:B 與 J 欄 created_at。
 7. 將整個 C 欄設為「保護工作表和範圍」，選擇「限制可編輯這個範圍的使用者」並只保留維護帳號，避免其他編輯者覆寫公式或結果；不要只設定編輯警告。保護範圍不會阻止公式依 B 欄更新，但 Google Sheets 的擁有者仍可修改受保護範圍。
 8. F2:F1000 設為六種事件狀態的嚴格下拉：`scheduled,tbd,day_off,unknown,cancelled,postponed`。E 欄使用純文字時間或空白，不再填入狀態 token。
 
@@ -40,11 +40,11 @@ miri_aetris_20261028_01,miri_aetris,aetris,2026-10-28,20:00,scheduled,雜談直�
 
 行程卡片中的成員名稱會依 `x_username` 連到對應的 X 個人頁，並於新分頁開啟；未設定帳號時維持純文字。
 
-`platform` 代表該場直播的平台，優先依該場官方行程文字、圖片或直播連結確認。ChatGPT 擷取範本的未標平台預設值見 [現行規格第 7 節](../SPEC.md#7-外部發現與-sheet-寫入)。休息或已確認不開台填 `none`；無明確平台且不適用預設值時填 `unknown`。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision；網站以紅色 YouTube、紫色 Twitch、灰色「平台未確認」徽章顯示平台，`none` 或休息日不顯示平台徽章。YouTube／Twitch 徽章分別連到該成員 `youtube`／`twitch` 欄位的頻道並於新分頁開啟；缺少有效網址或平台未確認時維持純文字徽章。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
+`platform` 代表該場直播的平台，ChatGPT 的判定方式見 [排程規則](schedule-rules.md#5-平台)。CSV 不再接受 `other`。`none` 與 `unknown` 會以不同值保存於正式行程與 Revision；網站以紅色 YouTube、紫色 Twitch、灰色「平台未確認」徽章顯示平台，`none` 或休息日不顯示平台徽章。YouTube／Twitch 徽章分別連到該成員 `youtube`／`twitch` 欄位的頻道並於新分頁開啟；缺少有效網址或平台未確認時維持純文字徽章。舊七欄 CSV 仍可匯入；更新既有行程時，缺欄或空白會保留原本平台。
 
 既有線上工作表新增 `event_status`、`platform` 或 `group` 欄之前，須先部署支援該欄的匯入程式；舊程式會將額外標題視為結構錯誤而中止整批。
 
-新 CSV 的 `scheduled` 必須填時間，`tbd`、`day_off`、`unknown` 必須留空，`cancelled`、`postponed` 可填已知時間或留空。空白時間匯入後為 JSON `null`，CSV 請留空。日期與時間均以台灣時間解讀。上述是匯入器驗證的配對規則，完整契約見 [SPEC.md 第 8 節](../SPEC.md#8-csv-欄位與狀態契約)。ChatGPT 依週表內容區分 `tbd` 與 `unknown` 的判定順序見 [SPEC.md 第 7 節](../SPEC.md#7-外部發現與-sheet-寫入)。
+新 CSV 的 `scheduled` 必須填時間，`tbd`、`day_off`、`unknown` 必須留空，`cancelled`、`postponed` 可填已知時間或留空。空白時間匯入後為 JSON `null`，CSV 請留空。日期與時間均以台灣時間解讀。上述是匯入器驗證的配對規則，完整契約見 [SPEC.md 第 8 節](../SPEC.md#8-csv-欄位與狀態契約)。ChatGPT 的判定順序見 [排程規則](schedule-rules.md#4-時間與事件狀態)。
 
 CSV `event_status` 對應既有正式 Event `status`，不新增重複的 JSON 欄位。時間為 null 時，網站依序顯示「時間待定」、「全天」、「未知」、「已取消」或「延期」，並保留各自狀態徽章。`unknown` 不代表休息，也與 `platform=unknown` 的平台未確認不同。新格式不接受 `changed`、`live`、`finished`，不得自行依時間推定直播狀態；正式 schema 仍保留舊值供歷史與相容流程使用。
 

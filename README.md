@@ -6,6 +6,8 @@
 
 目前主流程：ChatGPT 將行程寫入 Google Sheet `schedule_ingestion`，GitHub Actions 每小時透過 Publish to Web 公開 CSV 讀取、驗證、去重及合併，有實際資料差異才提交並更新 Pages。GitHub 端不使用 Google Sheets API、Service Account、OAuth、X API 或 OpenAI API，也不回寫 Sheet；未新增正式環境相依套件。
 
+ChatGPT 排程每次先讀取 GitHub `main` 的 [排程規則](docs/schedule-rules.md)，再依 [任務提示](docs/chatgpt-task.md) 同步週表。規則由 Git 維護，Google Sheet 保存待匯入的行程資料。
+
 v2.3 設定與離線範例見 [公開 CSV 匯入操作手冊](docs/ingestion.md)。Actions 只需 Repository Variable `SCHEDULE_CSV_URL` 與內建 `GITHUB_TOKEN`；CSV 匯入直接採用有效資料，不使用提案／審核流程。OAuth 雙表 Queue、X／AI API 自動管線及 Pi／RSS 補漏已退役，相關 workflows、CLI 與 systemd 範本已移除。手動 Parser、OpenAI Provider、提案採用與 PR 發佈也已退役，現在只維護 CSV 主流程、資料驗證、來源／歷史、備份復原與靜態網站。
 
 正式 `data/` 已採用 [璃 Miri 的 2026/10/12–10/18 週表](https://x.com/Miri_Aetris/status/2109291418233827667)，由人工依貼文圖片整理，包含 6 場直播與 2 個休息日，保留來源貼文與 8 筆 Revision。這份資料未經 AI API 解析；週三、週六的「目前璃線中！」以休息呈現，未標示的平台與個別直播網址保留 `null`，行程異動仍以官方最新公告為準。
@@ -37,7 +39,8 @@ CSV 匯入直接更新指定資料目錄，使用檔案鎖、備份與交易復�
 | `ingestion/schedule_csv.py`、`scripts/import_schedule.py` | v2.3 公開 CSV 下載、時間／狀態正規化與依 ID 更新 |
 | `schemas/schedule_ingestion.schema.json`、`imported_ids.schema.json` | 正規化 CSV 列與儲存庫匯入 ID 格式 |
 | `examples/schedule-ingestion.csv` | 單一工作表的十欄離線範例，含明確 event_status |
-| `docs/ingestion.md`、`docs/chatgpt-task.md` | v2.3 公開 CSV 設定、先部署後遷移步驟與 ChatGPT 寫入提示 |
+| `docs/schedule-rules.md`、`docs/chatgpt-task.md` | 週表判定規則與 ChatGPT 排程提示 |
+| `docs/ingestion.md` | v2.3 公開 CSV 設定與先部署後遷移步驟 |
 | `schemas/*.schema.json` | 成員、行程、貼文、歷史與 CSV 匯入的 JSON Schema |
 | `processor/models.py` | Member／Event dataclass |
 | `processor/schemas.py`、`validate.py` | Schema 驗證與跨檔資料關聯檢查 |
@@ -88,7 +91,7 @@ python -m scripts.build_site
 
 - MVP 僅支援 `Asia/Taipei`；`date` 為 `YYYY-MM-DD`，`time` 為 `HH:MM` 或 `null`。
 - 正式 JSON 的 `status` 為 `scheduled`、`changed`、`live` 或 `finished` 時，必須有時間。新 CSV 的 `event_status` 只接受 `scheduled`、`tbd`、`day_off`、`unknown`、`cancelled`、`postponed`，時間配對見 [SPEC.md 第 8 節](SPEC.md#8-csv-欄位與狀態契約)。
-- ChatGPT 擷取時，無開台時間但明確突發或該場有平台標示時填 `tbd`。排除明確休息後，其餘無法判定的情況填 `unknown`。兩者的 `time` 都留空，判定順序見 [SPEC.md 第 7 節](SPEC.md#7-外部發現與-sheet-寫入)。舊 CSV 沒有 `event_status` 標題時，可在 `time` 填 `unknown`／「未知」。舊 CSV 的 `working_day` 請改為 `unknown`。
+- ChatGPT 擷取時的時間、平台與狀態判定見 [排程規則](docs/schedule-rules.md)。舊 CSV 沒有 `event_status` 標題時，可在 `time` 填 `unknown`／「未知」。舊 CSV 的 `working_day` 請改為 `unknown`。
 - `updated_at`、貼文與歷史時間必須含時區；空行程可用 `updated_at: null`。
 - `youtube`、`twitch` 成員欄位為完整頻道 URL 或 `null`；`x_username` 為帳號名稱或 `null`。
 - 成員必須提供 `group`（團體識別碼）與 `group_name`（團體顯示名稱）。目前使用 `neon`／`霓 NEO(n)`、`ianvs`／`扉暮 IANVS`、`teraz`／`序境 TeRaź`、`aetris`／`沉珀 Aetris`；沒有團體時 `group` 填 `none`，`group_name` 直接填成員的 `name`；合作藝人填 `collaborators`／`合作藝人`。
@@ -131,7 +134,7 @@ Python 測試涵蓋 v2.3 明確事件狀態、時間配對驗證、取消／延�
 ## 尚待上線驗證
 
 1. 建立 `schedule_ingestion`，發布為公開 CSV；只存放公開行程資訊。
-2. 用 `docs/chatgpt-task.md` 提示執行一次，確認可搜尋官方來源、理解圖片、使用穩定 ID 並寫入 Sheet，再安排每小時執行。
+2. 依 [ChatGPT 排程任務設定](docs/chatgpt-task.md) 驗證規則讀取、週表擷取及 Sheet 寫入，再安排每小時執行。
 3. 設定 Repository Variable `SCHEDULE_CSV_URL`、確認內建 Token 的資料寫入權限並啟用 Pages，手動執行 `Process ingestion` 驗證 CSV → JSON → Pages。
 4. 使用相同 CSV 再跑一次，確認沒有額外 commit；測試錯誤單列及 CSV 無法下載時保留原資料。
 

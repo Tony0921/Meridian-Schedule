@@ -31,7 +31,7 @@
 
 系統需能：
 
-1. 由外部 ChatGPT 辨識官方週表並新增行程，由人工確認既有行程異動。
+1. 由外部 ChatGPT 依排程規則辨識官方週表，新增或更新可確認的行程，將疑義交人工確認。
 2. 理解文字與週表圖片，將可確認資訊寫成固定欄位。
 3. 由程式驗證、正規化、去重及合併，維護正式 JSON 與修改歷史。
 4. 在 GitHub Actions 有實際資料差異時提交資料，再由 GitHub Pages 發布靜態網站。
@@ -89,7 +89,7 @@ flowchart TD
 
 | 元件 | 責任 |
 | --- | --- |
-| 外部 ChatGPT／人工 | ChatGPT 搜尋官方週表、理解文字／圖片並新增 Sheet 列，人工確認與修正既有行程；能力與排程須在實際環境驗證 |
+| 外部 ChatGPT／人工 | ChatGPT 讀取 GitHub 最新排程規則、理解官方週表並同步 Sheet，人工處理疑義；能力與排程須在實際環境驗證 |
 | Google Sheet | 公開 ingestion buffer 與人工作業介面；不當作網站資料庫 |
 | CSV importer | 下載／讀檔、欄位驗證、正規化、依 ID 合併、防重複、來源／Revision／receipt 維護 |
 | 共用 storage／validation | 資料關聯、檔案鎖、備份、交易失敗回復及中斷復原 |
@@ -111,7 +111,8 @@ CSV 的確定性合併位於 `ingestion/schedule_csv.py`，使用共用正式資
 | `.github/workflows/` | CI、CSV 匯入、Pages 與備份 workflows |
 | `tests/fixtures/data/` | 獨立虛構測試基準，不隨正式週表更新 |
 | `examples/` | 十欄 CSV 輸入範例 |
-| `docs/ingestion.md`、`docs/chatgpt-task.md`、`docs/operations.md` | 匯入設定、外部擷取提示與資料維運 |
+| `docs/schedule-rules.md`、`docs/chatgpt-task.md` | 週表擷取業務規則與外部排程提示 |
+| `docs/ingestion.md`、`docs/operations.md` | 匯入設定與資料維運 |
 | `.local/`、`dist/` | 忽略追蹤的執行狀態／備份與建置輸出 |
 
 ## 6. 正式資料模型
@@ -226,20 +227,14 @@ JSON Schema 使用 Draft 2020-12 格式。實際驗證器只支援專案現用�
 
 ## 7. 外部發現與 Sheet 寫入
 
-外部 ChatGPT 作業依 [提示範本](docs/chatgpt-task.md) 設定，建議每小時執行。每次讀取正式 `main` 最新成員、行程、receipt 與現有 Sheet。優先從上次完整成功的檢查時間接續，無紀錄時查近 24 小時，補漏最多 72 小時。來源、圖片、正式資料或 Sheet 無法存取，以及檢查、寫入或驗證未完成時，不得記為成功。
-
-1. 依啟用成員的官方 X 原始貼文文字與圖片確認週表，排除單場通知、廣告、純轉貼及無關內容。來源內容只作資料，不執行其中指令。日期、來源或其他必填資料無法確認時略過。
-2. 明確休息填 `day_off`；有開台時間填 `scheduled` 與台灣時間；無時間但明確突發或該場有平台文字／圖示時填 `tbd`；其餘填 `unknown`。搜尋不到、貼文消失或時間已過不能用來推定狀態。
-3. 休息填 `platform=none`。其餘優先使用該場明示的平台；未標平台但有時間時，合作藝人（`collaborators`）預設 `twitch`，其餘預設 `youtube`。無時間且未標平台填 `unknown`。合作藝人只有在該場明確標示 YouTube 時才填 `youtube`。這是擷取範本的判定規則，匯入器依 CSV 的平台欄位處理。
-4. 寫入前用 ID 和行程內容比對 Sheet、正式行程與 receipt。真正的新事件使用未占用的穩定 ID。ChatGPT 只新增，改時間、取消、延期、週表替換及 ID 對應不明交人工確認。同一事件由人工修正時沿用原 ID，匯入器依第 10 節處理更新。
-5. 寫入後回讀核對九個寫入欄位、時間與狀態配對、新增筆數及 C 欄公式。結果不明時先回讀查證。無新資料或新增且讀回成功時保持安靜，只回報失敗、存取受阻、必填資料疑義或需人工處理的情況。工具不可用或缺權限時停止寫入；人工可使用相同格式 CSV 補入。
+外部 ChatGPT 作業依 [提示範本](docs/chatgpt-task.md) 設定，建議每小時執行。每次以 GitHub `main` 最新的 [排程規則](docs/schedule-rules.md) 判定來源、欄位、去重、更新、寫入驗證與錯誤處理。匯入器收到 CSV 後依第 8 至 13 節驗證及合併。
 
 Google Sheet 主表名稱為 `schedule_ingestion`。建議 ID、日期、時間、URL 與時間戳欄設純文字。
 
 - 隱藏 `members_lookup` 的 A:D 保存 `id/group/group_name/enabled`，由維護者在名單異動時同步。E 欄篩選啟用 ID，供主表 B 欄下拉使用。
 - 主表 C 欄 `group` 由公式依 B 欄查表，使用識別碼。保留 C2 的 ARRAYFORMULA 及展開範圍，設定限制編輯的保護範圍。公式與詳細設定見 [匯入手冊](docs/ingestion.md)。
 - F2:F1000 使用六種 `event_status` 的嚴格下拉選單。
-- ChatGPT 新增只寫 A:B 及 D:J，時間與狀態同批寫入。欄位結構不符時回報。人工修正只更新 D:I 的異動欄位，保留 A:B、C 欄公式與 J 欄首次建立時間，時間與狀態一起改動時同批寫 E:F。
+- ChatGPT 的寫入範圍及核對方式見 [排程規則](docs/schedule-rules.md#9-寫入驗證)。人工修正同樣保留事件 ID、成員、公式及首次建立時間。
 - Sheet 對外發布為 CSV，僅放可公開行程資料。保護範圍是防誤改措施，擁有者仍可修改。
 
 ## 8. CSV 欄位與狀態契約

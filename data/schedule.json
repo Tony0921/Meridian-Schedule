@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03T23:20:48+00:00",
+  "updated_at": "2026-11-04T10:10:57+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -1897,23 +1897,6 @@
       "updated_at": "2026-11-01T16:04:14+00:00"
     },
     {
-      "id": "ichii_aetris_20261103_01",
-      "timezone": "Asia/Taipei",
-      "url": null,
-      "origin": "weekly_schedule",
-      "confidence": 0.7,
-      "created_at": "2026-11-02T17:53:33+08:00",
-      "member_id": "ichii_aetris",
-      "date": "2026-11-03",
-      "time": "21:00",
-      "title": "【偶像劇歌回】台偶主題曲大串燒！",
-      "platform": "youtube",
-      "status": "scheduled",
-      "source_post_id": "csv-3ec9697ac66073a5398130e17b1186493a3ca155bbe1c8ee17f56e83e010f9af",
-      "source_url": "https://x.com/Ichii_Aetris/status/2117062564400210432",
-      "updated_at": "2026-11-02T15:05:51+00:00"
-    },
-    {
       "id": "miri_aetris_20261103_01",
       "timezone": "Asia/Taipei",
       "url": null,
@@ -3187,6 +3170,23 @@
       "source_post_id": "csv-50f76958ff0ab4a47a1ae0c7fa14d3778da57b20985447b589ce1b8bd808f501",
       "source_url": "https://x.com/998rrr_/status/2116898572788716006",
       "updated_at": "2026-11-02T00:42:53+00:00"
+    },
+    {
+      "id": "ichii_aetris_20261103_01",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-02T17:53:33+08:00",
+      "member_id": "ichii_aetris",
+      "date": "2026-11-10",
+      "time": "21:00",
+      "title": "【偶像劇歌回】台偶主題曲大串燒！",
+      "platform": "youtube",
+      "status": "postponed",
+      "source_post_id": "csv-25ef16010c45bc940161ca243237f161b285929cb826c2d138c13ec94040b189",
+      "source_url": "https://x.com/Ichii_Aetris/status/2117546029658853511",
+      "updated_at": "2026-11-04T10:10:57+00:00"
     },
     {
       "id": "998rrr__20261110_01",

@@ -355,5 +355,16 @@
     "type": "day_off",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-25ef16010c45bc940161ca243237f161b285929cb826c2d138c13ec94040b189",
+    "member_id": "ichii_aetris",
+    "source_url": "https://x.com/Ichii_Aetris/status/2117546029658853511",
+    "published_at": "2026-11-02T17:53:33+08:00",
+    "processed_at": "2026-11-04T10:10:57+00:00",
+    "type": "postponement",
+    "status": "processed",
+    "media": []
   }
 ]

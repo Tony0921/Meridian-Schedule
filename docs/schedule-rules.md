@@ -1,6 +1,6 @@
 # Meridian Schedule 排程規則
 
-本文件是 ChatGPT Scheduled Task 擷取、判定及寫入週表的唯一業務規則。執行時以 `Tony0921/Meridian-Schedule` 的 `main` 最新版為準。規則以 Git 歷史追蹤。CSV 匯入器的資料契約與合併行為見 [系統規格](../SPEC.md#8-csv-欄位與狀態契約)。
+本文件是 ChatGPT Scheduled Task 擷取、判定及寫入週表的唯一業務規則。執行時以 `tonyu2129/Meridian-Schedule` 的 `main` 最新版為準。規則以 Git 歷史追蹤。CSV 匯入器的資料契約與合併行為見 [系統規格](../SPEC.md#8-csv-欄位與狀態契約)。
 
 ## 1. 欄位與格式
 

@@ -15,7 +15,7 @@
 ```text
 執行 Meridian Schedule VTuber 週表同步。
 
-GitHub 儲存庫：Tony0921/Meridian-Schedule
+GitHub 儲存庫：tonyu2129/Meridian-Schedule
 分支：main
 規則文件：docs/schedule-rules.md
 Google Sheet：<試算表編輯連結>

@@ -127,7 +127,7 @@ Task Prompt 應維持精簡，主要負責：
 執行 Meridian Schedule VTuber 週表同步。
 
 GitHub Repository：
-Tony0921/Meridian-Schedule
+tonyu2129/Meridian-Schedule
 
 規則文件：
 docs/schedule-rules.md

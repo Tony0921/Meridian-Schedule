@@ -4,6 +4,7 @@ const STATUS_LABELS = Object.freeze({
   scheduled: "正常", changed: "已異動", cancelled: "已取消", postponed: "延期",
   live: "直播中", finished: "已結束", day_off: "休息", unknown: "未知", tbd: "待定",
 });
+const FILTER_STATUSES = Object.freeze(["scheduled", "tbd", "day_off", "unknown", "cancelled", "postponed"]);
 
 function taipeiDate(now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -24,11 +25,11 @@ function weekDates(selectedDate) {
   });
 }
 
-function selectEvents(schedule, members, selectedDate, view, memberId = "", statuses = null) {
+function selectEvents(schedule, members, selectedDate, view, memberIds = null, statuses = null) {
   const dates = new Set(view === "week" ? weekDates(selectedDate) : [selectedDate]);
   const enabled = new Set(members.filter((member) => member.enabled).map((member) => member.id));
   return schedule.events.filter((event) => dates.has(event.date) && enabled.has(event.member_id)
-    && (!memberId || event.member_id === memberId) && (!statuses || statuses.has(event.status)))
+    && (!memberIds || memberIds.has(event.member_id)) && (!statuses || statuses.has(event.status)))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99:99").localeCompare(b.time || "99:99")
       || a.id.localeCompare(b.id));
 }
@@ -52,13 +53,16 @@ function sourceUrl(event, member, sources = {}) {
 
 async function startApp() {
   const dateInput = document.querySelector("#selected-date");
-  const memberSelect = document.querySelector("#member");
+  const allMembers = document.querySelector("#all-members");
+  const groupOptions = document.querySelector("#group-options");
+  const memberOptions = document.querySelector("#member-options");
   const statusFilters = document.querySelector("#status-filters");
   const statusOptions = document.querySelector("#status-options");
   const container = document.querySelector("#schedule");
   const message = document.querySelector("#message");
   const todayButton = document.querySelector("#today-view");
   const weekButton = document.querySelector("#week-view");
+  const dateButton = document.querySelector("#date-view");
   let view = "today";
   dateInput.value = taipeiDate();
 
@@ -80,6 +84,17 @@ async function startApp() {
     return true;
   }
 
+  function checkbox(parent, name, value, label) {
+    const option = element("label", undefined, "filter-option");
+    const input = element("input");
+    input.type = "checkbox";
+    input.name = name;
+    input.value = value;
+    option.append(input, element("span", label));
+    parent.append(option);
+    return input;
+  }
+
   try {
     const [members, schedule] = await Promise.all(["members", "schedule"].map(async (name) => {
       const response = await fetch(`./data/${name}.json`, { cache: "no-store" });
@@ -87,38 +102,83 @@ async function startApp() {
       return response.json();
     }));
     const memberMap = new Map(members.map((member) => [member.id, member]));
-    for (const member of members.filter((item) => item.enabled)) {
-      const option = element("option", member.name);
-      option.value = member.id;
-      memberSelect.append(option);
+    const enabledMembers = members.filter((member) => member.enabled);
+    const enabledIds = new Set(enabledMembers.map((member) => member.id));
+    let selectedMemberIds = new Set(enabledIds);
+    try {
+      const saved = JSON.parse(localStorage.getItem("meridian-members"));
+      if (Array.isArray(saved) && saved.every((id) => typeof id === "string")) {
+        selectedMemberIds = new Set(saved.filter((id) => enabledIds.has(id)));
+      }
+    } catch {
+      // 無法讀取或解析偏好時，仍以首次全選狀態提供篩選。
     }
-    const statusInputs = Object.entries(STATUS_LABELS).map(([status, label]) => {
-      const option = element("label", undefined, "status-option");
-      const input = element("input");
-      input.type = "checkbox";
-      input.name = "event-status";
-      input.value = status;
+
+    const groups = new Map();
+    for (const member of enabledMembers) {
+      if (member.group === "none") continue;
+      if (!groups.has(member.group)) groups.set(member.group, { name: member.group_name, memberIds: [] });
+      groups.get(member.group).memberIds.push(member.id);
+    }
+    const groupInputs = Array.from(groups, ([id, group]) => {
+      const input = checkbox(groupOptions, "member-group", id, group.name);
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          selectedMemberIds = new Set(groupInputs.filter((item) => item.checked)
+            .flatMap((item) => groups.get(item.value).memberIds));
+        } else {
+          group.memberIds.forEach((memberId) => selectedMemberIds.delete(memberId));
+        }
+        changeMembers();
+      });
+      return input;
+    });
+    const memberInputs = enabledMembers.map((member) => {
+      const input = checkbox(memberOptions, "member", member.id, member.name);
+      input.addEventListener("change", () => {
+        if (input.checked) selectedMemberIds.add(member.id);
+        else selectedMemberIds.delete(member.id);
+        changeMembers();
+      });
+      return input;
+    });
+    const statusInputs = FILTER_STATUSES.map((status) => {
+      const input = checkbox(statusOptions, "event-status", status, STATUS_LABELS[status]);
       input.checked = true;
-      option.append(input, element("span", label));
-      statusOptions.append(option);
       return input;
     });
     document.querySelector("#updated-at").textContent = schedule.updated_at
       ? `最後更新 ${new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", dateStyle: "short", timeStyle: "short" }).format(new Date(schedule.updated_at))}`
       : "尚無更新資料";
 
+    function changeMembers() {
+      render();
+      try {
+        localStorage.setItem("meridian-members", JSON.stringify([...selectedMemberIds]));
+      } catch {
+        // 無法持久儲存時，保留本次瀏覽的勾選。
+      }
+    }
+
     function render() {
+      memberInputs.forEach((input) => { input.checked = selectedMemberIds.has(input.value); });
+      groupInputs.forEach((input) => {
+        input.checked = groups.get(input.value).memberIds.every((id) => selectedMemberIds.has(id));
+      });
+      allMembers.checked = enabledIds.size > 0 && selectedMemberIds.size === enabledIds.size;
       if (!dateInput.value || !dateInput.validity.valid) return;
       const selectedDate = dateInput.value;
       const dates = view === "week" ? weekDates(selectedDate) : [selectedDate];
       const statuses = new Set(statusInputs.filter((input) => input.checked).map((input) => input.value));
-      const events = selectEvents(schedule, members, selectedDate, view, memberSelect.value, statuses);
+      const events = selectEvents(schedule, members, selectedDate, view, selectedMemberIds, statuses);
       todayButton.setAttribute("aria-pressed", String(view === "today"));
       weekButton.setAttribute("aria-pressed", String(view === "week"));
+      dateButton.setAttribute("aria-pressed", String(view === "date"));
       document.querySelector("#range-title").textContent = view === "week"
         ? `${dates[0]} — ${dates[6]}` : `${selectedDate} 行程`;
       container.replaceChildren();
-      message.textContent = !statuses.size ? "請至少勾選一種事件狀態。"
+      message.textContent = !selectedMemberIds.size ? "請至少勾選一位 VTuber。"
+        : !statuses.size ? "請至少勾選一種事件狀態。"
         : events.length ? `共 ${events.length} 筆行程` : "目前篩選條件下沒有行程，請調整日期、成員或事件狀態。";
       for (const date of dates) {
         const group = element("section", undefined, "day-group");
@@ -169,12 +229,20 @@ async function startApp() {
       }
     }
 
-    dateInput.addEventListener("change", render);
-    memberSelect.addEventListener("change", render);
+    dateInput.addEventListener("change", () => {
+      if (!dateInput.value || !dateInput.validity.valid) return;
+      view = "date";
+      render();
+    });
+    allMembers.addEventListener("change", () => {
+      selectedMemberIds = allMembers.checked ? new Set(enabledIds) : new Set();
+      changeMembers();
+    });
     statusFilters.addEventListener("change", render);
-    todayButton.addEventListener("click", () => { view = "today"; render(); });
+    todayButton.addEventListener("click", () => { view = "today"; dateInput.value = taipeiDate(); render(); });
     weekButton.addEventListener("click", () => { view = "week"; render(); });
-    render();
+    dateButton.addEventListener("click", () => { view = "date"; render(); });
+    changeMembers();
   } catch {
     container.replaceChildren();
     message.textContent = "行程載入失敗，請稍後重新整理。若在本機預覽，請先建置網站並使用 HTTP 伺服器開啟。";

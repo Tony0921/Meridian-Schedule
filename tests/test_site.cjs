@@ -19,24 +19,31 @@ test("今日依時間排序並保留取消狀態", () => {
   assert.equal(events[0].status, "cancelled");
 });
 test("本週與單一成員篩選，待定時間排最後", () => {
-  const events = selectEvents(schedule, members, "2026-10-16", "week", "demo-miri");
+  const events = selectEvents(schedule, members, "2026-10-16", "week", new Set(["demo-miri"]));
   assert.equal(events.length, 3);
   assert.equal(events.at(-1).time, null);
 });
 test("事件狀態可複選，並維持日期、成員與排序條件", () => {
   const statuses = new Set(["scheduled", "day_off"]);
-  const events = selectEvents(schedule, members, "2026-10-16", "week", "", statuses);
+  const events = selectEvents(schedule, members, "2026-10-16", "week", null, statuses);
   assert.deepEqual(events.map((event) => event.id), [
     "demo-miri-20261016-2000-001", "demo-miri-20261017-2200-001", "demo-snow-20261017-off-001",
   ]);
-  assert.equal(selectEvents(schedule, members, "2026-10-16", "today", "", statuses).length, 1);
-  assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", "demo-snow", statuses)
+  assert.equal(selectEvents(schedule, members, "2026-10-16", "today", null, statuses).length, 1);
+  assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", new Set(["demo-snow"]), statuses)
     .map((event) => event.id), ["demo-snow-20261017-off-001"]);
 });
 test("未勾選任何事件狀態或狀態無符合行程時回傳空清單", () => {
   for (const statuses of [new Set(), new Set(["live"])]) {
-    assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", "", statuses), []);
+    assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", null, statuses), []);
   }
+});
+
+test("成員集合支援複選，空集合不等同所有成員", () => {
+  const selected = new Set(["demo-miri", "demo-snow", "missing"]);
+  assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "today", selected)
+    .map((event) => event.member_id), ["demo-snow", "demo-miri"]);
+  assert.deepEqual(selectEvents(schedule, members, "2026-10-16", "week", new Set()), []);
 });
 test("停用成員與無資料日期", () => {
   assert.equal(selectEvents(schedule, members.map((member) => ({ ...member, enabled: false })), "2026-10-16", "week").length, 0);
@@ -57,27 +64,209 @@ test("CSV 來源使用原始公開網址，舊資料只為數字 X ID 建立連�
   assert.equal(sourceUrl({ source_post_id: "demo-post" }, member), null);
 });
 
-async function schedulePage(events) {
+async function schedulePage(events = [], {
+  pageMembers = members, saved = null, blockRead = false, blockWrite = false,
+} = {}) {
   function element() {
+    const attributes = new Map();
     return Object.assign(new EventTarget(), {
-      children: [], textContent: "", validity: { valid: true },
+      children: [], textContent: "", checked: false, disabled: false, validity: { valid: true },
       append(...children) { this.children.push(...children); },
       replaceChildren(...children) { this.children = children; },
-      setAttribute() {},
+      setAttribute(name, value) { attributes.set(name, value); },
+      getAttribute(name) { return attributes.get(name) ?? null; },
     });
   }
-  const nodes = new Map(["#selected-date", "#member", "#schedule", "#message", "#today-view",
-    "#week-view", "#updated-at", "#range-title", "#status-filters", "#status-options"]
+  const nodes = new Map(["#selected-date", "#schedule", "#message", "#today-view", "#date-view",
+    "#week-view", "#updated-at", "#range-title", "#status-filters", "#status-options",
+    "#all-members", "#group-options", "#member-options"]
     .map((selector) => [selector, element()]));
+  const storage = new Map(saved === null ? [] : [["meridian-members", saved]]);
+  nodes.storage = storage;
   const context = vm.createContext({
     URL,
-    fetch: async (url) => ({ ok: true, json: async () => url.includes("members") ? members : { events } }),
+    fetch: async (url) => ({ ok: true, json: async () => url.includes("members") ? pageMembers : { events } }),
+    localStorage: {
+      getItem(key) {
+        if (blockRead) throw new Error("儲存空間無法讀取");
+        return storage.get(key) ?? null;
+      },
+      setItem(key, value) {
+        if (blockWrite) throw new Error("儲存空間無法寫入");
+        storage.set(key, value);
+      },
+    },
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../site/app.js"), "utf8"), context);
   context.document = { querySelector: (selector) => nodes.get(selector), createElement: element };
   await vm.runInContext("startApp()", context);
   return nodes;
 }
+
+const filterMembers = [
+  members[0],
+  { ...members[1], group: "alpha", group_name: "團體 A" },
+  { ...members[1], id: "alpha-two", name: "A2", group: "alpha", group_name: "團體 A" },
+  { ...members[1], id: "beta-one", name: "B1", group: "beta", group_name: "團體 B" },
+  { ...members[1], id: "beta-two", name: "B2", group: "beta", group_name: "團體 B" },
+  { ...members[1], id: "guest", name: "合作成員", group: "collaborators", group_name: "合作藝人" },
+  { ...members[1], id: "disabled-alpha", group: "alpha", group_name: "團體 A", enabled: false },
+  { ...members[1], id: "disabled-only", group: "empty", group_name: "無啟用成員", enabled: false },
+];
+
+function inputs(nodes, selector) {
+  return nodes.get(selector).children.map((label) => label.children[0]);
+}
+
+function selectedMembers(nodes) {
+  return inputs(nodes, "#member-options").filter((input) => input.checked).map((input) => input.value);
+}
+
+function checkOption(nodes, selector, value, checked) {
+  const input = inputs(nodes, selector).find((item) => item.value === value);
+  assert.ok(input, `應提供 ${selector} 的 ${value} 選項`);
+  input.checked = checked;
+  input.dispatchEvent(new Event("change"));
+}
+
+test("第一次開啟全選，團體排除 none、停用與零啟用成員的選項", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers });
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "demo-snow", "alpha-two", "beta-one", "beta-two", "guest"]);
+  const groups = inputs(nodes, "#group-options");
+  assert.deepEqual(groups.map((input) => input.value), ["alpha", "beta", "collaborators"]);
+  assert.ok(groups.every((input) => input.checked));
+  assert.equal(nodes.get("#all-members").checked, true);
+  const empty = await schedulePage([], { pageMembers: filterMembers.map((member) => ({ ...member, enabled: false })) });
+  assert.equal(inputs(empty, "#group-options").length, 0);
+  assert.equal(empty.get("#all-members").checked, false);
+});
+
+test("勾選團體以已選團體聯集取代成員選取，清除其他手動成員", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers, saved: "[]" });
+  checkOption(nodes, "#member-options", "demo-miri", true);
+  checkOption(nodes, "#group-options", "alpha", true);
+  assert.deepEqual(selectedMembers(nodes), ["demo-snow", "alpha-two"]);
+  checkOption(nodes, "#member-options", "demo-miri", true);
+  checkOption(nodes, "#group-options", "beta", true);
+  assert.deepEqual(selectedMembers(nodes), ["demo-snow", "alpha-two", "beta-one", "beta-two"]);
+  assert.deepEqual(inputs(nodes, "#group-options").filter((input) => input.checked).map((input) => input.value), ["alpha", "beta"]);
+});
+
+test("取消團體只移除該團體成員，其他手動選取保留且可繼續自由勾選", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers, saved: '["demo-miri","demo-snow","alpha-two","beta-one"]' });
+  checkOption(nodes, "#group-options", "alpha", false);
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "beta-one"]);
+  assert.ok(inputs(nodes, "#group-options").every((input) => !input.checked));
+  checkOption(nodes, "#member-options", "alpha-two", true);
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "alpha-two", "beta-one"]);
+});
+
+test("成員選滿自動勾選團體及全選，少一人即取消", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers, saved: "[]" });
+  for (const id of ["demo-snow", "alpha-two"]) checkOption(nodes, "#member-options", id, true);
+  const alpha = inputs(nodes, "#group-options").find((input) => input.value === "alpha");
+  assert.equal(alpha.checked, true);
+  assert.equal(nodes.get("#all-members").checked, false);
+  for (const id of ["demo-miri", "beta-one", "beta-two", "guest"]) checkOption(nodes, "#member-options", id, true);
+  assert.equal(nodes.get("#all-members").checked, true);
+  checkOption(nodes, "#member-options", "demo-snow", false);
+  assert.equal(alpha.checked, false);
+  assert.equal(nodes.get("#all-members").checked, false);
+});
+
+test("全選可清空與恢復所有成員及團體，並即時篩選行程而不改事件狀態", async () => {
+  const events = members.map((member) => ({ ...schedule.events[0], id: member.id, member_id: member.id, date: taipeiDate() }));
+  const nodes = await schedulePage(events, { pageMembers: filterMembers });
+  assert.equal(nodes.get("#message").textContent, "共 2 筆行程");
+  checkOption(nodes, "#member-options", "demo-snow", false);
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  const all = nodes.get("#all-members");
+  all.checked = false;
+  all.dispatchEvent(new Event("change"));
+  assert.deepEqual(selectedMembers(nodes), []);
+  assert.ok(inputs(nodes, "#group-options").every((input) => !input.checked));
+  assert.equal(nodes.get("#message").textContent, "請至少勾選一位 VTuber。");
+  assert.equal(nodes.get("#schedule").children[0].children[1].className, "empty-day");
+  assert.ok(inputs(nodes, "#status-options").every((input) => input.checked));
+  all.checked = true;
+  all.dispatchEvent(new Event("change"));
+  assert.equal(selectedMembers(nodes).length, 6);
+  assert.ok(inputs(nodes, "#group-options").every((input) => input.checked));
+  assert.equal(nodes.get("#message").textContent, "共 2 筆行程");
+});
+
+test("偏好重載恢復成員與團體，全部取消也會保存", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers, saved: "[]" });
+  checkOption(nodes, "#group-options", "alpha", true);
+  let restored = await schedulePage([], { pageMembers: filterMembers, saved: nodes.storage.get("meridian-members") });
+  assert.deepEqual(selectedMembers(restored), ["demo-snow", "alpha-two"]);
+  assert.equal(inputs(restored, "#group-options")[0].checked, true);
+  restored.get("#all-members").checked = false;
+  restored.get("#all-members").dispatchEvent(new Event("change"));
+  restored = await schedulePage([], { pageMembers: filterMembers, saved: restored.storage.get("meridian-members") });
+  assert.deepEqual(selectedMembers(restored), []);
+  assert.equal(restored.get("#all-members").checked, false);
+});
+
+test("恢復偏好忽略停用或移除成員，新成員不自動勾選", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers, saved: '["demo-miri","demo-snow","removed","disabled-alpha"]' });
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "demo-snow"]);
+  assert.equal(nodes.get("#all-members").checked, false);
+  assert.equal(inputs(nodes, "#group-options")[0].checked, false);
+});
+
+test("首次未操作篩選也保存當下名單，之後新增成員不自動勾選", async () => {
+  const first = await schedulePage();
+  assert.deepEqual(JSON.parse(first.storage.get("meridian-members") ?? "null"), ["demo-miri", "demo-snow"]);
+  const reloaded = await schedulePage([], { pageMembers: filterMembers, saved: first.storage.get("meridian-members") });
+  assert.deepEqual(selectedMembers(reloaded), ["demo-miri", "demo-snow"]);
+  assert.equal(reloaded.get("#all-members").checked, false);
+});
+
+test("損壞偏好回到全選，儲存讀寫遭封鎖時仍可使用篩選", async () => {
+  for (const saved of ["invalid", "null", "{}", '["demo-miri",1]']) {
+    const nodes = await schedulePage([], { saved });
+    assert.deepEqual(selectedMembers(nodes), ["demo-miri", "demo-snow"]);
+  }
+  const blocked = await schedulePage([], { saved: "[]", blockRead: true, blockWrite: true });
+  assert.equal(blocked.get("#all-members").checked, true);
+  checkOption(blocked, "#member-options", "demo-snow", false);
+  assert.deepEqual(selectedMembers(blocked), ["demo-miri"]);
+  const readOnly = await schedulePage([], { saved: '["demo-miri"]', blockWrite: true });
+  checkOption(readOnly, "#member-options", "demo-snow", true);
+  assert.equal(readOnly.get("#all-members").checked, true);
+});
+
+test("日期變更切至選擇日期並互斥高亮，今日回台灣當日，本週依所選日期", async () => {
+  const events = [{ ...schedule.events[0], date: "2027-01-03" }];
+  const nodes = await schedulePage(events);
+  const pressed = () => ["#today-view", "#week-view", "#date-view"].map((id) => nodes.get(id).getAttribute("aria-pressed"));
+  assert.deepEqual(pressed(), ["true", "false", "false"]);
+  const date = nodes.get("#selected-date");
+  date.value = "2027-01-03";
+  date.dispatchEvent(new Event("change"));
+  assert.deepEqual(pressed(), ["false", "false", "true"]);
+  assert.equal(nodes.get("#range-title").textContent, "2027-01-03 行程");
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  nodes.get("#week-view").dispatchEvent(new Event("click"));
+  assert.deepEqual(pressed(), ["false", "true", "false"]);
+  assert.equal(nodes.get("#range-title").textContent, "2026-12-28 — 2027-01-03");
+  assert.equal(nodes.get("#schedule").children.length, 7);
+  nodes.get("#date-view").dispatchEvent(new Event("click"));
+  assert.deepEqual(pressed(), ["false", "false", "true"]);
+  assert.equal(nodes.get("#schedule").children.length, 1);
+  nodes.get("#today-view").dispatchEvent(new Event("click"));
+  assert.equal(date.value, taipeiDate());
+  assert.deepEqual(pressed(), ["true", "false", "false"]);
+});
+
+test("事件狀態只提供六種匯入狀態，舊狀態不混入選項或符合結果", async () => {
+  const events = ["scheduled", "changed", "live", "finished"].map((status) => ({ ...schedule.events[0], id: status, date: taipeiDate(), status }));
+  const nodes = await schedulePage(events);
+  assert.deepEqual(inputs(nodes, "#status-options").map((input) => input.value), ["scheduled", "tbd", "day_off", "unknown", "cancelled", "postponed"]);
+  assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
+  assert.equal(selectEvents({ events }, members, taipeiDate(), "today").length, 4);
+});
 
 test("分開呈現未知、待定、休息、取消及延期的時間與狀態", async () => {
   const events = [["unknown", null], ["tbd", null], ["day_off", null], ["scheduled", "20:00"],

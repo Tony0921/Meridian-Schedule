@@ -76,11 +76,15 @@ button[aria-pressed="true"] { background: var(--accent); color: var(--accent-tex
 button:hover { filter: brightness(.94); }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .view-switch { display: flex; gap: 6px; }
-.status-filters { flex-basis: 100%; min-width: 0; margin: 0; padding: 0; border: 0; }
-.status-filters legend { padding: 0; margin-bottom: 6px; font-size: .8rem; font-weight: 600; }
-.status-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.toolbar .status-option { flex: 0 0 auto; flex-direction: row; align-items: center; gap: 8px; min-height: 44px; padding: 4px 10px; border: 1px solid var(--control-border); border-radius: 8px; cursor: pointer; }
-.status-option input { flex: none; width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0; accent-color: var(--accent); }
+.status-filters, .member-filters, .filter-section { min-width: 0; margin: 0; padding: 0; border: 0; }
+.status-filters, .member-filters { flex-basis: 100%; }
+.toolbar legend { padding: 0; margin-bottom: 6px; font-size: .8rem; font-weight: 600; }
+.member-sections { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 16px; margin-top: 12px; }
+.filter-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbar .filter-option { flex: 0 0 auto; flex-direction: row; align-items: center; gap: 8px; min-height: 44px; max-width: 100%; padding: 4px 10px; border: 1px solid var(--control-border); border-radius: 8px; cursor: pointer; }
+.member-filters > .filter-option { width: fit-content; }
+.filter-option span { overflow-wrap: anywhere; }
+.filter-option input { flex: none; width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0; accent-color: var(--accent); }
 .section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 28px; }
 h2 { font-size: 1.3rem; margin: 0; }
 #updated-at, #message { font-size: .85rem; color: var(--muted); }
@@ -117,6 +121,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
   .toolbar label { flex: 1 1 130px; min-width: 0; }
   .view-switch { width: 100%; }
   .view-switch button { flex: 1; }
+  .member-sections { grid-template-columns: minmax(0, 1fr); }
   input, select { width: 100%; min-width: 0; }
   .event-card { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 16px; }
   .event-time { font-size: 1.1rem; }

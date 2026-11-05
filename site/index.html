@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light dark">
   <title>VTuber 行程聚合器</title>
   <script src="./theme.js?v=1"></script>
-  <link rel="stylesheet" href="./style.css?v=8">
-  <script src="./app.js?v=8" defer></script>
+  <link rel="stylesheet" href="./style.css?v=9">
+  <script src="./app.js?v=9" defer></script>
 </head>
 <body>
   <main>
@@ -24,18 +24,32 @@
       </div>
       <h1>今天，想看誰？</h1>
       <p>把喜歡的直播，留一個時間。</p>
-      <p class="notice">行程依來源貼文整理 · 最新異動以官方公告為準</p>
+      <p class="notice">本站由非官方維護，行程資訊僅供參考，最新異動請以官方公告為準。</p>
     </header>
     <section class="toolbar" aria-label="行程篩選">
       <div class="view-switch" role="group" aria-label="顯示範圍">
         <button type="button" id="today-view" aria-pressed="true">今日</button>
         <button type="button" id="week-view" aria-pressed="false">本週</button>
+        <button type="button" id="date-view" aria-pressed="false">選擇日期</button>
       </div>
       <label>日期<input type="date" id="selected-date" required></label>
-      <label>VTuber<select id="member"><option value="">所有成員</option></select></label>
+      <fieldset class="member-filters">
+        <legend>VTuber 篩選</legend>
+        <label class="filter-option"><input type="checkbox" id="all-members"><span>全選</span></label>
+        <div class="member-sections">
+          <fieldset class="filter-section">
+            <legend>團體</legend>
+            <div id="group-options" class="filter-options"></div>
+          </fieldset>
+          <fieldset class="filter-section">
+            <legend>VTuber</legend>
+            <div id="member-options" class="filter-options"></div>
+          </fieldset>
+        </div>
+      </fieldset>
       <fieldset id="status-filters" class="status-filters">
         <legend>事件狀態</legend>
-        <div id="status-options" class="status-options"></div>
+        <div id="status-options" class="filter-options"></div>
       </fieldset>
     </section>
     <section aria-labelledby="range-title">
@@ -46,7 +60,7 @@
       <p id="message" role="status" aria-live="polite">正在載入行程…</p>
       <div id="schedule"></div>
     </section>
-    <footer>時間皆為台灣時間（Asia/Taipei） · 行程異動請以官方公告為準</footer>
+    <footer>時間皆為台灣時間（Asia/Taipei） · 本站由非官方維護，行程資訊僅供參考，最新異動請以官方公告為準。</footer>
   </main>
 </body>
 </html>

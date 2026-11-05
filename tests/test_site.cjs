@@ -79,7 +79,7 @@ async function schedulePage(events = [], {
   }
   const nodes = new Map(["#selected-date", "#schedule", "#message", "#today-view", "#date-view",
     "#week-view", "#updated-at", "#range-title", "#status-filters", "#status-options",
-    "#all-members", "#group-options", "#member-options"]
+    "#all-members", "#group-options", "#member-options", "#member-count", "#status-count"]
     .map((selector) => [selector, element()]));
   const storage = new Map(saved === null ? [] : [["meridian-members", saved]]);
   nodes.storage = storage;
@@ -141,15 +141,40 @@ test("第一次開啟全選，團體排除 none、停用與零啟用成員的選
   assert.equal(empty.get("#all-members").checked, false);
 });
 
-test("勾選團體以已選團體聯集取代成員選取，清除其他手動成員", async () => {
+test("勾選團體加選成員，保留無團體與其他團體中手動勾選的成員", async () => {
   const nodes = await schedulePage([], { pageMembers: filterMembers, saved: "[]" });
   checkOption(nodes, "#member-options", "demo-miri", true);
+  checkOption(nodes, "#member-options", "beta-one", true);
   checkOption(nodes, "#group-options", "alpha", true);
-  assert.deepEqual(selectedMembers(nodes), ["demo-snow", "alpha-two"]);
-  checkOption(nodes, "#member-options", "demo-miri", true);
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "demo-snow", "alpha-two", "beta-one"]);
   checkOption(nodes, "#group-options", "beta", true);
-  assert.deepEqual(selectedMembers(nodes), ["demo-snow", "alpha-two", "beta-one", "beta-two"]);
+  assert.deepEqual(selectedMembers(nodes), ["demo-miri", "demo-snow", "alpha-two", "beta-one", "beta-two"]);
   assert.deepEqual(inputs(nodes, "#group-options").filter((input) => input.checked).map((input) => input.value), ["alpha", "beta"]);
+  const restored = await schedulePage([], { pageMembers: filterMembers, saved: nodes.storage.get("meridian-members") });
+  assert.deepEqual(selectedMembers(restored), ["demo-miri", "demo-snow", "alpha-two", "beta-one", "beta-two"]);
+});
+
+test("兩區摘要分別顯示已選數量，成員與狀態操作互不影響", async () => {
+  const nodes = await schedulePage([], { pageMembers: filterMembers });
+  assert.equal(nodes.get("#member-count").textContent, "已選 6 / 6 位");
+  assert.equal(nodes.get("#status-count").textContent, "已選 6 / 6 種");
+  checkOption(nodes, "#member-options", "demo-miri", false);
+  assert.equal(nodes.get("#member-count").textContent, "已選 5 / 6 位");
+  assert.equal(nodes.get("#status-count").textContent, "已選 6 / 6 種");
+  const statuses = inputs(nodes, "#status-options");
+  statuses.find((input) => input.value === "scheduled").checked = false;
+  nodes.get("#status-filters").dispatchEvent(new Event("change"));
+  assert.equal(nodes.get("#status-count").textContent, "已選 5 / 6 種");
+  assert.equal(nodes.get("#member-count").textContent, "已選 5 / 6 位");
+  nodes.get("#all-members").checked = false;
+  nodes.get("#all-members").dispatchEvent(new Event("change"));
+  statuses.forEach((input) => { input.checked = false; });
+  nodes.get("#status-filters").dispatchEvent(new Event("change"));
+  assert.equal(nodes.get("#member-count").textContent, "已選 0 / 6 位");
+  assert.equal(nodes.get("#status-count").textContent, "已選 0 / 6 種");
+  const restored = await schedulePage([], { pageMembers: filterMembers, saved: nodes.storage.get("meridian-members") });
+  assert.equal(restored.get("#member-count").textContent, "已選 0 / 6 位");
+  assert.equal(restored.get("#status-count").textContent, "已選 6 / 6 種");
 });
 
 test("取消團體只移除該團體成員，其他手動選取保留且可繼續自由勾選", async () => {
@@ -237,12 +262,17 @@ test("損壞偏好回到全選，儲存讀寫遭封鎖時仍可使用篩選", as
   assert.equal(readOnly.get("#all-members").checked, true);
 });
 
-test("日期變更切至選擇日期並互斥高亮，今日回台灣當日，本週依所選日期", async () => {
+test("日期框只在選擇日期模式啟用，今日與本週停用並互斥高亮", async () => {
   const events = [{ ...schedule.events[0], date: "2027-01-03" }];
   const nodes = await schedulePage(events);
   const pressed = () => ["#today-view", "#week-view", "#date-view"].map((id) => nodes.get(id).getAttribute("aria-pressed"));
   assert.deepEqual(pressed(), ["true", "false", "false"]);
   const date = nodes.get("#selected-date");
+  assert.equal(date.disabled, true);
+  date.dispatchEvent(new Event("change"));
+  assert.deepEqual(pressed(), ["true", "false", "false"]);
+  nodes.get("#date-view").dispatchEvent(new Event("click"));
+  assert.equal(date.disabled, false);
   date.value = "2027-01-03";
   date.dispatchEvent(new Event("change"));
   assert.deepEqual(pressed(), ["false", "false", "true"]);
@@ -250,14 +280,55 @@ test("日期變更切至選擇日期並互斥高亮，今日回台灣當日，�
   assert.equal(nodes.get("#message").textContent, "共 1 筆行程");
   nodes.get("#week-view").dispatchEvent(new Event("click"));
   assert.deepEqual(pressed(), ["false", "true", "false"]);
+  assert.equal(date.disabled, true);
+  assert.equal(date.value, "2026-12-28");
   assert.equal(nodes.get("#range-title").textContent, "2026-12-28 — 2027-01-03");
   assert.equal(nodes.get("#schedule").children.length, 7);
   nodes.get("#date-view").dispatchEvent(new Event("click"));
   assert.deepEqual(pressed(), ["false", "false", "true"]);
+  assert.equal(date.disabled, false);
   assert.equal(nodes.get("#schedule").children.length, 1);
+  assert.equal(nodes.get("#range-title").textContent, "2026-12-28 行程");
   nodes.get("#today-view").dispatchEvent(new Event("click"));
   assert.equal(date.value, taipeiDate());
   assert.deepEqual(pressed(), ["true", "false", "false"]);
+  assert.equal(date.disabled, true);
+});
+
+test("自訂日期清空後切換今日仍同步停用日期框與模式高亮", async () => {
+  const nodes = await schedulePage();
+  const date = nodes.get("#selected-date");
+  nodes.get("#date-view").dispatchEvent(new Event("click"));
+  assert.equal(date.disabled, false);
+  date.value = "";
+  date.dispatchEvent(new Event("change"));
+  nodes.get("#today-view").dispatchEvent(new Event("click"));
+  assert.equal(date.value, taipeiDate());
+  assert.equal(date.disabled, true);
+  assert.equal(nodes.get("#today-view").getAttribute("aria-pressed"), "true");
+  assert.equal(nodes.get("#date-view").getAttribute("aria-pressed"), "false");
+});
+
+test("本週將日期框設為週一，跨月跨年與重複點選範圍一致", async () => {
+  const nodes = await schedulePage();
+  for (const [selected, monday, sunday] of [
+    ["2027-01-03", "2026-12-28", "2027-01-03"],
+    ["2026-11-01", "2026-10-26", "2026-11-01"],
+    ["2026-11-02", "2026-11-02", "2026-11-08"],
+  ]) {
+    nodes.get("#date-view").dispatchEvent(new Event("click"));
+    nodes.get("#selected-date").value = selected;
+    nodes.get("#selected-date").dispatchEvent(new Event("change"));
+    for (let click = 0; click < 2; click++) {
+      nodes.get("#week-view").dispatchEvent(new Event("click"));
+      assert.equal(nodes.get("#selected-date").value, monday);
+      assert.equal(nodes.get("#range-title").textContent, `${monday} — ${sunday}`);
+      assert.equal(nodes.get("#week-view").getAttribute("aria-pressed"), "true");
+      assert.equal(nodes.get("#date-view").getAttribute("aria-pressed"), "false");
+      assert.equal(nodes.get("#selected-date").disabled, true);
+      assert.equal(nodes.get("#schedule").children.length, 7);
+    }
+  }
 });
 
 test("事件狀態只提供六種匯入狀態，舊狀態不混入選項或符合結果", async () => {

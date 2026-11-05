@@ -56,8 +56,10 @@ async function startApp() {
   const allMembers = document.querySelector("#all-members");
   const groupOptions = document.querySelector("#group-options");
   const memberOptions = document.querySelector("#member-options");
+  const memberCount = document.querySelector("#member-count");
   const statusFilters = document.querySelector("#status-filters");
   const statusOptions = document.querySelector("#status-options");
+  const statusCount = document.querySelector("#status-count");
   const container = document.querySelector("#schedule");
   const message = document.querySelector("#message");
   const todayButton = document.querySelector("#today-view");
@@ -124,8 +126,7 @@ async function startApp() {
       const input = checkbox(groupOptions, "member-group", id, group.name);
       input.addEventListener("change", () => {
         if (input.checked) {
-          selectedMemberIds = new Set(groupInputs.filter((item) => item.checked)
-            .flatMap((item) => groups.get(item.value).memberIds));
+          group.memberIds.forEach((memberId) => selectedMemberIds.add(memberId));
         } else {
           group.memberIds.forEach((memberId) => selectedMemberIds.delete(memberId));
         }
@@ -161,19 +162,22 @@ async function startApp() {
     }
 
     function render() {
+      dateInput.disabled = view !== "date";
+      todayButton.setAttribute("aria-pressed", String(view === "today"));
+      weekButton.setAttribute("aria-pressed", String(view === "week"));
+      dateButton.setAttribute("aria-pressed", String(view === "date"));
       memberInputs.forEach((input) => { input.checked = selectedMemberIds.has(input.value); });
       groupInputs.forEach((input) => {
         input.checked = groups.get(input.value).memberIds.every((id) => selectedMemberIds.has(id));
       });
       allMembers.checked = enabledIds.size > 0 && selectedMemberIds.size === enabledIds.size;
+      const statuses = new Set(statusInputs.filter((input) => input.checked).map((input) => input.value));
+      memberCount.textContent = `已選 ${selectedMemberIds.size} / ${enabledIds.size} 位`;
+      statusCount.textContent = `已選 ${statuses.size} / ${statusInputs.length} 種`;
       if (!dateInput.value || !dateInput.validity.valid) return;
       const selectedDate = dateInput.value;
       const dates = view === "week" ? weekDates(selectedDate) : [selectedDate];
-      const statuses = new Set(statusInputs.filter((input) => input.checked).map((input) => input.value));
       const events = selectEvents(schedule, members, selectedDate, view, selectedMemberIds, statuses);
-      todayButton.setAttribute("aria-pressed", String(view === "today"));
-      weekButton.setAttribute("aria-pressed", String(view === "week"));
-      dateButton.setAttribute("aria-pressed", String(view === "date"));
       document.querySelector("#range-title").textContent = view === "week"
         ? `${dates[0]} — ${dates[6]}` : `${selectedDate} 行程`;
       container.replaceChildren();
@@ -230,8 +234,7 @@ async function startApp() {
     }
 
     dateInput.addEventListener("change", () => {
-      if (!dateInput.value || !dateInput.validity.valid) return;
-      view = "date";
+      if (view !== "date" || !dateInput.value || !dateInput.validity.valid) return;
       render();
     });
     allMembers.addEventListener("change", () => {
@@ -240,7 +243,12 @@ async function startApp() {
     });
     statusFilters.addEventListener("change", render);
     todayButton.addEventListener("click", () => { view = "today"; dateInput.value = taipeiDate(); render(); });
-    weekButton.addEventListener("click", () => { view = "week"; render(); });
+    weekButton.addEventListener("click", () => {
+      if (!dateInput.value || !dateInput.validity.valid) return;
+      dateInput.value = weekDates(dateInput.value)[0];
+      view = "week";
+      render();
+    });
     dateButton.addEventListener("click", () => { view = "date"; render(); });
     changeMembers();
   } catch {

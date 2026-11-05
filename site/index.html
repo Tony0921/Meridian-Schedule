@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light dark">
   <title>VTuber 行程聚合器</title>
   <script src="./theme.js?v=1"></script>
-  <link rel="stylesheet" href="./style.css?v=9">
-  <script src="./app.js?v=9" defer></script>
+  <link rel="stylesheet" href="./style.css?v=12">
+  <script src="./app.js?v=11" defer></script>
 </head>
 <body>
   <main>
@@ -27,30 +27,37 @@
       <p class="notice">本站由非官方維護，行程資訊僅供參考，最新異動請以官方公告為準。</p>
     </header>
     <section class="toolbar" aria-label="行程篩選">
-      <div class="view-switch" role="group" aria-label="顯示範圍">
-        <button type="button" id="today-view" aria-pressed="true">今日</button>
-        <button type="button" id="week-view" aria-pressed="false">本週</button>
-        <button type="button" id="date-view" aria-pressed="false">選擇日期</button>
-      </div>
-      <label>日期<input type="date" id="selected-date" required></label>
-      <fieldset class="member-filters">
-        <legend>VTuber 篩選</legend>
-        <label class="filter-option"><input type="checkbox" id="all-members"><span>全選</span></label>
-        <div class="member-sections">
-          <fieldset class="filter-section">
-            <legend>團體</legend>
-            <div id="group-options" class="filter-options"></div>
-          </fieldset>
-          <fieldset class="filter-section">
-            <legend>VTuber</legend>
-            <div id="member-options" class="filter-options"></div>
-          </fieldset>
+      <div class="view-control">
+        <span id="view-label" class="control-label">顯示範圍</span>
+        <div class="view-switch" role="group" aria-labelledby="view-label">
+          <button type="button" id="today-view" aria-pressed="true">今日</button>
+          <button type="button" id="week-view" aria-pressed="false">本週</button>
+          <button type="button" id="date-view" aria-pressed="false">選擇日期</button>
         </div>
-      </fieldset>
-      <fieldset id="status-filters" class="status-filters">
-        <legend>事件狀態</legend>
-        <div id="status-options" class="filter-options"></div>
-      </fieldset>
+      </div>
+      <label class="date-filter">日期<input type="date" id="selected-date" required disabled></label>
+      <details id="member-panel" class="filter-panel">
+        <summary>VTuber 篩選 <span id="member-count" class="filter-count">載入中…</span></summary>
+        <fieldset class="member-filters" aria-label="VTuber 篩選">
+          <label class="filter-option"><input type="checkbox" id="all-members"><span>全選</span></label>
+          <div class="member-sections">
+            <fieldset class="filter-section">
+              <legend>團體</legend>
+              <div id="group-options" class="filter-options"></div>
+            </fieldset>
+            <fieldset class="filter-section">
+              <legend>VTuber</legend>
+              <div id="member-options" class="filter-options"></div>
+            </fieldset>
+          </div>
+        </fieldset>
+      </details>
+      <details id="status-panel" class="filter-panel">
+        <summary>事件狀態 <span id="status-count" class="filter-count">載入中…</span></summary>
+        <fieldset id="status-filters" class="status-filters" aria-label="事件狀態">
+          <div id="status-options" class="filter-options"></div>
+        </fieldset>
+      </details>
     </section>
     <section aria-labelledby="range-title">
       <div class="section-heading">

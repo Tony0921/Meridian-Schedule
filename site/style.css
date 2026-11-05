@@ -75,7 +75,18 @@ button { cursor: pointer; }
 button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 button:hover { filter: brightness(.94); }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.view-control { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.control-label { font-size: .8rem; font-weight: 600; }
 .view-switch { display: flex; gap: 6px; }
+.toolbar .date-filter { flex: 0 1 180px; min-width: 0; max-width: 100%; }
+/* iOS 原生日期外觀可能覆蓋盒模型，讓百分比寬度額外加上內距。 */
+.date-filter input { -webkit-appearance: none; appearance: none; box-sizing: border-box; display: block; width: 100%; min-width: 0; max-width: 100%; font-size: 1rem; line-height: 1.5; }
+.date-filter input::-webkit-date-and-time-value { min-width: 0; text-align: left; }
+.date-filter input:disabled { color: var(--muted); -webkit-text-fill-color: var(--muted); background: var(--badge-bg); opacity: 1; cursor: not-allowed; }
+.filter-panel { flex-basis: 100%; min-width: 0; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.filter-panel > summary { min-height: 44px; align-content: center; cursor: pointer; font-size: .9rem; font-weight: 600; }
+.filter-panel[open] > summary { margin-bottom: 12px; }
+.filter-count { display: inline-block; margin-left: 8px; color: var(--muted); font-size: .8rem; font-weight: 400; }
 .status-filters, .member-filters, .filter-section { min-width: 0; margin: 0; padding: 0; border: 0; }
 .status-filters, .member-filters { flex-basis: 100%; }
 .toolbar legend { padding: 0; margin-bottom: 6px; font-size: .8rem; font-weight: 600; }
@@ -119,8 +130,9 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
   main { padding: 22px 16px; }
   .toolbar { padding: 16px; gap: 14px; }
   .toolbar label { flex: 1 1 130px; min-width: 0; }
-  .view-switch { width: 100%; }
-  .view-switch button { flex: 1; }
+  .toolbar .date-filter { flex-basis: 100%; }
+  .view-control, .view-switch { width: 100%; }
+  .view-switch button { flex: 1; white-space: nowrap; }
   .member-sections { grid-template-columns: minmax(0, 1fr); }
   input, select { width: 100%; min-width: 0; }
   .event-card { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 16px; }

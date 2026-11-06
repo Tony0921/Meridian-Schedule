@@ -366,5 +366,16 @@
     "type": "postponement",
     "status": "processed",
     "media": []
+  },
+  {
+    "source": "x",
+    "post_id": "csv-59b88cc27893975936631df5f004c544b84f2f70b9bfe36d387d264e4b869a94",
+    "member_id": "iseri_aetris",
+    "source_url": "https://x.com/Iseri_Aetris/status/2118340554992001336",
+    "published_at": "2026-11-06T05:47:48+08:00",
+    "processed_at": "2026-11-06T00:14:12+00:00",
+    "type": "weekly_schedule",
+    "status": "processed",
+    "media": []
   }
 ]

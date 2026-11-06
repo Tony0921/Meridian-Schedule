@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-04T18:25:05+00:00",
+  "updated_at": "2026-11-06T00:14:12+00:00",
   "events": [
     {
       "member_id": "miri_aetris",
@@ -2592,6 +2592,23 @@
       "source_post_id": "csv-ea39f9a18314a545d35e67e291ec2fbd093d66df50e7bd760a0149041427a1ba",
       "source_url": "https://x.com/Yuzumi_Neon/status/2117135256101003761",
       "updated_at": "2026-11-02T15:05:51+00:00"
+    },
+    {
+      "id": "iseri_aetris_20261106_02",
+      "timezone": "Asia/Taipei",
+      "url": null,
+      "origin": "weekly_schedule",
+      "confidence": 0.7,
+      "created_at": "2026-11-06T05:47:48+08:00",
+      "member_id": "iseri_aetris",
+      "date": "2026-11-06",
+      "time": "22:00",
+      "title": "【月光宓談室】繼續閱讀大家的煩惱",
+      "platform": "youtube",
+      "status": "scheduled",
+      "source_post_id": "csv-59b88cc27893975936631df5f004c544b84f2f70b9bfe36d387d264e4b869a94",
+      "source_url": "https://x.com/Iseri_Aetris/status/2118340554992001336",
+      "updated_at": "2026-11-06T00:14:12+00:00"
     },
     {
       "id": "iruni_ianvs_20261106_01",
